@@ -51,7 +51,7 @@ Deliverables
 
 # SPR-002 - Dataset Engineering
 
-Status : In Progress
+Status : Completed
 
 Target
 
@@ -59,23 +59,18 @@ Membangun dataset penelitian.
 
 Tasks
 
-[x] Menentukan seluruh pair (XAUUSD/GBPUSD)
-
-[x] Menentukan timeframe (H4, H1, M15, M5)
-
-[ ] Menentukan market session
-
-[ ] Menentukan kategori news
-
-[ ] Menentukan metadata
-
-[ ] Menentukan folder dataset
-
-[ ] Menentukan dataset versioning
-
-[ ] Mengumpulkan screenshot awal
-
-[ ] Dokumentasi dataset
+[x] Menentukan seluruh pair
+[x] Menentukan timeframe
+[x] Menentukan market session
+[x] Menentukan kategori news
+[x] Menentukan metadata
+[x] Menentukan folder dataset
+[x] Menentukan dataset versioning
+[x] Mengumpulkan screenshot awal
+[x] Dokumentasi dataset
+[x] Validasi raw OHLCV
+[x] Generate chart image
+[x] Dataset distribution report
 
 Deliverables
 

@@ -103,3 +103,44 @@
 - Documentation workflow changed to smaller section batches
 
 ---
+
+---
+
+## 2026-07-04 - Sprint 2 Dataset Engineering
+
+### Added
+
+- Added yearly raw OHLCV dataset structure.
+- Added dataset folder structure for XAUUSD and GBPUSD.
+- Added timeframe structure for M5, M15, H1, and H4.
+- Added yearly structure from 2020 to 2025.
+- Added raw OHLCV metadata.
+- Added chart image metadata.
+- Added class mapping file.
+- Added dataset versioning file.
+- Added OHLCV validation script.
+- Added chart image generation script.
+- Added OHLCV validation report.
+- Added chart image distribution report.
+- Added generated chart image pipeline.
+
+### Changed
+
+- Updated dataset version status to raw_chart_generated.
+- Updated dataset source to broker_mt5_valetax.
+- Updated dataset strategy to support yearly incremental learning.
+- Updated .gitignore to exclude raw CSV and generated PNG dataset files.
+
+### Dataset Summary
+
+- Total raw OHLCV files: 48
+- Total generated chart images: 1980
+- Pairs: XAUUSD, GBPUSD
+- Timeframes: M5, M15, H1, H4
+- Years: 2020, 2021, 2022, 2023, 2024, 2025
+
+### Notes
+
+Raw OHLCV CSV files and generated chart PNG files are excluded from GitHub to prevent repository size issues.
+Only scripts, metadata, reports, and documentation are tracked.
+
