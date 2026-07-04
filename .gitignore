@@ -29,3 +29,7 @@ frontend/main.py
 frontend/AGENTS.md
 frontend/CLAUDE.md
 frontend/__pycache__/
+
+# AI-TDSS Dataset Raw Files
+ai/datasets/raw/ohlcv/**/*.csv
+ai/datasets/raw/charts/**/*.png

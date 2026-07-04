@@ -1,0 +1,61 @@
+{
+    "dataset_name":  "AI-TDSS Dataset",
+    "version":  "v1.0",
+    "status":  "raw_chart_generated",
+    "created_by":  "Hefi Kristianto",
+    "created_at":  "2026-07-01",
+    "pairs":  [
+                  "XAUUSD",
+                  "GBPUSD"
+              ],
+    "broker_symbols":  {
+                           "XAUUSD":  "XAUUSD",
+                           "GBPUSD":  "GBPUSD"
+                       },
+    "timeframes":  [
+                       "M5",
+                       "M15",
+                       "H1",
+                       "H4"
+                   ],
+    "years":  [
+                  "2020",
+                  "2021",
+                  "2022",
+                  "2023",
+                  "2024",
+                  "2025"
+              ],
+    "raw_data_types":  [
+                           "ohlcv",
+                           "chart_image"
+                       ],
+    "source":  "broker_mt5_valetax",
+    "folder_pattern":  "ai/datasets/raw/{data_type}/{pair}/{timeframe}/{year}/",
+    "incremental_learning_strategy":  {
+                                          "base_training_year":  "2020",
+                                          "incremental_years":  [
+                                                                    "2021",
+                                                                    "2022",
+                                                                    "2023",
+                                                                    "2024",
+                                                                    "2025"
+                                                                ],
+                                          "strategy":  "yearly fine-tuning with replay samples from previous years"
+                                      },
+    "sessions":  [
+                     "asia",
+                     "london",
+                     "new_york",
+                     "london_new_york_overlap"
+                 ],
+    "news_categories":  [
+                            "normal_market",
+                            "pre_news",
+                            "during_news",
+                            "post_news"
+                        ],
+    "total_ohlcv_files":  48,
+    "total_chart_images":  1980,
+    "description":  "Year-based raw OHLCV dataset structure for AI-TDSS using MetaTrader 5 broker export and supporting yearly incremental learning."
+}
