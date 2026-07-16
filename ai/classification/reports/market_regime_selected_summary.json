@@ -1,0 +1,32 @@
+{
+  "seed": 42,
+  "strategy": {
+    "train": "Keep all bullish and bearish samples, cap sideways to the largest directional class.",
+    "valid": "Keep natural distribution.",
+    "test": "Keep natural distribution."
+  },
+  "original_train_distribution": {
+    "sideways": 11167,
+    "bullish": 2854,
+    "bearish": 2630
+  },
+  "sideways_train_limit": 2854,
+  "selected_distribution": {
+    "train": {
+      "bearish": 2630,
+      "bullish": 2854,
+      "sideways": 2854
+    },
+    "valid": {
+      "bearish": 684,
+      "bullish": 843,
+      "sideways": 2631
+    },
+    "test": {
+      "bearish": 601,
+      "bullish": 958,
+      "sideways": 2568
+    }
+  },
+  "selected_total": 16623
+}

@@ -1,0 +1,36 @@
+{
+  "configuration": {
+    "manifest": "ai\\datasets\\classification\\market_regime\\market_regime_selected_manifest.csv",
+    "output_root": "ai\\datasets\\classification\\market_regime",
+    "image_size": 224,
+    "dpi": 100,
+    "limit": 0,
+    "overwrite": false
+  },
+  "result": {
+    "requested": 16623,
+    "rendered": 16593,
+    "skipped_existing": 30,
+    "failed": 0,
+    "corrected_windows": 4736,
+    "corrected_candles": 5513
+  },
+  "distribution": {
+    "test": {
+      "bearish": 601,
+      "bullish": 958,
+      "sideways": 2568
+    },
+    "train": {
+      "bearish": 2630,
+      "bullish": 2854,
+      "sideways": 2854
+    },
+    "valid": {
+      "bearish": 684,
+      "bullish": 843,
+      "sideways": 2631
+    }
+  },
+  "failed_samples": []
+}

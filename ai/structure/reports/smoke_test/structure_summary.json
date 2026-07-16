@@ -1,0 +1,20 @@
+{
+  "ohlcv_source": "C:\\Users\\ASUS\\Documents\\Project\\AI-TDSS\\ai\\datasets\\raw\\ohlcv\\GBPUSD\\H1\\2025\\GBPUSD_H1_2025_RAW.csv",
+  "candles": 6141,
+  "swing_highs": 572,
+  "swing_lows": 600,
+  "liquidity_levels": 386,
+  "liquidity_sweeps": 240,
+  "confirmed_sweeps": 120,
+  "structure_events": 321,
+  "bos_events": 160,
+  "choch_events": 161,
+  "parameters": {
+    "swing_left": 3,
+    "swing_right": 3,
+    "equal_tolerance_atr": 0.2,
+    "lookback_swings": 8,
+    "max_sweep_bars": 30,
+    "max_confirmation_bars": 20
+  }
+}

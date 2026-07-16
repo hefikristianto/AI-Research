@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "expected": {
+    "train": {
+      "bearish": 2630,
+      "bullish": 2854,
+      "sideways": 2854
+    },
+    "valid": {
+      "bearish": 684,
+      "bullish": 843,
+      "sideways": 2631
+    },
+    "test": {
+      "bearish": 601,
+      "bullish": 958,
+      "sideways": 2568
+    }
+  },
+  "actual": {
+    "train": {
+      "bearish": 2630,
+      "bullish": 2854,
+      "sideways": 2854
+    },
+    "valid": {
+      "bearish": 684,
+      "bullish": 843,
+      "sideways": 2631
+    },
+    "test": {
+      "bearish": 601,
+      "bullish": 958,
+      "sideways": 2568
+    }
+  },
+  "invalid_images": [],
+  "unexpected_files": [],
+  "total_images": 16623
+}

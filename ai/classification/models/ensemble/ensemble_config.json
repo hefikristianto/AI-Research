@@ -1,0 +1,58 @@
+{
+  "ensemble_name": "AI-TDSS Market Regime CNN Ensemble",
+  "method": "weighted_soft_voting",
+  "weight_source": "validation_macro_f1",
+  "classes": [
+    "bearish",
+    "bullish",
+    "sideways"
+  ],
+  "class_to_idx": {
+    "bearish": 0,
+    "bullish": 1,
+    "sideways": 2
+  },
+  "image_size": 224,
+  "normalization": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "models": {
+    "vgg11": {
+      "architecture": "vgg11",
+      "checkpoint": "ai\\classification\\models\\ensemble\\vgg11.pt",
+      "source_checkpoint": "ai\\classification\\runs\\vgg11_main_20e\\best.pt",
+      "validation_macro_f1": 0.8037666517226082,
+      "weight": 0.24988946069250953
+    },
+    "vgg16": {
+      "architecture": "vgg16",
+      "checkpoint": "ai\\classification\\models\\ensemble\\vgg16.pt",
+      "source_checkpoint": "ai\\classification\\runs\\vgg16_resume_batch4\\best.pt",
+      "validation_macro_f1": 0.8074027808670956,
+      "weight": 0.25101992604458273
+    },
+    "googlenet": {
+      "architecture": "googlenet",
+      "checkpoint": "ai\\classification\\models\\ensemble\\googlenet.pt",
+      "source_checkpoint": "ai\\classification\\runs\\googlenet_main_20e\\best.pt",
+      "validation_macro_f1": 0.798729128330126,
+      "weight": 0.24832330464326888
+    },
+    "resnet18": {
+      "architecture": "resnet18",
+      "checkpoint": "ai\\classification\\models\\ensemble\\resnet18.pt",
+      "source_checkpoint": "ai\\classification\\runs\\resnet18_main_20e\\best.pt",
+      "validation_macro_f1": 0.8065902397489101,
+      "weight": 0.2507673086196389
+    }
+  }
+}

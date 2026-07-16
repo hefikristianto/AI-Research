@@ -1,0 +1,23 @@
+{
+  "status": "STABLE",
+  "recommendation": "NO_ACTION",
+  "drift_score": 0.0,
+  "sample_count": 4127,
+  "class_distribution_distance": 0.0,
+  "confidence_psi": 0.0,
+  "entropy_psi": 0.0,
+  "baseline_class_distribution": {
+    "bearish": 0.18027622970680882,
+    "bullish": 0.2551490186576206,
+    "sideways": 0.5645747516355706
+  },
+  "current_class_distribution": {
+    "bearish": 0.18027622970680882,
+    "bullish": 0.2551490186576206,
+    "sideways": 0.5645747516355706
+  },
+  "baseline_confidence_mean": 0.8059110686077193,
+  "current_confidence_mean": 0.8059110686077193,
+  "baseline_entropy_mean": 0.47938885654416913,
+  "current_entropy_mean": 0.47938885654416913
+}

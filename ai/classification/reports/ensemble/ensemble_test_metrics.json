@@ -1,0 +1,90 @@
+{
+  "method": "weighted_soft_voting",
+  "weight_source": "validation_macro_f1",
+  "weights": {
+    "vgg11": 0.24988946069250953,
+    "vgg16": 0.25101992604458273,
+    "googlenet": 0.24832330464326888,
+    "resnet18": 0.2507673086196389
+  },
+  "sample_count": 4127,
+  "metrics": {
+    "accuracy": 0.860673612793797,
+    "balanced_accuracy": 0.8746492100059764,
+    "macro_precision": 0.819518136924724,
+    "macro_recall": 0.8746492100059764,
+    "macro_f1": 0.8427263689646972,
+    "average_confidence": 0.8059110686077193,
+    "average_entropy": 0.47938885654416913,
+    "per_class": {
+      "bearish": {
+        "precision": 0.717741935483871,
+        "recall": 0.8885191347753744,
+        "f1": 0.7940520446096654,
+        "support": 601
+      },
+      "bullish": {
+        "precision": 0.8129154795821463,
+        "recall": 0.8935281837160751,
+        "f1": 0.8513177523620089,
+        "support": 958
+      },
+      "sideways": {
+        "precision": 0.9278969957081545,
+        "recall": 0.8419003115264797,
+        "f1": 0.8828093099224174,
+        "support": 2568
+      }
+    },
+    "confusion_matrix": [
+      [
+        534,
+        1,
+        66
+      ],
+      [
+        0,
+        856,
+        102
+      ],
+      [
+        210,
+        196,
+        2162
+      ]
+    ],
+    "classification_report": {
+      "bearish": {
+        "precision": 0.717741935483871,
+        "recall": 0.8885191347753744,
+        "f1-score": 0.7940520446096654,
+        "support": 601.0
+      },
+      "bullish": {
+        "precision": 0.8129154795821463,
+        "recall": 0.8935281837160751,
+        "f1-score": 0.8513177523620089,
+        "support": 958.0
+      },
+      "sideways": {
+        "precision": 0.9278969957081545,
+        "recall": 0.8419003115264797,
+        "f1-score": 0.8828093099224174,
+        "support": 2568.0
+      },
+      "accuracy": 0.860673612793797,
+      "macro avg": {
+        "precision": 0.819518136924724,
+        "recall": 0.8746492100059764,
+        "f1-score": 0.8427263689646972,
+        "support": 4127.0
+      },
+      "weighted avg": {
+        "precision": 0.8706022334974662,
+        "recall": 0.860673612793797,
+        "f1-score": 0.8625737808223846,
+        "support": 4127.0
+      }
+    }
+  }
+}

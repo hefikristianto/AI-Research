@@ -1,0 +1,91 @@
+{
+  "architecture": "vgg11",
+  "checkpoint": "ai\\classification\\models\\ensemble\\vgg11.pt",
+  "split": "test",
+  "dataset": "ai\\datasets\\classification\\market_regime\\test",
+  "device": "cpu",
+  "metrics": {
+    "accuracy": 0.83741216379937,
+    "balanced_accuracy": 0.8204640732635604,
+    "macro_precision": 0.8032121500055155,
+    "macro_recall": 0.8204640732635604,
+    "macro_f1": 0.8111070830364296,
+    "average_confidence": 0.8534718877558042,
+    "average_entropy": 0.3694689352496234,
+    "per_class": {
+      "bearish": {
+        "precision": 0.7226386806596702,
+        "recall": 0.8019966722129783,
+        "f1": 0.7602523659305994,
+        "support": 601
+      },
+      "bullish": {
+        "precision": 0.8080168776371308,
+        "recall": 0.7995824634655533,
+        "f1": 0.8037775445960126,
+        "support": 958
+      },
+      "sideways": {
+        "precision": 0.8789808917197452,
+        "recall": 0.8598130841121495,
+        "f1": 0.8692913385826772,
+        "support": 2568
+      }
+    },
+    "confusion_matrix": [
+      [
+        482,
+        5,
+        114
+      ],
+      [
+        2,
+        766,
+        190
+      ],
+      [
+        183,
+        177,
+        2208
+      ]
+    ],
+    "classification_report": {
+      "bearish": {
+        "precision": 0.7226386806596702,
+        "recall": 0.8019966722129783,
+        "f1-score": 0.7602523659305994,
+        "support": 601.0
+      },
+      "bullish": {
+        "precision": 0.8080168776371308,
+        "recall": 0.7995824634655533,
+        "f1-score": 0.8037775445960126,
+        "support": 958.0
+      },
+      "sideways": {
+        "precision": 0.8789808917197452,
+        "recall": 0.8598130841121495,
+        "f1-score": 0.8692913385826772,
+        "support": 2568.0
+      },
+      "accuracy": 0.83741216379937,
+      "macro avg": {
+        "precision": 0.8032121500055155,
+        "recall": 0.8204640732635604,
+        "f1-score": 0.8111070830364296,
+        "support": 4127.0
+      },
+      "weighted avg": {
+        "precision": 0.8397404763239978,
+        "recall": 0.83741216379937,
+        "f1-score": 0.8382046806706046,
+        "support": 4127.0
+      }
+    },
+    "inference": {
+      "total_images": 4127,
+      "total_seconds": 222.67774359999999,
+      "milliseconds_per_image": 53.956322655682094
+    }
+  }
+}

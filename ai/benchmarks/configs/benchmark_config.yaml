@@ -1,0 +1,74 @@
+# AI-TDSS Final Benchmark Configuration
+
+project:
+  name: AI-TDSS
+  task: OB_FVG_DETECTION
+  status: BENCHMARK_PREPARATION
+
+classes:
+  0: order_block
+  1: fair_value_gap
+
+datasets:
+  cumulative:
+    name: cumulative_yolo_2020_2024
+    path: ai/datasets/annotation/exports/cumulative_yolo_2020_2024/dataset.yaml
+    train_years:
+      - 2020
+      - 2021
+      - 2022
+      - 2023
+      - 2024
+    test_year: 2025
+
+  incremental:
+    name: incremental_yolo
+    root: ai/datasets/annotation/exports/incremental_yolo
+    stages:
+      - base_2020
+      - inc_2021
+      - inc_2022
+      - inc_2023
+      - inc_2024
+      - final_test_2025
+
+baseline:
+  model: YOLOv8n
+  role: temporary_development_baseline
+  best_method: cumulative
+  final_test_2025:
+    precision: 0.515
+    recall: 0.595
+    map50: 0.543
+    map50_95: 0.408
+
+target_models:
+  - YOLOv9
+  - YOLOv11
+  - YOLOv26
+
+training:
+  imgsz: 640
+  epochs_min: 100
+  epochs_max: 150
+  patience_min: 10
+  patience_max: 20
+  batch: hardware_adjusted
+  device: hardware_adjusted
+
+evaluation:
+  final_test_split: test
+  final_test_year: 2025
+  metrics:
+    - precision
+    - recall
+    - map50
+    - map50_95
+    - per_class_metrics
+    - confusion_matrix
+    - prediction_samples
+
+notes:
+  - YOLOv8n is not the final benchmark model.
+  - All benchmark models must use the same dataset split for fair comparison.
+  - Current dataset is still limited and may need expansion before final thesis result.

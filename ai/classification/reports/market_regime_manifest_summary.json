@@ -1,0 +1,71 @@
+{
+  "configuration": {
+    "input_root": "ai\\datasets\\raw\\ohlcv",
+    "window_size": 100,
+    "stride": 50,
+    "sideways_threshold": 0.18,
+    "minimum_confidence": 0.22,
+    "split_rule": {
+      "train": "2020-2023",
+      "valid": "2024",
+      "test": "2025"
+    }
+  },
+  "totals": {
+    "all_windows": 24966,
+    "included_windows": 24936,
+    "excluded_windows": 30
+  },
+  "split_distribution": {
+    "train": {
+      "bearish": 2630,
+      "bullish": 2854,
+      "sideways": 11167
+    },
+    "valid": {
+      "bearish": 684,
+      "bullish": 843,
+      "sideways": 2631
+    },
+    "test": {
+      "bearish": 601,
+      "bullish": 958,
+      "sideways": 2568
+    }
+  },
+  "pair_distribution": {
+    "GBPUSD": {
+      "bearish": 2218,
+      "bullish": 2337,
+      "sideways": 8216
+    },
+    "XAUUSD": {
+      "bearish": 1697,
+      "bullish": 2318,
+      "sideways": 8150
+    }
+  },
+  "timeframe_distribution": {
+    "H1": {
+      "bearish": 212,
+      "bullish": 303,
+      "sideways": 937
+    },
+    "H4": {
+      "bearish": 57,
+      "bullish": 83,
+      "sideways": 213
+    },
+    "M15": {
+      "bearish": 959,
+      "bullish": 1155,
+      "sideways": 3678
+    },
+    "M5": {
+      "bearish": 2687,
+      "bullish": 3114,
+      "sideways": 11538
+    }
+  },
+  "skipped_files": []
+}
