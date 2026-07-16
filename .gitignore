@@ -33,3 +33,95 @@ frontend/__pycache__/
 # AI-TDSS Dataset Raw Files
 ai/datasets/raw/ohlcv/**/*.csv
 ai/datasets/raw/charts/**/*.png
+
+# AI-TDSS Annotation Samples
+ai/datasets/annotation/samples/images/**/*.png
+
+# Local virtual environments
+.venv-labeling/
+
+# YOLO pretrained weights
+*.pt
+
+# Ultralytics runs
+runs/
+
+# AI-TDSS generated annotation outputs
+ai/datasets/annotation/auto_labels/
+ai/datasets/annotation/auto_labels_v5/images/
+ai/datasets/annotation/auto_labels_v5/labels/
+ai/datasets/annotation/exports/yolo_v5_baseline/images/
+ai/datasets/annotation/exports/yolo_v5_baseline/labels/
+
+# Python virtual environments
+.venv-yolov9/
+
+# Python cache
+*.py[cod]
+
+# Archives
+*.zip
+
+# Temporary diagnostic outputs
+endpoint_detection_025_debug.json
+production_threshold_smoke_test.json
+production_full_pipeline_batch/
+production_full_pipeline_*.json
+production_detection_diagnostic_*.csv
+production_detection_smoke_test_*.csv
+production_full_pipeline_batch_summary.csv
+production_full_pipeline_quality_gate_final.csv
+
+# Temporary source-search notes
+canonical_functions_search.txt
+canonical_x_to_ohlcv_mapping.txt
+chart_generator_candidates_full.txt
+chart_generator_search.txt
+chart_generator_snippets_full.txt
+evaluate_setup_full.txt
+generate_chart_images_targeted.txt
+ob_fvg_index_mapping_search.txt
+pairing_temporal_fields_search.txt
+price_conversion_candidates_full.txt
+price_conversion_search.txt
+price_conversion_snippets_full.txt
+structure_price_conversion_targeted.txt
+x_to_candle_mapping_search.txt
+
+# Generated datasets
+ai/datasets/annotation/auto_labels_v5/
+ai/datasets/annotation/auto_labels_v5_medium/
+ai/datasets/annotation/exports/
+
+# Training outputs
+**/runs/
+**/weights/*.pt
+**/checkpoints/
+
+
+# Generated classification dataset
+ai/datasets/classification/
+
+# External benchmark repositories
+ai/benchmarks/external/yolov9/
+
+# Local backup files
+*.bak
+
+# External repositories
+
+# Generated visual review images
+ai/benchmarks/reports/**/visual_review*/
+ai/detection/postprocessing/visual_review/
+
+# Generated prediction outputs
+ai/classification/predictions/
+ai/classification/reports/ensemble/*predictions.csv
+
+# Temporary pipeline files
+ai/decision/temp/
+
+# Generated annotation reports
+ai/datasets/annotation/reports/
+**/*.before_*.py
+**/*.backup_*.py
