@@ -232,17 +232,14 @@ async def run_full_analysis(
             ),
         ) from error
 
-    original_threshold = (
-        yolo_service.confidence_threshold
-    )
-
     try:
-        yolo_service.confidence_threshold = (
-            confidence_threshold
-        )
-
         detection_result = (
-            yolo_service.predict(image)
+            yolo_service.predict(
+                image,
+                confidence_threshold=(
+                    confidence_threshold
+                ),
+            )
         )
 
     except Exception as error:
@@ -253,11 +250,6 @@ async def run_full_analysis(
                 f"{error}"
             ),
         ) from error
-
-    finally:
-        yolo_service.confidence_threshold = (
-            original_threshold
-        )
 
     pairing_result = pairing_service.pair(
         detection_result.get(
