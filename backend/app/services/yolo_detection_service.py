@@ -35,6 +35,7 @@ class YOLODetectionService:
 
         self._model: YOLO | None = None
         self._load_lock = Lock()
+        self._predict_lock = Lock()
 
     def load(self) -> None:
         if self._model is not None:
@@ -54,6 +55,7 @@ class YOLODetectionService:
     def predict(
         self,
         image: Image.Image,
+        confidence_threshold: float | None = None,
     ) -> dict[str, Any]:
         self.load()
 
@@ -63,6 +65,12 @@ class YOLODetectionService:
             )
 
         rgb_image = image.convert("RGB")
+
+        effective_confidence_threshold = (
+            self.confidence_threshold
+            if confidence_threshold is None
+            else confidence_threshold
+        )
 
         temp_path: Path | None = None
 
@@ -78,14 +86,17 @@ class YOLODetectionService:
                 format="PNG",
             )
 
-            results = self._model.predict(
-                source=str(temp_path),
-                conf=self.confidence_threshold,
-                iou=0.70,
-                imgsz=self.image_size,
-                max_det=300,
-                verbose=False,
-            )
+            with self._predict_lock:
+                results = self._model.predict(
+                    source=str(temp_path),
+                    conf=(
+                        effective_confidence_threshold
+                    ),
+                    iou=0.70,
+                    imgsz=self.image_size,
+                    max_det=300,
+                    verbose=False,
+                )
 
         finally:
             if (
@@ -104,7 +115,7 @@ class YOLODetectionService:
                 "detections": [],
                 "model_path": str(MODEL_PATH),
                 "confidence_threshold": (
-                    self.confidence_threshold
+                    effective_confidence_threshold
                 ),
                 "image_size": self.image_size,
             }
@@ -207,7 +218,7 @@ class YOLODetectionService:
             "detections": detections,
             "model_path": str(MODEL_PATH),
             "confidence_threshold": (
-                self.confidence_threshold
+                effective_confidence_threshold
             ),
             "image_size": self.image_size,
         }

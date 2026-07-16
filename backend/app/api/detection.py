@@ -107,10 +107,11 @@ async def detect_chart_objects(
         ) from error
 
     try:
-        yolo_service.confidence_threshold = confidence_threshold
-
         detection = yolo_service.predict(
-            image
+            image,
+            confidence_threshold=(
+                confidence_threshold
+            ),
         )
 
     except FileNotFoundError as error:
@@ -138,4 +139,3 @@ async def detect_chart_objects(
         "height": image.height,
         "detection": detection,
     }
-
