@@ -1,8 +1,8 @@
-# AI-TDSS Label Specification
+# AI-TDSS YOLO Label Specification
 
-Version : v1.0
-Sprint  : Sprint 3 - Annotation System
-Status  : Draft
+Version : v2.0
+Sprint  : Annotation and Detection
+Status  : Production Scope Locked
 
 ---
 
@@ -12,14 +12,6 @@ Status  : Draft
 |----|------------|-------------|
 | 0 | order_block | Area candle terakhir sebelum pergerakan impulsif yang menyebabkan break structure |
 | 1 | fair_value_gap | Area imbalance antara candle yang tidak tertutup sempurna |
-| 2 | liquidity | Area kumpulan high/low yang berpotensi menjadi target likuiditas |
-| 3 | supply | Area potensial tekanan jual |
-| 4 | demand | Area potensial tekanan beli |
-| 5 | bos | Break of Structure |
-| 6 | choch | Change of Character |
-| 7 | equal_high | High sejajar yang berpotensi menjadi buy-side liquidity |
-| 8 | equal_low | Low sejajar yang berpotensi menjadi sell-side liquidity |
-| 9 | mitigation | Area zona yang sudah disentuh kembali oleh harga |
 
 ---
 
@@ -27,17 +19,25 @@ Status  : Draft
 
 0 order_block
 1 fair_value_gap
-2 liquidity
-3 supply
-4 demand
-5 bos
-6 choch
-7 equal_high
-8 equal_low
-9 mitigation
+
+---
+
+## Derived OHLCV Features
+
+Feature berikut bukan class YOLO:
+
+| Feature | Source |
+|---|---|
+| liquidity level/sweep | Swing dan equal level pada OHLCV |
+| equal high/equal low | Perbandingan level swing dengan ATR tolerance |
+| BOS/CHOCH | Urutan break structure pada candle |
+| candle pattern | Relasi OHLC candle tunggal/berurutan |
+| mitigation state | Interaksi harga setelah zona terbentuk |
+
+Feature tersebut boleh digambar sebagai overlay setelah dihitung, tetapi tidak boleh dicatat sebagai hasil object detection.
 
 ---
 
 ## Notes
 
-Label specification ini digunakan sebagai acuan awal untuk proses anotasi dataset chart image AI-TDSS.
+Label specification ini menjadi acuan dataset YOLO produksi dua kelas. Perluasan class memerlukan research question, guideline, reviewed annotations, dan benchmark baru; tidak boleh dilakukan hanya dengan mengubah `classes.txt`.

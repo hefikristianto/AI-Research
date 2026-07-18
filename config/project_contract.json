@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "project": {
+    "name": "AI-TDSS",
+    "system_type": "decision_support",
+    "primary_pair": "GBPUSD",
+    "secondary_research_pairs": [
+      "XAUUSD"
+    ],
+    "supported_timeframes": [
+      "M5",
+      "M15",
+      "H1",
+      "H4"
+    ],
+    "frontend": "Next.js React",
+    "automatic_trade_execution": false
+  },
+  "analysis_pipeline": {
+    "required_inputs": [
+      "chart_image",
+      "pair",
+      "timeframe",
+      "chart_datetime"
+    ],
+    "public_decisions": [
+      "BUY",
+      "SELL",
+      "WATCHLIST",
+      "NO_TRADE"
+    ],
+    "entry_fields": [
+      "entry",
+      "stop_loss",
+      "take_profit",
+      "risk_reward_ratio"
+    ],
+    "model_roles": {
+      "cnn_ensemble": {
+        "role": "market_regime_classification",
+        "classes": [
+          "bearish",
+          "bullish",
+          "sideways"
+        ],
+        "method": "validation_weighted_soft_voting"
+      },
+      "yolo": {
+        "role": "visual_zone_detection_and_explanation",
+        "production_classes": [
+          "order_block",
+          "fair_value_gap"
+        ],
+        "annotated_image_required": true,
+        "direct_trade_decision_allowed": false
+      },
+      "ohlcv_rules": {
+        "role": "deterministic_market_context",
+        "derived_features": [
+          "liquidity_level",
+          "liquidity_sweep",
+          "equal_high",
+          "equal_low",
+          "bos",
+          "choch",
+          "candle_pattern",
+          "volatility",
+          "session_context"
+        ]
+      },
+      "decision_engine": {
+        "role": "entry_and_risk_recommendation",
+        "requires_canonical_ohlcv_for_entry": true,
+        "fallback_without_ohlcv": "NO_TRADE"
+      }
+    }
+  },
+  "journal": {
+    "record_every_analysis": true,
+    "user_scoped": true,
+    "excel_export_required": true,
+    "excel_sheets": [
+      "Analyses",
+      "Trade_Outcomes",
+      "Model_Metadata",
+      "Definitions"
+    ],
+    "training_eligibility_requires_outcome": true
+  },
+  "incremental_learning": {
+    "execution_location": "local_laptop_only",
+    "mode": "offline_batch_champion_challenger",
+    "raw_prediction_as_ground_truth": false,
+    "eligible_data_requires_verified_outcome": true,
+    "candidate_targets": [
+      "cnn_component_fine_tuning",
+      "ensemble_weight_recalibration"
+    ],
+    "yolo_update_requires_reviewed_bounding_boxes": true,
+    "triggers": {
+      "preferred_batch_size": 200,
+      "minimum_batch_size": 50,
+      "maximum_interval_days": 30,
+      "drift_score_threshold": 0.6,
+      "condition": "count>=preferred OR (days>=maximum AND count>=minimum) OR (drift>=threshold AND count>=minimum)"
+    },
+    "promotion_gates": [
+      "frozen_temporal_holdout_passed",
+      "walk_forward_evaluation_passed",
+      "primary_metric_non_regression",
+      "risk_metric_non_regression",
+      "artifact_and_data_lineage_complete"
+    ]
+  }
+}

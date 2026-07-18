@@ -36,7 +36,7 @@ Berbeda dengan model object detection yang hanya mampu mengenali objek visual pa
 
 ## Background
 
-Model Computer Vision seperti YOLO memiliki kemampuan yang baik dalam mendeteksi objek visual seperti Order Block (OB), Fair Value Gap (FVG), maupun Liquidity Area. Namun, kemampuan tersebut belum cukup untuk menghasilkan keputusan trading.
+Model Computer Vision seperti YOLO memiliki kemampuan mendeteksi objek visual Order Block (OB) dan Fair Value Gap (FVG). Liquidity, BOS/CHOCH, serta candle pattern dihitung dari OHLCV kanonis. Seluruh bukti tersebut belum cukup secara individual untuk menghasilkan keputusan trading.
 
 Sebuah zona yang berhasil dideteksi dengan confidence tinggi belum tentu layak dijadikan area entry karena masih dipengaruhi oleh berbagai faktor lain, seperti arah trend yang lebih besar, struktur pasar, kondisi sesi perdagangan, volatilitas akibat berita ekonomi, serta kelayakan risk-reward.
 
@@ -96,6 +96,7 @@ Trade Validation Layer
       │
       ▼
 Trading Recommendation
+```
 
 ---
 
@@ -139,7 +140,7 @@ Trade Decision Engine menerima data dari beberapa modul lain yang telah diproses
 
 | Module | Data |
 |---------|------|
-| YOLO Detection | Order Block, Fair Value Gap, Liquidity, Confidence |
+| YOLO Detection | Order Block, Fair Value Gap, Bounding Box, Confidence |
 | Zone Filtering | Fresh Zone, Mitigated Zone, Overlap Result |
 | Market Structure Engine | Trend, BOS, CHoCH, HH, HL, LH, LL |
 | Metadata Detection | Pair, Timeframe, Device |
@@ -402,4 +403,3 @@ Dengan demikian, Trade Decision Engine tidak hanya berfungsi sebagai modul penga
 ---
 
 ## End of Chapter 9
-
