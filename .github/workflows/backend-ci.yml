@@ -6,12 +6,16 @@ on:
       - main
     paths:
       - "backend/**"
+      - "ai/scripts/validate_project_contract.py"
+      - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   push:
     branches:
       - main
     paths:
       - "backend/**"
+      - "ai/scripts/validate_project_contract.py"
+      - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   workflow_dispatch:
 
@@ -54,6 +58,10 @@ jobs:
           -s backend/tests
           -p "test_*.py"
           -v
+
+      - name: Validate project contract
+        run: >-
+          python ai/scripts/validate_project_contract.py
 
       - name: Compile backend Python sources
         run: >-

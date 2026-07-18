@@ -1,5 +1,32 @@
 ﻿# Changelog - AI-TDSS
 
+## Unreleased - 18-07-2026
+
+### Added
+
+- Added a machine-readable canonical project contract.
+- Added project-contract validation and unit tests.
+- Added research synthesis for academic writing and revision.
+- Added a local-only experiment plan with explicit artifact paths.
+- Added SDD chapters for overview, architecture, requirements, AI roles, labeling, journal, and incremental learning.
+- Added the four-sheet Excel journal contract.
+
+### Changed
+
+- Locked GBPUSD as the primary research/product pair.
+- Locked production YOLO scope to Order Block and Fair Value Gap.
+- Assigned liquidity, BOS/CHOCH, EQH/EQL, and candle patterns to deterministic OHLCV analysis.
+- Defined CNN incremental learning as an offline batch champion–challenger process.
+- Required verified outcomes and prohibited raw predictions as automatic ground truth.
+- Standardized large local artifacts under ignored `local_artifacts/`.
+
+### Notes
+
+- No model retraining is performed by this documentation/contract milestone.
+- GitHub CI remains limited to lightweight tests, syntax checks, and contract validation.
+
+---
+
 ## v0.1.0 - 30-06-2026
 
 ### Added
@@ -143,4 +170,3 @@
 
 Raw OHLCV CSV files and generated chart PNG files are excluded from GitHub to prevent repository size issues.
 Only scripts, metadata, reports, and documentation are tracked.
-

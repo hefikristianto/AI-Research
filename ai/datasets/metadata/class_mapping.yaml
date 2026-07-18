@@ -1,11 +1,20 @@
 classes:
   0: order_block
   1: fair_value_gap
-  2: liquidity
-  3: supply
-  4: demand
-  5: bos
-  6: choch
-  7: equal_high
-  8: equal_low
-  9: mitigation
+
+scope: production_yolo
+version: "2.0"
+
+derived_ohlcv_features:
+  - liquidity_level
+  - liquidity_sweep
+  - equal_high
+  - equal_low
+  - bos
+  - choch
+  - candle_pattern
+  - mitigation_state
+
+notes:
+  - Liquidity, market structure, candle patterns, and mitigation are derived from canonical OHLCV.
+  - Adding a YOLO class requires a new annotation protocol and a separate benchmark.

@@ -1,7 +1,7 @@
 # AI-TDSS Annotation System
 
-Sprint: Sprint 3 - Annotation System  
-Status: In Progress
+Sprint: Annotation and Detection
+Status: Production Scope Locked; Quality Improvement In Progress
 
 ---
 
@@ -17,23 +17,23 @@ Dataset anotasi digunakan untuk training object detection model berbasis YOLO.
 
 annotation/
 +-- guidelines/
-¦   +-- annotation_guideline.md
-¦   +-- bounding_box_guideline.md
-¦   +-- label_specification.md
-¦   +-- yolo_label_format.md
-¦   +-- annotation_split_plan.md
+   +-- annotation_guideline.md
+   +-- bounding_box_guideline.md
+   +-- label_specification.md
+   +-- yolo_label_format.md
+   +-- annotation_split_plan.md
 +-- examples/
 +-- exports/
-¦   +-- yolo/
-¦       +-- dataset.yaml
-¦       +-- images/
-¦       ¦   +-- train/
-¦       ¦   +-- valid/
-¦       ¦   +-- test/
-¦       +-- labels/
-¦           +-- train/
-¦           +-- valid/
-¦           +-- test/
+   +-- yolo/
+       +-- dataset.yaml
+       +-- images/
+          +-- train/
+          +-- valid/
+          +-- test/
+       +-- labels/
+           +-- train/
+           +-- valid/
+           +-- test/
 +-- tools/
 
 ---
@@ -44,14 +44,8 @@ annotation/
 |----|------------|
 | 0 | order_block |
 | 1 | fair_value_gap |
-| 2 | liquidity |
-| 3 | supply |
-| 4 | demand |
-| 5 | bos |
-| 6 | choch |
-| 7 | equal_high |
-| 8 | equal_low |
-| 9 | mitigation |
+
+Liquidity, BOS/CHOCH, EQH/EQL, candle pattern, dan mitigation state dihitung dari canonical OHLCV dan bukan class YOLO produksi.
 
 ---
 
@@ -67,8 +61,6 @@ Semua koordinat dinormalisasi dari 0 sampai 1.
 
 # Current Status
 
-Annotation guideline sudah dibuat.
+Annotation guideline, export structure, semi-automatic labeling, cumulative/incremental dataset workflow, dan benchmark dua kelas sudah tersedia.
 
-Export structure untuk YOLO sudah disiapkan.
-
-Dataset belum dianotasi.
+Pekerjaan aktif berikutnya adalah meningkatkan kualitas/review label OB/FVG dan menjaga hubungan box dengan candle index/time.

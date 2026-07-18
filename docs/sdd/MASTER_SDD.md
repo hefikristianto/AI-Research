@@ -10,6 +10,8 @@
 | Version | 1.0 |
 | Status | In Development |
 | Author | Hefi Kristianto |
+| Canonical Contract | ../../config/project_contract.json |
+| Research Synthesis | ../research/AI_TDSS_RESEARCH_SYNTHESIS.md |
 
 ---
 
@@ -20,6 +22,8 @@ MASTER SDD merupakan dokumen utama yang menjadi acuan seluruh proses pengembanga
 Seluruh keputusan desain sistem, arsitektur, database, AI, frontend, backend, dashboard, API, trading journal, dan incremental learning wajib mengacu pada dokumen ini.
 
 Setiap perubahan besar harus dicatat pada Decision Log dan Changelog.
+
+Scope yang dapat divalidasi mesin berada pada `config/project_contract.json`. Jika teks SDD, TDD, atau report lama bertentangan dengan kontrak tersebut, konflik harus diselesaikan melalui Decision Log sebelum implementasi dilanjutkan.
 
 ---
 

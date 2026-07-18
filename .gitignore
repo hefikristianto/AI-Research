@@ -98,6 +98,9 @@ ai/datasets/annotation/exports/
 **/weights/*.pt
 **/checkpoints/
 
+# Canonical local-only experiment workspace
+local_artifacts/
+
 
 # Generated classification dataset
 ai/datasets/classification/

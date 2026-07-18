@@ -1,8 +1,8 @@
 # AI-TDSS Bounding Box Guideline
 
-Version : v1.0
+Version : v2.0
 Sprint  : Sprint 3 - Annotation System
-Status  : Draft
+Status  : Production Scope Locked
 
 ---
 
@@ -11,6 +11,8 @@ Status  : Draft
 Dokumen ini menjelaskan aturan pembuatan bounding box untuk setiap class pada dataset chart image AI-TDSS.
 
 Bounding box guideline digunakan agar proses anotasi memiliki standar visual yang konsisten sebelum dataset digunakan untuk training YOLO.
+
+Scope YOLO produksi hanya `order_block` dan `fair_value_gap`. Liquidity, BOS/CHOCH, EQH/EQL, candle pattern, dan mitigation dihitung dari OHLCV dan tidak diberi bounding box training YOLO.
 
 ---
 
@@ -192,10 +194,7 @@ Bounding box untuk fair_value_gap harus:
 
 # Ambiguous Cases
 
-Jika terdapat area yang bisa dianggap Order Block dan Supply/Demand, gunakan prioritas:
-
-1. order_block jika area menjadi origin impulsive move dan break structure.
-2. supply atau demand jika area hanya berupa zona reaksi umum.
+Jika terdapat area yang tampak seperti zona reaksi umum tetapi tidak memenuhi definisi Order Block, jangan memberi label. Dataset produksi tidak memiliki class supply atau demand.
 
 Jika terdapat FVG yang overlap dengan OB:
 
