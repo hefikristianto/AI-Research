@@ -153,6 +153,13 @@ async def run_full_analysis(
         ge=-12.0,
         le=14.0,
     ),
+    include_annotated_chart: bool = Query(
+        default=True,
+        description=(
+            "Set false untuk batch audit agar response "
+            "tidak membawa PNG base64."
+        ),
+    ),
 ):
     content_type = (
         file.content_type
@@ -1017,26 +1024,36 @@ async def run_full_analysis(
         execution_gate_result
     )
 
-    try:
-        annotated_chart_result = (
-            AnnotatedChartService.render(
-                image=image,
-                detections=detection_result.get(
-                    "detections",
-                    [],
-                ),
-                decision=recommendation_result[
-                    "decision"
-                ],
-                execution_status=recommendation_result[
-                    "execution_status"
-                ],
+    if include_annotated_chart:
+        try:
+            annotated_chart_result = (
+                AnnotatedChartService.render(
+                    image=image,
+                    detections=detection_result.get(
+                        "detections",
+                        [],
+                    ),
+                    decision=recommendation_result[
+                        "decision"
+                    ],
+                    execution_status=recommendation_result[
+                        "execution_status"
+                    ],
+                )
             )
-        )
-    except Exception as error:
+        except Exception as error:
+            annotated_chart_result = {
+                "status": "ERROR",
+                "error": str(error),
+                "rendered_detections": 0,
+            }
+    else:
         annotated_chart_result = {
-            "status": "ERROR",
-            "error": str(error),
+            "status": "SKIPPED",
+            "reason": (
+                "Annotated chart dinonaktifkan "
+                "untuk batch audit."
+            ),
             "rendered_detections": 0,
         }
 

@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.1
-**Tanggal:** 18 Juli 2026
-**Status:** Baseline terkunci; vertical slice web dan explainability tersedia; journal dan eksperimen end-to-end berjalan
+**Versi:** 1.2
+**Tanggal:** 20 Juli 2026
+**Status:** Baseline terkunci; vertical slice web dan explainability tersedia; tooling audit coverage tersedia; journal dan evaluasi outcome berjalan
 
 ## 1. Ringkasan Penelitian
 
@@ -145,6 +145,7 @@ Output minimum mencakup:
 | React chart upload | Implemented | Memanggil `/api/analysis/full` dengan pair, timeframe, chart time, dan UTC offset |
 | Public decision boundary | Implemented | Hanya `TRADE_CANDIDATE` yang konsisten dapat menjadi BUY/SELL; level trade disembunyikan untuk hasil non-actionable |
 | Annotated chart | Implemented | Backend mengembalikan PNG base64 dengan bounding box OB/FVG dan banner keputusan |
+| Decision coverage audit | Implemented | Runner lokal memanggil endpoint produksi dan melaporkan funnel detection→pairing→watchlist/actionable serta blocker tanpa retraining |
 | Persistent journal | Pending | Harus user-scoped dan menyimpan semua keputusan |
 | Verified outcome feedback | Pending | Diperlukan sebelum data dapat eligible untuk incremental learning |
 | Four-sheet Excel export | Pending | Mengikuti kontrak pada Bagian 12 |
@@ -200,6 +201,12 @@ Sumber internal: [`FINAL_CNN_ENSEMBLE_RESULT.md`](../../ai/classification/report
 | Product | Upload success, analysis latency, journal completeness, Excel validity, annotated-image availability |
 
 Metrik trading harus dilaporkan bersama jumlah trade dan coverage. Win rate tinggi dengan hanya sedikit trade tidak boleh disimpulkan lebih baik tanpa konteks.
+
+### 8.3 Audit coverage sebelum evaluasi outcome
+
+Sebelum precision keputusan atau metrik trading dihitung, pipeline dijalankan pada seluruh population GBPUSD 2025 melalui endpoint `/api/analysis/full`. Audit mencatat detection coverage, paired-setup coverage, `WATCHLIST`, actionable `BUY/SELL`, `NO_TRADE`, request failure, serta distribusi blocker per timeframe.
+
+Request failure dan gambar lokal yang hilang dipisahkan dari denominator respons sukses; keduanya tidak boleh diam-diam dihitung sebagai `NO_TRADE`. Output audit berupa CSV per gambar serta ringkasan JSON/Markdown di `local_artifacts/`. Audit ini tidak melakukan training dan tidak digunakan untuk mengubah threshold pada final test. Protokol operasional berada di [`DECISION_COVERAGE_AUDIT.md`](../experiments/DECISION_COVERAGE_AUDIT.md).
 
 ## 9. Incremental Learning yang Aman
 
@@ -292,6 +299,8 @@ Export harus mempertahankan timestamp UTC, analysis ID, model version, blockers,
 | Analysis ID dan lineage model belum dipersistenkan pada event journal | Audit end-to-end belum lengkap | P1 |
 | Timezone broker dataset masih bersifat asumsi provisional | Penyelarasan screenshot lintas platform perlu divalidasi | P1 |
 | Endpoint full analysis belum memiliki fixture integration test dengan model stub | Risiko regresi orkestrasi masih lebih tinggi daripada service-level unit test | P1 |
+| Baseline coverage 2025 belum selesai dijalankan | Selectivity dan blocker dominan belum dapat diklaim secara kuantitatif | P0 |
+| Robustness tema warna/platform belum dievaluasi | Recall dapat turun pada TradingView/MT5 yang berbeda dari renderer dataset | P1 |
 
 ## 14. Batas Klaim Akademik
 

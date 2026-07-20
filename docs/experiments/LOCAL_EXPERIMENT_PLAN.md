@@ -133,6 +133,23 @@ Gate:
 
 **Tujuan:** mengukur pipeline produksi tanpa retraining.
 
+E2 dimulai dengan audit coverage melalui endpoint produksi yang sama dengan web. Audit ini memisahkan masalah detector, pairing, dan execution gate sebelum outcome trading dihitung.
+
+Smoke sample deterministik:
+
+```powershell
+$E2 = "$ARTIFACTS\experiments\20260720_E2_gbpusd_full_baseline"
+python ai\scripts\audit_decision_coverage.py `
+  --year 2025 `
+  --pair GBPUSD `
+  --sample-size 10 `
+  --seed 42 `
+  --confidence-threshold 0.25 `
+  --output-dir "$E2\metrics\decision_coverage_smoke"
+```
+
+Jika smoke audit tidak memiliki request error, jalankan seluruh chart GBPUSD 2025 dengan menghapus `--sample-size`. Gunakan `--resume` bila proses terputus. Protokol lengkap tersedia di [`DECISION_COVERAGE_AUDIT.md`](DECISION_COVERAGE_AUDIT.md).
+
 Input:
 
 ```text
@@ -146,6 +163,9 @@ config/project_contract.json
 Output:
 
 ```text
+local_artifacts/experiments/{E2_ID}/metrics/decision_coverage/decision_coverage_rows.csv
+local_artifacts/experiments/{E2_ID}/metrics/decision_coverage/decision_coverage_summary.json
+local_artifacts/experiments/{E2_ID}/metrics/decision_coverage/decision_coverage_summary.md
 local_artifacts/experiments/{E2_ID}/predictions/full_analysis.jsonl
 local_artifacts/experiments/{E2_ID}/metrics/decision_metrics.json
 local_artifacts/experiments/{E2_ID}/metrics/trading_metrics.json
@@ -157,6 +177,8 @@ Evaluasi wajib mencakup semua keputusan, termasuk `NO_TRADE`, untuk mencegah sur
 
 Metrik:
 
+- detection coverage, paired-setup coverage, watchlist/actionable/no-trade rate;
+- distribusi blocker, warning, execution status, dan kegagalan request;
 - actionable precision dan recall;
 - decision Macro F1;
 - coverage dan no-trade rate;
@@ -167,6 +189,8 @@ Metrik:
 
 Gate:
 
+- audit coverage selesai pada denominator yang dilaporkan dan tidak mencampur request failure sebagai `NO_TRADE`;
+- threshold tidak dituning pada final test 2025;
 - entry hanya dinilai bila mapping OHLCV kanonis tersedia;
 - spread/slippage assumption dibekukan;
 - reason code dan model version tersimpan untuk setiap event.
