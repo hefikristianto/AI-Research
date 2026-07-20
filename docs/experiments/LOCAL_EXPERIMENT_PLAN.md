@@ -150,6 +150,8 @@ python ai\scripts\audit_decision_coverage.py `
 
 Jika smoke audit tidak memiliki request error, jalankan seluruh chart GBPUSD 2025 dengan menghapus `--sample-size`. Gunakan `--resume` bila proses terputus. Protokol lengkap tersedia di [`DECISION_COVERAGE_AUDIT.md`](DECISION_COVERAGE_AUDIT.md).
 
+Jika baseline menunjukkan valid setup tetapi tidak menjelaskan transisi menuju `WATCHLIST`/`NO_TRADE`, jalankan E2.1 pada image ID yang dibekukan. E2.1 mengekspor raw JSON, annotated PNG, telemetry sebelum quality normalization, dan recency zona tanpa mengubah gate. Protokol dan tujuh kasus baseline berada di [`E2_1_DIAGNOSTIC_REVIEW_PACK.md`](E2_1_DIAGNOSTIC_REVIEW_PACK.md).
+
 Input:
 
 ```text

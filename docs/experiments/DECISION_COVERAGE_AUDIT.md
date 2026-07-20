@@ -123,6 +123,9 @@ decision_coverage_summary.md
 - internal and public decisions;
 - execution status and actionable flag;
 - mapping status/confidence and entry distance in ATR;
+- detector composition, right-edge gap, and mapped candles from chart end;
+- advanced, HTF, session, RR, and pre-quality execution telemetry;
+- quality-added blockers/warnings and artifact verification fields;
 - blockers, warnings, reasons, and errors.
 
 The summary also reports mean, p50, p95, and maximum end-to-end request latency.
@@ -130,6 +133,8 @@ The summary also reports mean, p50, p95, and maximum end-to-end request latency.
 `run_config.json` records the Git commit/dirty flag, dataset version, manifest/config hashes, sample digest, seed, threshold, context sizes, and confirmation that no training was performed.
 
 The JSON and Markdown summaries report the denominator explicitly. Failed or missing images are never silently counted as `NO_TRADE`; they are reported separately and excluded from successful-response coverage rates.
+
+For exact image-ID selection plus raw response JSON and verified annotated PNG export, follow [`E2_1_DIAGNOSTIC_REVIEW_PACK.md`](E2_1_DIAGNOSTIC_REVIEW_PACK.md). The review-pack mode is targeted forensic telemetry and does not change any model or decision rule.
 
 ## Interpretation Rules
 

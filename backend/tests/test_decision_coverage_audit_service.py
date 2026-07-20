@@ -34,9 +34,24 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
                         "order_block": 1,
                         "fair_value_gap": 1,
                     },
+                    "detections": [
+                        {
+                            "bbox_normalized": {
+                                "x": 0.70,
+                                "width": 0.10,
+                            }
+                        },
+                        {
+                            "bbox_normalized": {
+                                "x": 0.75,
+                                "width": 0.08,
+                            }
+                        },
+                    ],
                 },
                 "pairing": {
                     "total_pairs": 1,
+                    "candidate_combinations": 1,
                     "pairing_status": "PAIRS_FOUND",
                 },
                 "scoring": {
@@ -44,14 +59,76 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
                     "valid_setups": 1,
                     "best_setup": {
                         "live_status": "ACCEPT",
+                        "live_score": 0.81,
+                        "detector_valid": True,
+                        "average_confidence": 0.44,
+                        "x_distance": 0.05,
+                        "y_distance": 0.08,
+                        "ob_bbox": {
+                            "x": 0.70,
+                            "width": 0.10,
+                        },
+                        "fvg_bbox": {
+                            "x": 0.75,
+                            "width": 0.08,
+                        },
                     },
+                },
+                "ohlcv_context": {
+                    "resolved_chart_candles": 100,
+                },
+                "advanced_scoring": {
+                    "base_structure_score": 0.66,
+                    "advanced_score": 0.64,
+                    "advanced_status": "REVIEW",
+                    "htf_alignment_score": 0.50,
+                    "volatility_regime": "NORMAL",
                 },
                 "price_conversion": {
                     "status": "MAPPED",
+                    "mapping_mode": "CANONICAL",
+                    "mapping_provisional": False,
                     "mapping_confidence": 0.82,
+                    "ob_index_error": 1,
+                    "fvg_index_error": 2,
+                    "distance_from_prediction": 1,
+                    "matched_ob_idx": 70,
+                    "matched_fvg_idx": 72,
+                    "ob_datetime": "2025-01-03T08:00:00",
+                    "fvg_datetime": "2025-01-03T08:10:00",
+                    "zone_status": "fresh",
+                    "zone_touch_count": 0,
+                },
+                "session_risk": {
+                    "session": {
+                        "session": "LONDON",
+                        "session_score": 1.0,
+                    },
+                    "risk_reward": {
+                        "risk_reward_ratio": 2.1,
+                        "entry_side_valid": True,
+                        "zone_invalidated": False,
+                    },
                 },
                 "execution_gate": {
                     "entry_distance_atr": 1.8,
+                    "advanced_score": 0.64,
+                    "advanced_status": "REVIEW",
+                    "htf_alignment_score": 0.50,
+                    "volatility_regime": "NORMAL",
+                    "session": "LONDON",
+                    "session_score": 1.0,
+                    "risk_reward_ratio": 2.1,
+                    "quality_normalization": {
+                        "pre_decision": "BUY",
+                        "pre_execution_status": "TRADE_CANDIDATE",
+                        "pre_final_decision_ready": True,
+                        "status_changed": True,
+                        "added_blockers": [],
+                        "added_warnings": [
+                            "ENTRY_DISTANCE_ABOVE_1_5_ATR",
+                        ],
+                    },
                 },
                 "recommendation": {
                     "decision": "WATCHLIST",
@@ -68,6 +145,10 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
                         "ENTRY_DISTANCE_ABOVE_1_5_ATR",
                     ],
                 },
+                "annotated_chart": {
+                    "status": "RENDERED",
+                    "sha256": "abc123",
+                },
             },
             latency_ms=123.4567,
         )
@@ -80,6 +161,31 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
         self.assertEqual(row["pair_count"], 1)
         self.assertEqual(row["valid_setup_count"], 1)
         self.assertEqual(row["best_setup_status"], "ACCEPT")
+        self.assertEqual(row["best_setup_live_score"], 0.81)
+        self.assertEqual(row["both_detection_classes"], 1)
+        self.assertAlmostEqual(
+            row["rightmost_detection_gap_ratio"],
+            0.21,
+        )
+        self.assertAlmostEqual(
+            row["best_pair_gap_ratio"],
+            0.21,
+        )
+        self.assertEqual(row["advanced_score"], 0.64)
+        self.assertEqual(row["session_score"], 1.0)
+        self.assertEqual(row["risk_reward_ratio"], 2.1)
+        self.assertEqual(
+            row["pre_quality_execution_status"],
+            "TRADE_CANDIDATE",
+        )
+        self.assertEqual(row["quality_status_changed"], 1)
+        self.assertEqual(
+            row["quality_added_warnings"],
+            "ENTRY_DISTANCE_ABOVE_1_5_ATR",
+        )
+        self.assertEqual(row["mapped_ob_candles_from_end"], 29)
+        self.assertEqual(row["mapped_fvg_candles_from_end"], 27)
+        self.assertEqual(row["annotated_chart_status"], "RENDERED")
         self.assertEqual(row["actionable"], 0)
         self.assertEqual(
             row["warnings"],
@@ -178,6 +284,7 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
             },
         )
 
+        self.assertEqual(summary["schema_version"], 2)
         self.assertEqual(summary["population"]["successful_responses"], 2)
         self.assertEqual(summary["population"]["failed_responses"], 1)
         self.assertEqual(
@@ -187,6 +294,10 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
         self.assertEqual(
             summary["coverage"]["paired_setup"],
             {"count": 1, "denominator": 2, "rate": 0.5},
+        )
+        self.assertEqual(
+            summary["coverage"]["paired_given_both_classes"],
+            {"count": 1, "denominator": 1, "rate": 1.0},
         )
         self.assertEqual(
             summary["coverage"]["valid_setup"],
