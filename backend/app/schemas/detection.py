@@ -11,3 +11,4 @@ class DetectionResponse(BaseModel):
     width: int
     height: int
     detection: dict[str, Any]
+    annotated_chart: dict[str, Any]

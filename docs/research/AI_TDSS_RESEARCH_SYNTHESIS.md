@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.0
+**Versi:** 1.1
 **Tanggal:** 18 Juli 2026
-**Status:** Baseline terkunci; integrasi produk dan eksperimen end-to-end berjalan
+**Status:** Baseline terkunci; vertical slice web dan explainability tersedia; journal dan eksperimen end-to-end berjalan
 
 ## 1. Ringkasan Penelitian
 
@@ -137,6 +137,19 @@ Output minimum mencakup:
 - entry, stop loss, take profit, risk-reward, dan order type;
 - annotated image URL atau payload;
 - versi model, policy, dan pipeline.
+
+### 6.3 Status implementasi kontrak
+
+| Kapabilitas | Status | Catatan |
+|---|---|---|
+| React chart upload | Implemented | Memanggil `/api/analysis/full` dengan pair, timeframe, chart time, dan UTC offset |
+| Public decision boundary | Implemented | Hanya `TRADE_CANDIDATE` yang konsisten dapat menjadi BUY/SELL; level trade disembunyikan untuk hasil non-actionable |
+| Annotated chart | Implemented | Backend mengembalikan PNG base64 dengan bounding box OB/FVG dan banner keputusan |
+| Persistent journal | Pending | Harus user-scoped dan menyimpan semua keputusan |
+| Verified outcome feedback | Pending | Diperlukan sebelum data dapat eligible untuk incremental learning |
+| Four-sheet Excel export | Pending | Mengikuti kontrak pada Bagian 12 |
+
+Payload PNG base64 dipakai untuk vertical slice lokal. Implementasi produksi dapat memindahkan gambar beranotasi ke object storage dan mengembalikan URL tanpa mengubah makna output.
 
 ## 7. Dataset dan Desain Evaluasi
 
@@ -273,13 +286,12 @@ Export harus mempertahankan timestamp UTC, analysis ID, model version, blockers,
 
 | Gap | Dampak | Prioritas |
 |---|---|---|
-| Frontend masih memakai endpoint upload lama | Hasil full analysis belum tampil | P0 |
-| Annotated image belum menjadi output full pipeline | Tujuan edukasi belum terpenuhi | P0 |
 | Journal router/store belum selesai | Analisis dan feedback belum persisten | P0 |
 | Excel export belum tersedia | Kebutuhan pengguna belum terpenuhi | P0 |
-| Public decision masih menggunakan `WAIT` internal | Kontrak UI belum konsisten | P1 |
 | Feedback loop belum memiliki eligibility store | Incremental learning belum aman dijalankan | P1 |
-| Kontrak kelas tersebar di beberapa artefak | Risiko drift dokumentasi bila tidak divalidasi | Continuous |
+| Analysis ID dan lineage model belum dipersistenkan pada event journal | Audit end-to-end belum lengkap | P1 |
+| Timezone broker dataset masih bersifat asumsi provisional | Penyelarasan screenshot lintas platform perlu divalidasi | P1 |
+| Endpoint full analysis belum memiliki fixture integration test dengan model stub | Risiko regresi orkestrasi masih lebih tinggi daripada service-level unit test | P1 |
 
 ## 14. Batas Klaim Akademik
 

@@ -37,7 +37,9 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - CNN weighted ensemble (VGG11, VGG16, GoogLeNet, ResNet18) pada test 2025: accuracy `0.8607` dan Macro F1 `0.8427`.
 - YOLO11s 50 epoch untuk OB/FVG pada final test 2025: precision `0.591`, recall `0.593`, mAP50 `0.590`, dan mAP50-95 `0.452`.
 - Eksperimen YOLOv8n incremental sebelumnya valid sebagai proof of workflow, tetapi masih kalah dari cumulative baseline pada final test 2025.
-- Pipeline FastAPI CNN→YOLO→OHLCV→structure→risk→execution gate sudah terintegrasi. Integrasi UI hasil analisis, annotated image, jurnal persisten, dan ekspor Excel masih menjadi pekerjaan berikutnya.
+- Pipeline FastAPI CNN→YOLO→OHLCV→structure→risk→execution gate sudah terintegrasi.
+- Halaman upload React sudah memakai `/api/analysis/full` dan menampilkan keputusan publik, parameter risiko, reason codes, ringkasan regime/detection, serta annotated chart OB/FVG.
+- Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
 
@@ -80,9 +82,12 @@ Frontend Next.js/React:
 
 ```powershell
 cd C:\Users\ASUS\Documents\Project\AI-TDSS\frontend
-npm install
+Copy-Item .env.example .env.local
+npm ci
 npm run dev
 ```
+
+Nilai bawaan `NEXT_PUBLIC_API_URL` adalah `http://127.0.0.1:8000`. Ubah `.env.local` hanya jika backend dijalankan pada host atau port lain.
 
 Validasi kontrak dan unit test ringan:
 
@@ -106,10 +111,10 @@ python -m unittest discover -s backend\tests -p "test_*.py" -v
 
 ## Urutan Pengembangan Berikutnya
 
-1. Integrasikan frontend upload dengan endpoint `/api/analysis/full`.
-2. Kembalikan dan tampilkan annotated image serta alasan rekomendasi.
-3. Simpan setiap hasil analisis ke journal milik pengguna.
-4. Implementasikan unduhan workbook Excel.
+1. Simpan setiap hasil analisis, termasuk `WATCHLIST` dan `NO_TRADE`, ke journal milik pengguna.
+2. Implementasikan feedback outcome terverifikasi dan eligibility store.
+3. Implementasikan unduhan workbook Excel empat sheet.
+4. Jalankan product acceptance untuk upload, annotated chart, journal, dan Excel.
 5. Jalankan baseline end-to-end dan ablation secara lokal pada GBPUSD.
 6. Jalankan incremental experiment hanya setelah feedback eligible memenuhi trigger.
 

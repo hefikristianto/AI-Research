@@ -4,6 +4,11 @@
 
 ### Added
 
+- Added a public recommendation boundary for `BUY`, `SELL`, `WATCHLIST`, and `NO_TRADE` that fails closed when execution gates are incomplete or inconsistent.
+- Added server-side annotated PNG rendering for YOLO Order Block and Fair Value Gap detections.
+- Added the React full-analysis result view with risk levels, reason codes, regime probabilities, detection summary, and annotated chart.
+- Added backend unit coverage for public decision mapping and annotated-image rendering.
+- Added frontend lint and production-build CI.
 - Added a machine-readable canonical project contract.
 - Added project-contract validation and unit tests.
 - Added research synthesis for academic writing and revision.
@@ -13,6 +18,8 @@
 
 ### Changed
 
+- Connected the upload workflow to `/api/analysis/full` with required pair, timeframe, chart time, and UTC-offset metadata.
+- Redacted entry, stop-loss, take-profit, risk-reward, and order type from non-actionable public decisions.
 - Locked GBPUSD as the primary research/product pair.
 - Locked production YOLO scope to Order Block and Fair Value Gap.
 - Assigned liquidity, BOS/CHOCH, EQH/EQL, and candle patterns to deterministic OHLCV analysis.
@@ -22,8 +29,9 @@
 
 ### Notes
 
+- This milestone does not add journal persistence, outcome feedback, or Excel export; those remain the next product slice.
 - No model retraining is performed by this documentation/contract milestone.
-- GitHub CI remains limited to lightweight tests, syntax checks, and contract validation.
+- GitHub CI remains limited to lightweight tests, linting, syntax/contract validation, and application builds; it never trains models.
 
 ---
 

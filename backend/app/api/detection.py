@@ -15,6 +15,9 @@ from PIL import UnidentifiedImageError
 from app.schemas.detection import (
     DetectionResponse,
 )
+from app.services.annotated_chart_service import (
+    AnnotatedChartService,
+)
 from app.services.yolo_detection_service import (
     YOLODetectionService,
 )
@@ -129,6 +132,14 @@ async def detect_chart_objects(
             ),
         ) from error
 
+    annotated_chart = AnnotatedChartService.render(
+        image=image,
+        detections=detection.get(
+            "detections",
+            [],
+        ),
+    )
+
     return {
         "filename": (
             file.filename
@@ -138,4 +149,5 @@ async def detect_chart_objects(
         "width": image.width,
         "height": image.height,
         "detection": detection,
+        "annotated_chart": annotated_chart,
     }

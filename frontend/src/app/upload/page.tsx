@@ -9,7 +9,7 @@ export default function UploadPage() {
 
         <DashboardLayout>
 
-            <div className="mx-auto max-w-5xl">
+            <div className="mx-auto max-w-7xl">
 
                 <div className="mb-8">
 
@@ -18,7 +18,7 @@ export default function UploadPage() {
                     </h1>
 
                     <p className="mt-2 text-neutral-400">
-                        Upload screenshot TradingView, MT5, cTrader, atau platform trading lainnya.
+                        Upload chart GBPUSD untuk mendapatkan rekomendasi, parameter risiko, alasan, dan visualisasi zona OB/FVG.
                     </p>
 
                 </div>
