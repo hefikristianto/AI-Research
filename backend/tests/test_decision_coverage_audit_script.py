@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import base64
 import csv
+import hashlib
 import io
 import json
 import tempfile
@@ -13,6 +15,7 @@ from unittest.mock import patch
 from ai.scripts.audit_decision_coverage import (
     ensure_resume_compatible,
     multipart_body,
+    persist_review_artifacts,
     request_analysis,
     run,
     select_samples,
@@ -81,6 +84,36 @@ class DecisionCoverageAuditScriptTest(unittest.TestCase):
         self.assertEqual(len(first), 2)
         self.assertTrue(all(row["pair"] == "GBPUSD" for row in first))
 
+        targeted = select_samples(
+            rows,
+            images_root=Path("charts"),
+            year=2025,
+            pairs=["GBPUSD"],
+            timeframes=["M5"],
+            sample_size=0,
+            seed=17,
+            image_ids=["GBPUSD_M5_2025_3"],
+        )
+        self.assertEqual(
+            [row["image_id"] for row in targeted],
+            ["GBPUSD_M5_2025_3"],
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Image ID tidak ditemukan",
+        ):
+            select_samples(
+                rows,
+                images_root=Path("charts"),
+                year=2025,
+                pairs=["GBPUSD"],
+                timeframes=["M5"],
+                sample_size=0,
+                seed=17,
+                image_ids=["MISSING_CASE"],
+            )
+
     def test_request_uses_batch_flag_and_multipart_image(self) -> None:
         payload = {
             "recommendation": {"decision": "NO_TRADE"},
@@ -148,6 +181,64 @@ class DecisionCoverageAuditScriptTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "sample_digest_sha256"):
             ensure_resume_compatible(existing, current)
 
+        old_schema = dict(existing)
+        old_schema["schema_version"] = 1
+        new_schema = dict(existing)
+        new_schema["schema_version"] = 2
+        with self.assertRaisesRegex(ValueError, "schema_version"):
+            ensure_resume_compatible(old_schema, new_schema)
+
+    def test_review_pack_saves_response_and_verified_png(self) -> None:
+        image_bytes = b"diagnostic-png"
+        encoded = base64.b64encode(
+            image_bytes
+        ).decode("ascii")
+        payload = {
+            "pipeline_status": "COMPLETE",
+            "annotated_chart": {
+                "status": "RENDERED",
+                "data_url": (
+                    "data:image/png;base64,"
+                    + encoded
+                ),
+                "sha256": hashlib.sha256(
+                    image_bytes
+                ).hexdigest(),
+            },
+        }
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output_dir = Path(temporary_directory)
+            result = persist_review_artifacts(
+                output_dir,
+                {"image_id": "GBPUSD/M5 CASE"},
+                payload,
+            )
+
+            response_path = (
+                output_dir
+                / result["response_json_path"]
+            )
+            annotated_path = (
+                output_dir
+                / result["annotated_chart_path"]
+            )
+            self.assertTrue(response_path.exists())
+            self.assertEqual(
+                annotated_path.read_bytes(),
+                image_bytes,
+            )
+            self.assertEqual(
+                result[
+                    "annotated_chart_sha256_verified"
+                ],
+                1,
+            )
+            self.assertEqual(
+                result["review_artifact_error"],
+                "",
+            )
+
     def test_run_writes_resumable_rows_and_summaries(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -191,6 +282,7 @@ class DecisionCoverageAuditScriptTest(unittest.TestCase):
                 pairs=["GBPUSD"],
                 timeframes=["M5"],
                 sample_size=0,
+                image_ids=None,
                 seed=42,
                 confidence_threshold=0.25,
                 chart_candles=100,
@@ -201,6 +293,7 @@ class DecisionCoverageAuditScriptTest(unittest.TestCase):
                 output_dir=output_dir,
                 resume=False,
                 include_annotated_chart=False,
+                review_pack=False,
                 skip_health_check=False,
             )
             payload = {

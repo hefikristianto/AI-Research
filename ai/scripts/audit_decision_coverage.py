@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import hashlib
 import json
 import mimetypes
 import random
+import re
 import subprocess
 import sys
 import time
@@ -105,6 +107,15 @@ def parse_args() -> argparse.Namespace:
         help="Deterministic random sample size; 0 processes all selected rows.",
     )
     parser.add_argument(
+        "--image-id",
+        dest="image_ids",
+        action="append",
+        help=(
+            "Exact metadata image_id untuk targeted review. "
+            "Ulangi argumen untuk beberapa kasus."
+        ),
+    )
+    parser.add_argument(
         "--seed",
         type=int,
         default=42,
@@ -160,6 +171,14 @@ def parse_args() -> argparse.Namespace:
         help="Request base64 annotated images. Disabled by default for batch speed.",
     )
     parser.add_argument(
+        "--review-pack",
+        action="store_true",
+        help=(
+            "Simpan full response JSON dan annotated PNG untuk setiap "
+            "kasus terpilih. Opsi ini otomatis meminta annotated chart."
+        ),
+    )
+    parser.add_argument(
         "--skip-health-check",
         action="store_true",
         help="Skip the initial /health request.",
@@ -182,6 +201,10 @@ def validate_args(args: argparse.Namespace) -> None:
         raise ValueError("--timeout-seconds harus lebih dari nol.")
     if args.max_errors < 0:
         raise ValueError("--max-errors tidak boleh negatif.")
+    if args.image_ids and args.sample_size:
+        raise ValueError(
+            "--image-id tidak boleh digabung dengan --sample-size."
+        )
 
 
 def read_metadata(path: Path) -> list[dict[str, str]]:
@@ -217,21 +240,33 @@ def select_samples(
     timeframes: list[str],
     sample_size: int,
     seed: int,
+    image_ids: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     pair_filter = {value.upper() for value in pairs}
     timeframe_filter = {value.upper() for value in timeframes}
+    image_id_filter = {
+        value.upper()
+        for value in (image_ids or [])
+    }
 
     selected: list[dict[str, Any]] = []
     for row in metadata_rows:
         pair = row.get("pair", "").upper()
         timeframe = row.get("timeframe", "").upper()
         row_year = row.get("year", "")
+        image_id = row.get("image_id", "")
 
         if row_year != str(year):
             continue
         if pair_filter and pair not in pair_filter:
             continue
         if timeframe_filter and timeframe not in timeframe_filter:
+            continue
+        if (
+            image_id_filter
+            and image_id.upper()
+            not in image_id_filter
+        ):
             continue
 
         image_path = (
@@ -243,7 +278,7 @@ def select_samples(
         )
         selected.append(
             {
-                "image_id": row.get("image_id", ""),
+                "image_id": image_id,
                 "file_name": row.get("file_name", ""),
                 "image_path": str(image_path.resolve()),
                 "pair": pair,
@@ -252,6 +287,21 @@ def select_samples(
                 "chart_datetime": row.get("end_datetime", ""),
             }
         )
+
+    if image_id_filter:
+        selected_ids = {
+            str(item["image_id"]).upper()
+            for item in selected
+        }
+        missing_ids = sorted(
+            image_id_filter
+            - selected_ids
+        )
+        if missing_ids:
+            raise ValueError(
+                "Image ID tidak ditemukan dalam filter aktif: "
+                + ", ".join(missing_ids)
+            )
 
     selected.sort(
         key=lambda item: (
@@ -367,6 +417,136 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
+def _artifact_stem(value: str) -> str:
+    stem = re.sub(
+        r"[^A-Za-z0-9._-]+",
+        "_",
+        value,
+    ).strip("._")
+    return stem or "unnamed_case"
+
+
+def persist_review_artifacts(
+    output_dir: Path,
+    sample: dict[str, Any],
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    stem = _artifact_stem(
+        str(sample.get("image_id", ""))
+    )
+    responses_dir = (
+        output_dir
+        / "review_pack"
+        / "responses"
+    )
+    annotated_dir = (
+        output_dir
+        / "review_pack"
+        / "annotated"
+    )
+    responses_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+    annotated_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    response_path = (
+        responses_dir
+        / f"{stem}.json"
+    )
+    write_json(response_path, payload)
+
+    annotated_chart = payload.get(
+        "annotated_chart"
+    )
+    if not isinstance(annotated_chart, dict):
+        annotated_chart = {}
+
+    result: dict[str, Any] = {
+        "response_json_path": response_path.relative_to(
+            output_dir
+        ).as_posix(),
+        "annotated_chart_path": "",
+        "annotated_chart_status": annotated_chart.get(
+            "status",
+            "UNKNOWN",
+        ),
+        "annotated_chart_sha256": annotated_chart.get(
+            "sha256",
+            "",
+        ),
+        "annotated_chart_sha256_verified": "",
+        "review_artifact_error": "",
+    }
+
+    if annotated_chart.get("status") != "RENDERED":
+        result["review_artifact_error"] = (
+            "Annotated chart tidak berstatus RENDERED."
+        )
+        return result
+
+    data_url = str(
+        annotated_chart.get("data_url", "")
+    )
+    prefix = "data:image/png;base64,"
+    if not data_url.startswith(prefix):
+        result["review_artifact_error"] = (
+            "Annotated chart tidak memiliki PNG base64 data URL."
+        )
+        return result
+
+    try:
+        image_bytes = base64.b64decode(
+            data_url[len(prefix) :],
+            validate=True,
+        )
+    except (ValueError, TypeError) as error:
+        result["review_artifact_error"] = (
+            "Annotated chart gagal didekode: "
+            + str(error)
+        )
+        return result
+
+    annotated_path = (
+        annotated_dir
+        / f"{stem}.png"
+    )
+    annotated_path.write_bytes(image_bytes)
+    actual_sha256 = hashlib.sha256(
+        image_bytes
+    ).hexdigest()
+    expected_sha256 = str(
+        annotated_chart.get("sha256", "")
+    )
+
+    result["annotated_chart_path"] = (
+        annotated_path.relative_to(
+            output_dir
+        ).as_posix()
+    )
+    result[
+        "annotated_chart_sha256_verified"
+    ] = int(
+        bool(expected_sha256)
+        and actual_sha256
+        == expected_sha256
+    )
+
+    if (
+        expected_sha256
+        and actual_sha256
+        != expected_sha256
+    ):
+        result["review_artifact_error"] = (
+            "SHA256 annotated chart tidak cocok."
+        )
+
+    return result
+
+
 def read_existing_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -480,7 +660,9 @@ def request_analysis(
     try:
         payload = json.loads(raw.decode("utf-8"))
     except json.JSONDecodeError as error:
-        raise AuditRequestError("Backend mengembalikan JSON yang tidak valid.") from error
+        raise AuditRequestError(
+            "Backend mengembalikan JSON yang tidak valid."
+        ) from error
 
     if not isinstance(payload, dict):
         raise AuditRequestError("Payload full analysis bukan JSON object.")
@@ -496,7 +678,7 @@ def build_run_configuration(
     samples: list[dict[str, Any]],
 ) -> dict[str, Any]:
     configuration = {
-        "schema_version": 1,
+        "schema_version": 2,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "base_url": args.base_url.rstrip("/"),
         "metadata": str(args.metadata.resolve()),
@@ -505,6 +687,9 @@ def build_run_configuration(
         "pairs": pairs,
         "timeframes": timeframes,
         "sample_size_requested": args.sample_size,
+        "image_ids_requested": sorted(
+            args.image_ids or []
+        ),
         "selected_images": len(samples),
         "sample_seed": args.seed,
         "sample_digest_sha256": sample_digest(samples),
@@ -512,7 +697,13 @@ def build_run_configuration(
         "chart_candles": args.chart_candles,
         "context_candles": args.context_candles,
         "utc_offset": args.utc_offset,
-        "include_annotated_chart": args.include_annotated_chart,
+        "include_annotated_chart": bool(
+            args.include_annotated_chart
+            or args.review_pack
+        ),
+        "review_pack": bool(
+            args.review_pack
+        ),
         "metadata_sha256": file_sha256(args.metadata),
         "project_contract_sha256": file_sha256(
             PROJECT_ROOT / "config" / "project_contract.json"
@@ -537,6 +728,7 @@ def ensure_resume_compatible(
     current: dict[str, Any],
 ) -> None:
     keys = (
+        "schema_version",
         "year",
         "pairs",
         "timeframes",
@@ -545,6 +737,9 @@ def ensure_resume_compatible(
         "chart_candles",
         "context_candles",
         "utc_offset",
+        "image_ids_requested",
+        "include_annotated_chart",
+        "review_pack",
     )
     mismatched = [key for key in keys if existing.get(key) != current.get(key)]
     if mismatched:
@@ -582,6 +777,7 @@ def run(args: argparse.Namespace) -> int:
         timeframes=timeframes,
         sample_size=args.sample_size,
         seed=args.seed,
+        image_ids=args.image_ids,
     )
     if not samples:
         raise ValueError("Tidak ada metadata yang cocok dengan filter audit.")
@@ -601,7 +797,9 @@ def run(args: argparse.Namespace) -> int:
 
     if rows_path.exists() and not args.resume:
         raise FileExistsError(
-            f"Output sudah berisi rows CSV. Gunakan --resume atau folder baru: {rows_path}"
+            "Output sudah berisi rows CSV. "
+            "Gunakan --resume atau folder baru: "
+            f"{rows_path}"
         )
 
     if args.resume and config_path.exists():
@@ -627,7 +825,11 @@ def run(args: argparse.Namespace) -> int:
     pending = [
         sample for sample in samples if sample["image_id"] not in completed_ids
     ]
-    print(f"Selected: {len(samples)} | Existing: {len(existing_rows)} | Pending: {len(pending)}")
+    print(
+        f"Selected: {len(samples)} | "
+        f"Existing: {len(existing_rows)} | "
+        f"Pending: {len(pending)}"
+    )
     print(f"Output: {output_dir}")
 
     new_file = not rows_path.exists()
@@ -670,7 +872,10 @@ def run(args: argparse.Namespace) -> int:
                         chart_candles=args.chart_candles,
                         context_candles=args.context_candles,
                         utc_offset=args.utc_offset,
-                        include_annotated_chart=args.include_annotated_chart,
+                        include_annotated_chart=bool(
+                            args.include_annotated_chart
+                            or args.review_pack
+                        ),
                         timeout_seconds=args.timeout_seconds,
                     )
                     latency_ms = (time.perf_counter() - started) * 1000.0
@@ -680,6 +885,20 @@ def run(args: argparse.Namespace) -> int:
                         latency_ms=latency_ms,
                         http_status=http_status,
                     )
+                    if args.review_pack:
+                        try:
+                            row.update(
+                                persist_review_artifacts(
+                                    output_dir,
+                                    sample,
+                                    payload,
+                                )
+                            )
+                        except (OSError, ValueError, TypeError) as error:
+                            row["review_artifact_error"] = (
+                                "Review artifact gagal disimpan: "
+                                + str(error)
+                            )
                     consecutive_errors = 0
                     print(
                         prefix
@@ -732,6 +951,11 @@ def run(args: argparse.Namespace) -> int:
 
     print(f"Rows: {rows_path}")
     print(f"Summary: {output_dir / 'decision_coverage_summary.md'}")
+    if args.review_pack:
+        print(
+            "Review pack: "
+            f"{output_dir / 'review_pack'}"
+        )
     if interrupted:
         print("Jalankan ulang command yang sama dengan --resume untuk melanjutkan.")
         return 130

@@ -113,11 +113,14 @@ python ai\scripts\audit_decision_coverage.py `
 
 Runner menyimpan checkpoint CSV setelah setiap gambar dan dapat dilanjutkan menggunakan `--resume`. Panduan lengkap: [`docs/experiments/DECISION_COVERAGE_AUDIT.md`](docs/experiments/DECISION_COVERAGE_AUDIT.md).
 
+Targeted E2.1 review dapat memilih exact `image_id`, menyimpan full response JSON, dan memverifikasi annotated PNG tanpa mengubah keputusan produksi. Panduan: [`docs/experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md`](docs/experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md).
+
 ## Dokumen Utama
 
 - [Research synthesis](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md)
 - [Local experiment plan](docs/experiments/LOCAL_EXPERIMENT_PLAN.md)
 - [Decision coverage audit](docs/experiments/DECISION_COVERAGE_AUDIT.md)
+- [E2.1 diagnostic review pack](docs/experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)

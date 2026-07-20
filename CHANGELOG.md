@@ -11,6 +11,8 @@
 - Added frontend lint and production-build CI.
 - Added a resumable local decision-coverage audit for the 2025 temporal test population, including per-image CSV and JSON/Markdown funnel summaries.
 - Added unit coverage for audit row extraction, denominator handling, deterministic sampling, multipart requests, and resume compatibility.
+- Added E2.1 targeted review packs with exact image-ID selection, raw endpoint responses, SHA256-verified annotated PNGs, and expanded execution/mapping/zone-recency telemetry.
+- Documented the frozen 165-window GBPUSD 2025 coverage funnel and seven-case diagnostic protocol without changing model thresholds or execution gates.
 - Added a machine-readable canonical project contract.
 - Added project-contract validation and unit tests.
 - Added research synthesis for academic writing and revision.

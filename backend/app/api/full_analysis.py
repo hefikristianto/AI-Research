@@ -803,6 +803,25 @@ async def run_full_analysis(
     # ---------------------------------------------
     # Execution quality normalization
     # ---------------------------------------------
+    pre_quality_decision = (
+        execution_gate_result.get(
+            "decision"
+        )
+    )
+
+    pre_quality_execution_status = (
+        execution_gate_result.get(
+            "execution_status"
+        )
+    )
+
+    pre_quality_final_decision_ready = bool(
+        execution_gate_result.get(
+            "final_decision_ready",
+            False,
+        )
+    )
+
     minimum_mapping_confidence = 0.65
     warning_entry_distance_atr = 1.5
     maximum_entry_distance_atr = 3.0
@@ -819,6 +838,13 @@ async def run_full_analysis(
             "warnings"
         )
         or []
+    )
+
+    pre_quality_blockers = list(
+        blockers
+    )
+    pre_quality_warnings = list(
+        warnings
     )
 
     mapping_status = (
@@ -1019,6 +1045,83 @@ async def run_full_analysis(
         ] = [
             "ALL_EXECUTION_GATES_PASSED"
         ]
+
+    execution_gate_result[
+        "quality_normalization"
+    ] = {
+        "status": "COMPLETE",
+        "pre_decision": (
+            pre_quality_decision
+        ),
+        "pre_execution_status": (
+            pre_quality_execution_status
+        ),
+        "pre_final_decision_ready": (
+            pre_quality_final_decision_ready
+        ),
+        "post_decision": (
+            execution_gate_result.get(
+                "decision"
+            )
+        ),
+        "post_execution_status": (
+            execution_gate_result.get(
+                "execution_status"
+            )
+        ),
+        "post_final_decision_ready": bool(
+            execution_gate_result.get(
+                "final_decision_ready",
+                False,
+            )
+        ),
+        "status_changed": (
+            pre_quality_decision
+            != execution_gate_result.get(
+                "decision"
+            )
+            or pre_quality_execution_status
+            != execution_gate_result.get(
+                "execution_status"
+            )
+            or pre_quality_final_decision_ready
+            != bool(
+                execution_gate_result.get(
+                    "final_decision_ready",
+                    False,
+                )
+            )
+        ),
+        "applied": bool(
+            blockers
+            != pre_quality_blockers
+            or warnings
+            != pre_quality_warnings
+        ),
+        "added_blockers": [
+            blocker
+            for blocker in blockers
+            if blocker
+            not in pre_quality_blockers
+        ],
+        "added_warnings": [
+            warning
+            for warning in warnings
+            if warning
+            not in pre_quality_warnings
+        ],
+        "thresholds": {
+            "minimum_mapping_confidence": (
+                minimum_mapping_confidence
+            ),
+            "warning_entry_distance_atr": (
+                warning_entry_distance_atr
+            ),
+            "maximum_entry_distance_atr": (
+                maximum_entry_distance_atr
+            ),
+        },
+    }
 
     recommendation_result = recommendation_service.build(
         execution_gate_result

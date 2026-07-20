@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.2
+**Versi:** 1.3
 **Tanggal:** 20 Juli 2026
-**Status:** Baseline terkunci; vertical slice web dan explainability tersedia; tooling audit coverage tersedia; journal dan evaluasi outcome berjalan
+**Status:** Baseline coverage terkunci; diagnostic review pack tersedia; journal dan evaluasi outcome berjalan
 
 ## 1. Ringkasan Penelitian
 
@@ -207,6 +207,8 @@ Metrik trading harus dilaporkan bersama jumlah trade dan coverage. Win rate ting
 Sebelum precision keputusan atau metrik trading dihitung, pipeline dijalankan pada seluruh population GBPUSD 2025 melalui endpoint `/api/analysis/full`. Audit mencatat detection coverage, paired-setup coverage, `WATCHLIST`, actionable `BUY/SELL`, `NO_TRADE`, request failure, serta distribusi blocker per timeframe.
 
 Request failure dan gambar lokal yang hilang dipisahkan dari denominator respons sukses; keduanya tidak boleh diam-diam dihitung sebagai `NO_TRADE`. Output audit berupa CSV per gambar serta ringkasan JSON/Markdown di `local_artifacts/`. Audit ini tidak melakukan training dan tidak digunakan untuk mengubah threshold pada final test. Protokol operasional berada di [`DECISION_COVERAGE_AUDIT.md`](../experiments/DECISION_COVERAGE_AUDIT.md).
+
+Jika summary agregat belum cukup menjelaskan transisi keputusan, E2.1 memakai targeted case review yang telah ditentukan sebelumnya. Telemetry memisahkan kondisi sebelum dan sesudah quality normalization, mengukur recency zona terhadap sisi kanan gambar dan akhir window OHLCV, serta menyimpan raw response dan annotated image dengan verifikasi hash. Review ini bersifat forensik; perubahan algoritme berikutnya tetap dikembangkan pada periode development/validation, bukan dituning pada tujuh kasus final-test. Protokol berada di [`E2_1_DIAGNOSTIC_REVIEW_PACK.md`](../experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md).
 
 ## 9. Incremental Learning yang Aman
 
