@@ -9,6 +9,8 @@
 - Added the React full-analysis result view with risk levels, reason codes, regime probabilities, detection summary, and annotated chart.
 - Added backend unit coverage for public decision mapping and annotated-image rendering.
 - Added frontend lint and production-build CI.
+- Added a resumable local decision-coverage audit for the 2025 temporal test population, including per-image CSV and JSON/Markdown funnel summaries.
+- Added unit coverage for audit row extraction, denominator handling, deterministic sampling, multipart requests, and resume compatibility.
 - Added a machine-readable canonical project contract.
 - Added project-contract validation and unit tests.
 - Added research synthesis for academic writing and revision.
@@ -26,12 +28,14 @@
 - Defined CNN incremental learning as an offline batch champion–challenger process.
 - Required verified outcomes and prohibited raw predictions as automatic ground truth.
 - Standardized large local artifacts under ignored `local_artifacts/`.
+- Allowed batch audit requests to omit annotated PNG base64 while keeping the interactive API default unchanged.
 
 ### Notes
 
 - This milestone does not add journal persistence, outcome feedback, or Excel export; those remain the next product slice.
 - No model retraining is performed by this documentation/contract milestone.
 - GitHub CI remains limited to lightweight tests, linting, syntax/contract validation, and application builds; it never trains models.
+- Decision coverage is reported separately from accuracy and profitability; the audit does not tune the locked 2025 threshold.
 
 ---
 

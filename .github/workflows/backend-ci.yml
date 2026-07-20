@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "backend/**"
+      - "ai/scripts/audit_decision_coverage.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
@@ -14,6 +15,7 @@ on:
       - main
     paths:
       - "backend/**"
+      - "ai/scripts/audit_decision_coverage.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
@@ -68,3 +70,4 @@ jobs:
           python -m compileall -q
           backend/app
           backend/tests
+          ai/scripts/audit_decision_coverage.py

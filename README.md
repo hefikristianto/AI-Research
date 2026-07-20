@@ -39,6 +39,7 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - Eksperimen YOLOv8n incremental sebelumnya valid sebagai proof of workflow, tetapi masih kalah dari cumulative baseline pada final test 2025.
 - Pipeline FastAPI CNN→YOLO→OHLCV→structure→risk→execution gate sudah terintegrasi.
 - Halaman upload React sudah memakai `/api/analysis/full` dan menampilkan keputusan publik, parameter risiko, reason codes, ringkasan regime/detection, serta annotated chart OB/FVG.
+- Runner audit lokal tersedia untuk mengukur detection, pairing, `WATCHLIST`, actionable, `NO_TRADE`, dan distribusi blocker pada seluruh test window 2025 tanpa retraining.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -98,10 +99,25 @@ $env:PYTHONPATH = "backend"
 python -m unittest discover -s backend\tests -p "test_*.py" -v
 ```
 
+Smoke audit decision coverage pada 10 chart GBPUSD 2025, dengan backend tetap berjalan pada port 8000:
+
+```powershell
+python ai\scripts\audit_decision_coverage.py `
+  --year 2025 `
+  --pair GBPUSD `
+  --sample-size 10 `
+  --seed 42 `
+  --confidence-threshold 0.25 `
+  --output-dir ".\local_artifacts\decision_coverage\gbpusd_2025_smoke"
+```
+
+Runner menyimpan checkpoint CSV setelah setiap gambar dan dapat dilanjutkan menggunakan `--resume`. Panduan lengkap: [`docs/experiments/DECISION_COVERAGE_AUDIT.md`](docs/experiments/DECISION_COVERAGE_AUDIT.md).
+
 ## Dokumen Utama
 
 - [Research synthesis](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md)
 - [Local experiment plan](docs/experiments/LOCAL_EXPERIMENT_PLAN.md)
+- [Decision coverage audit](docs/experiments/DECISION_COVERAGE_AUDIT.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)
@@ -111,11 +127,11 @@ python -m unittest discover -s backend\tests -p "test_*.py" -v
 
 ## Urutan Pengembangan Berikutnya
 
-1. Simpan setiap hasil analisis, termasuk `WATCHLIST` dan `NO_TRADE`, ke journal milik pengguna.
-2. Implementasikan feedback outcome terverifikasi dan eligibility store.
-3. Implementasikan unduhan workbook Excel empat sheet.
-4. Jalankan product acceptance untuk upload, annotated chart, journal, dan Excel.
-5. Jalankan baseline end-to-end dan ablation secara lokal pada GBPUSD.
-6. Jalankan incremental experiment hanya setelah feedback eligible memenuhi trigger.
+1. Jalankan decision-coverage audit 2025 dan bekukan baseline funnel serta distribusi blocker.
+2. Simpan setiap hasil analisis, termasuk `WATCHLIST` dan `NO_TRADE`, ke journal milik pengguna.
+3. Implementasikan feedback outcome terverifikasi dan eligibility store.
+4. Implementasikan unduhan workbook Excel empat sheet.
+5. Jalankan product acceptance untuk upload, annotated chart, journal, dan Excel.
+6. Jalankan baseline outcome, ablation, dan incremental experiment sesuai evaluation gate.
 
 Semua rekomendasi AI-TDSS bersifat bantuan analisis, bukan nasihat keuangan atau jaminan hasil trading.
