@@ -23,4 +23,6 @@ class FullAnalysisResponse(BaseModel):
     price_conversion: dict[str, Any]
     session_risk: dict[str, Any]
     execution_gate: dict[str, Any]
+    recommendation: dict[str, Any]
+    annotated_chart: dict[str, Any]
     pipeline_status: str

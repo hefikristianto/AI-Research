@@ -18,6 +18,9 @@ from app.api.detection import yolo_service
 from app.schemas.full_analysis import (
     FullAnalysisResponse,
 )
+from app.services.annotated_chart_service import (
+    AnnotatedChartService,
+)
 from app.services.chart_metadata_service import (
     ChartMetadataService,
 )
@@ -50,6 +53,9 @@ from app.services.ob_fvg_pairing_service import (
 )
 from app.services.ohlcv_context_service import (
     OHLCVContextService,
+)
+from app.services.public_recommendation_service import (
+    PublicRecommendationService,
 )
 
 
@@ -100,6 +106,8 @@ execution_gate_service = (
 price_conversion_service = (
     CanonicalOHLCVPriceConversionService()
 )
+
+recommendation_service = PublicRecommendationService()
 
 ALLOWED_CONTENT_TYPES = {
     "image/png",
@@ -1005,6 +1013,33 @@ async def run_full_analysis(
             "ALL_EXECUTION_GATES_PASSED"
         ]
 
+    recommendation_result = recommendation_service.build(
+        execution_gate_result
+    )
+
+    try:
+        annotated_chart_result = (
+            AnnotatedChartService.render(
+                image=image,
+                detections=detection_result.get(
+                    "detections",
+                    [],
+                ),
+                decision=recommendation_result[
+                    "decision"
+                ],
+                execution_status=recommendation_result[
+                    "execution_status"
+                ],
+            )
+        )
+    except Exception as error:
+        annotated_chart_result = {
+            "status": "ERROR",
+            "error": str(error),
+            "rendered_detections": 0,
+        }
+
     execution_complete = (
         execution_gate_result.get(
             "status"
@@ -1101,6 +1136,8 @@ async def run_full_analysis(
         "execution_gate": (
             execution_gate_result
         ),
+        "recommendation": recommendation_result,
+        "annotated_chart": annotated_chart_result,
         "pipeline_status": (
             pipeline_status
         ),
