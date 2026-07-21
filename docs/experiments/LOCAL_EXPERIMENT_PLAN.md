@@ -203,7 +203,7 @@ Gate:
 
 Jalankan baseline dan `--plot-aware-mapping` pada sampel GBPUSD 2024 yang identik. Kedua run wajib memakai seed, sample digest, threshold, commit, dan context size yang sama. Bandingkan error indeks OB/FVG, mapping confidence, fallback geometry, keputusan yang berubah, dan request failure. Jumlah sinyal bukan acceptance metric.
 
-Legacy full-image mapping tetap menjadi default. Hanya setelah A/B development 2020–2024 lulus, aturan boleh dibekukan untuk satu perbandingan final 2025. Protokol dan command lengkap berada di [`E2_2_PLOT_MAPPING_CALIBRATION.md`](E2_2_PLOT_MAPPING_CALIBRATION.md).
+Legacy full-image mapping tetap menjadi default. A/B lengkap GBPUSD 2024 telah lulus dan kandidat dibekukan pada 21 Juli 2026 untuk satu perbandingan final 2025. Bukti, konstanta, dan command final berada di [`E2_2_PLOT_MAPPING_RESULT.md`](E2_2_PLOT_MAPPING_RESULT.md); kontrak machine-readable berada di `config/experiments/e2_2_plot_mapping_freeze.json`.
 
 Gate:
 
@@ -379,4 +379,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-Urutan kerja aktif adalah E2.2 mapping calibration → E2.3 high-risk daily coverage → journal/feedback/Excel → E3 ablation → E5 product acceptance. E2.3 tidak dimulai sebelum mapping dibekukan, dan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+Urutan kerja aktif adalah single frozen E2.2 comparison 2025 → keputusan mapping → E2.3 high-risk daily coverage → journal/feedback/Excel → E3 ablation → E5 product acceptance. E2.2 tidak boleh dituning ulang dari hasil 2025. E2.3 memakai policy mapping yang telah dipilih, dan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

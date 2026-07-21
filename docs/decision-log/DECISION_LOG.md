@@ -109,3 +109,14 @@
 | Impact | Metadata/OHLCV yang tidak lengkap menghasilkan WATCHLIST atau NO_TRADE. Analisis visual boleh ditampilkan untuk edukasi tetapi tidak disebut final entry recommendation |
 
 ---
+
+## Decision #012
+
+| Item | Description |
+|------|-------------|
+| Date | 21-07-2026 |
+| Decision | Kandidat plot-aware mapping E2.2 dibekukan untuk tepat satu paired comparison GBPUSD 2025; full-image tetap menjadi default produksi sampai hasil final diinterpretasikan |
+| Reason | A/B development 2024 dengan 165 chart memiliki lineage identik dan nol request failure. Error indeks berpasangan membaik, sedangkan seluruh perubahan keputusan dapat dijelaskan oleh hilangnya blocker `LOW_MAPPING_CONFIDENCE` tanpa perubahan detector, pairing, atau threshold eksekusi |
+| Impact | Konstanta geometry, seed, threshold, context size, dan aturan interpretasi dikunci dalam kontrak machine-readable. Kedua run 2025 harus identik kecuali flag plot-aware, hanya boleh diselesaikan sekali per mode, dan hasilnya tidak boleh digunakan untuk tuning ulang E2.2 |
+
+---

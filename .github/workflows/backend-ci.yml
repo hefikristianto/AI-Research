@@ -7,7 +7,9 @@ on:
     paths:
       - "backend/**"
       - "ai/scripts/audit_decision_coverage.py"
+      - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
+      - "config/experiments/e2_2_plot_mapping_freeze.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   push:
@@ -16,7 +18,9 @@ on:
     paths:
       - "backend/**"
       - "ai/scripts/audit_decision_coverage.py"
+      - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
+      - "config/experiments/e2_2_plot_mapping_freeze.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   workflow_dispatch:
@@ -71,3 +75,4 @@ jobs:
           backend/app
           backend/tests
           ai/scripts/audit_decision_coverage.py
+          ai/scripts/validate_e2_2_final_comparison.py

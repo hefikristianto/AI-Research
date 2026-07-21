@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.2",
+  "decision_status": "FROZEN_FOR_SINGLE_FINAL_COMPARISON",
+  "frozen_on": "2026-07-21",
+  "implementation_commit": "f7993442cfc9f63b381ea8ddd02fab79d5d29c15",
+  "training_performed": false,
+  "mapping_policy": {
+    "production_default": "FULL_IMAGE",
+    "candidate_mode": "PLOT_AWARE",
+    "opt_in_query_parameter": "plot_aware_mapping",
+    "uncertain_geometry_fallback": "FULL_IMAGE",
+    "production_promotion_deferred": true
+  },
+  "geometry_constants": {
+    "difference_threshold": 24,
+    "minimum_span_ratio": 0.55,
+    "maximum_span_ratio": 0.98,
+    "minimum_margin_ratio": 0.01,
+    "maximum_margin_ratio": 0.2,
+    "minimum_active_column_ratio": 0.1
+  },
+  "development_evidence": {
+    "pair": "GBPUSD",
+    "year": 2024,
+    "timeframes": [
+      "H1",
+      "H4",
+      "M15",
+      "M5"
+    ],
+    "population": 165,
+    "successful_responses_per_mode": 165,
+    "failed_responses_per_mode": 0,
+    "sample_seed": 42,
+    "sample_digest_sha256": "8b756a1aebe9383a90b44669842da0de05953a4525bcbbb9deee322c7a041d34",
+    "metadata_sha256": "78e0e6c2a1273cc2f8e5844e309ada3e740ba6c7b32d016d8cbe7375df11a65d",
+    "project_contract_sha256": "5149b0e8b31b819217f6a44c83373d3a4d2d7faf1f72976592bc3de4cc8694d0",
+    "ensemble_config_sha256": "86e50b207d5b5915c17d321719b83f258aba463159cf476983a2c459928d1a6f",
+    "geometry_detected": 165,
+    "paired_setup_count": 33,
+    "observable_mapping_matches": 30,
+    "paired_ob_error": {
+      "improved": 28,
+      "unchanged": 2,
+      "worsened": 0,
+      "mean_legacy_minus_plot_aware": 2.966667
+    },
+    "paired_fvg_error": {
+      "improved": 22,
+      "unchanged": 5,
+      "worsened": 3,
+      "mean_legacy_minus_plot_aware": 1.766667
+    },
+    "decision_transitions": {
+      "NO_TRADE_TO_NO_TRADE": 150,
+      "WATCHLIST_TO_WATCHLIST": 12,
+      "WATCHLIST_TO_BUY": 3
+    },
+    "low_mapping_confidence_blockers_removed": 19,
+    "mapping_status_changes": 0,
+    "actionable_candidate_image_ids": [
+      "GBPUSD_H1_2024_20240222_120000_0010",
+      "GBPUSD_H1_2024_20240730_050000_0037",
+      "GBPUSD_M15_2024_20240125_170000_0018"
+    ],
+    "targeted_review": {
+      "cases_per_mode": 8,
+      "rendered_and_sha256_verified_per_mode": 8,
+      "artifact_errors": 0,
+      "interactive_web_reproduction_image_id": "GBPUSD_H1_2024_20240730_050000_0037",
+      "interactive_web_reproduction_decision": "BUY"
+    }
+  },
+  "final_comparison_protocol": {
+    "pair": "GBPUSD",
+    "year": 2025,
+    "timeframes": [
+      "H1",
+      "H4",
+      "M15",
+      "M5"
+    ],
+    "sample_size": 0,
+    "sample_seed": 42,
+    "confidence_threshold": 0.25,
+    "chart_candles": 100,
+    "context_candles": 300,
+    "utc_offset": 0.0,
+    "runs_per_mode": 1,
+    "resume_same_run_only": true,
+    "require_clean_git_tree": true,
+    "require_matching_lineage_between_modes": true,
+    "tuning_after_results_allowed": false
+  },
+  "interpretation_guardrails": {
+    "coverage_is_accuracy": false,
+    "actionable_coverage_is_profitability": false,
+    "local_matcher_is_independent_ground_truth": false,
+    "raw_predictions_are_ground_truth": false,
+    "verified_outcomes_required_for_trade_quality_claims": true,
+    "final_2025_results_may_change_frozen_constants": false
+  }
+}
