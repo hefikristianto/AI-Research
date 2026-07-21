@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.3
+**Versi:** 1.4
 **Tanggal:** 20 Juli 2026
-**Status:** Baseline coverage terkunci; diagnostic review pack tersedia; journal dan evaluasi outcome berjalan
+**Status:** Baseline coverage terkunci; E2.2 plot-mapping calibration siap diuji; E2.3 high-risk daily coverage masuk workflow berikutnya
 
 ## 1. Ringkasan Penelitian
 
@@ -146,6 +146,7 @@ Output minimum mencakup:
 | Public decision boundary | Implemented | Hanya `TRADE_CANDIDATE` yang konsisten dapat menjadi BUY/SELL; level trade disembunyikan untuk hasil non-actionable |
 | Annotated chart | Implemented | Backend mengembalikan PNG base64 dengan bounding box OB/FVG dan banner keputusan |
 | Decision coverage audit | Implemented | Runner lokal memanggil endpoint produksi dan melaporkan funnel detection→pairing→watchlist/actionable serta blocker tanpa retraining |
+| Plot-aware mapping calibration | Experimental, opt-in | Mengestimasi batas plot secara color-agnostic, fallback ke full-image, dan mencatat indeks legacy/candidate untuk A/B 2020–2024 |
 | Persistent journal | Pending | Harus user-scoped dan menyimpan semua keputusan |
 | Verified outcome feedback | Pending | Diperlukan sebelum data dapat eligible untuk incremental learning |
 | Four-sheet Excel export | Pending | Mengikuti kontrak pada Bagian 12 |
@@ -210,6 +211,10 @@ Request failure dan gambar lokal yang hilang dipisahkan dari denominator respons
 
 Jika summary agregat belum cukup menjelaskan transisi keputusan, E2.1 memakai targeted case review yang telah ditentukan sebelumnya. Telemetry memisahkan kondisi sebelum dan sesudah quality normalization, mengukur recency zona terhadap sisi kanan gambar dan akhir window OHLCV, serta menyimpan raw response dan annotated image dengan verifikasi hash. Review ini bersifat forensik; perubahan algoritme berikutnya tetap dikembangkan pada periode development/validation, bukan dituning pada tujuh kasus final-test. Protokol berada di [`E2_1_DIAGNOSTIC_REVIEW_PACK.md`](../experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md).
 
+E2.1 mengidentifikasi kemungkinan bias horizontal pada mapping pixel→candle karena koordinat YOLO sebelumnya ditafsirkan terhadap lebar seluruh gambar. E2.2 menguji transformasi terhadap area plot yang dideteksi secara color-agnostic. Fitur ini opt-in dan gagal aman ke mapping lama. Konstanta tidak dipilih dari tujuh kasus 2025; A/B dilakukan pada synthetic test dan GBPUSD 2020–2024, lalu implementasi dibekukan sebelum satu perbandingan final 2025. Protokol berada di [`E2_2_PLOT_MAPPING_CALIBRATION.md`](../experiments/E2_2_PLOT_MAPPING_CALIBRATION.md).
+
+Setelah mapping dibekukan, E2.3 menguji tier `HIGH_RISK_CANDIDATE` sebagai policy paralel. Data quality dan market risk dipisahkan: entry berisiko tinggi masih wajib memiliki metadata, OHLCV, arah, zona, dan mapping harga yang valid. Populasi evaluasi dibentuk per trading day pada slot sesi yang ditentukan sebelumnya; standard-only dan standard+high-risk dibandingkan pada event yang sama. Target daily berarti analisis tersedia setiap hari, bukan memaksa entry ketika hard gate gagal. Protokol berada di [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](../experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
+
 ## 9. Incremental Learning yang Aman
 
 ### 9.1 Unit pembelajaran
@@ -259,6 +264,9 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E0 | Reproduksi baseline | Memastikan hasil CNN/YOLO dapat direproduksi lokal | Baseline lock |
 | E1 | Validasi OHLCV | Mengukur akurasi liquidity, BOS/CHOCH, candle pattern, dan mapping harga | Rule/config lock |
 | E2 | Baseline end-to-end GBPUSD | Mengukur kualitas entry dan risk gate | Full-system baseline |
+| E2.1 | Diagnostic review pack | Menjelaskan drop-off keputusan tanpa mengubah gate | Defect hypothesis |
+| E2.2 | Plot-aware mapping A/B | Menguji koreksi pixel→candle pada development period | Mapping promotion decision |
+| E2.3 | High-risk daily coverage | Menambah tier risiko secara paralel dan mengukur candidate-day coverage | Risk-tier promotion decision |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |
 | E5 | Product acceptance | Menguji React upload, annotated image, journal, dan Excel | Release readiness |

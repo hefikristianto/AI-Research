@@ -11,6 +11,7 @@ class FullAnalysisResponse(BaseModel):
     width: int
     height: int
     metadata: dict[str, Any]
+    chart_geometry: dict[str, Any]
     regime: dict[str, Any]
     detection: dict[str, Any]
     pairing: dict[str, Any]

@@ -142,11 +142,13 @@ class DecisionCoverageAuditScriptTest(unittest.TestCase):
                     context_candles=300,
                     utc_offset=0.0,
                     include_annotated_chart=False,
+                    plot_aware_mapping=True,
                     timeout_seconds=30.0,
                 )
 
             request = mocked_urlopen.call_args.args[0]
             self.assertIn("include_annotated_chart=false", request.full_url)
+            self.assertIn("plot_aware_mapping=true", request.full_url)
             self.assertIn(b"fake-png", request.data)
             self.assertEqual(status, 200)
             self.assertEqual(result, payload)
@@ -293,6 +295,7 @@ class DecisionCoverageAuditScriptTest(unittest.TestCase):
                 output_dir=output_dir,
                 resume=False,
                 include_annotated_chart=False,
+                plot_aware_mapping=False,
                 review_pack=False,
                 skip_health_check=False,
             )

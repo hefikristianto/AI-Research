@@ -76,3 +76,13 @@ class AnnotatedChartServiceTest(unittest.TestCase):
         )
 
         self.assertEqual(result["rendered_detections"], 0)
+
+    def test_label_origin_is_clamped_inside_right_edge(self) -> None:
+        label_x = AnnotatedChartService._label_x(
+            x1=110.0,
+            text_width=70,
+            canvas_width=120,
+        )
+
+        self.assertEqual(label_x, 41.0)
+        self.assertLessEqual(label_x + 70 + 8, 119)

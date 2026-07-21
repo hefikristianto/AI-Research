@@ -24,6 +24,13 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
             self.sample,
             {
                 "pipeline_status": "EXECUTION_COMPLETE",
+                "chart_geometry": {
+                    "status": "DETECTED",
+                    "method": "BACKGROUND_CONTRAST_BOUNDS",
+                    "confidence": 0.91,
+                    "plot_left_normalized": 0.05,
+                    "plot_right_normalized": 0.95,
+                },
                 "regime": {
                     "label": "bullish",
                     "confidence": 0.649,
@@ -52,6 +59,13 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
                 "pairing": {
                     "total_pairs": 1,
                     "candidate_combinations": 1,
+                    "evaluated_combinations": 2,
+                    "rejected_combinations": 1,
+                    "rejection_counts": {
+                        "X_DISTANCE_EXCEEDS_MAX": 0,
+                        "Y_DISTANCE_EXCEEDS_MAX": 1,
+                    },
+                    "rejection_details_truncated": False,
                     "pairing_status": "PAIRS_FOUND",
                 },
                 "scoring": {
@@ -89,8 +103,19 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
                     "mapping_mode": "CANONICAL",
                     "mapping_provisional": False,
                     "mapping_confidence": 0.82,
+                    "mapping_index_mode": "PLOT_AWARE",
+                    "plot_aware_mapping_requested": True,
+                    "mapping_calibration_applied": True,
                     "ob_index_error": 1,
                     "fvg_index_error": 2,
+                    "legacy_approx_ob_idx": 68,
+                    "plot_aware_approx_ob_idx": 69,
+                    "legacy_approx_fvg_idx": 69,
+                    "plot_aware_approx_fvg_idx": 70,
+                    "legacy_ob_index_error": 2,
+                    "plot_aware_ob_index_error": 1,
+                    "legacy_fvg_index_error": 3,
+                    "plot_aware_fvg_index_error": 2,
                     "distance_from_prediction": 1,
                     "matched_ob_idx": 70,
                     "matched_fvg_idx": 72,
@@ -159,6 +184,8 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
         self.assertEqual(row["order_block_count"], 1)
         self.assertEqual(row["fair_value_gap_count"], 1)
         self.assertEqual(row["pair_count"], 1)
+        self.assertEqual(row["pairing_rejected_combinations"], 1)
+        self.assertEqual(row["pairing_rejected_y_distance"], 1)
         self.assertEqual(row["valid_setup_count"], 1)
         self.assertEqual(row["best_setup_status"], "ACCEPT")
         self.assertEqual(row["best_setup_live_score"], 0.81)
@@ -179,6 +206,11 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
             "TRADE_CANDIDATE",
         )
         self.assertEqual(row["quality_status_changed"], 1)
+        self.assertEqual(row["chart_geometry_status"], "DETECTED")
+        self.assertEqual(row["mapping_index_mode"], "PLOT_AWARE")
+        self.assertEqual(row["mapping_calibration_applied"], 1)
+        self.assertEqual(row["mapping_legacy_ob_index_error"], 2.0)
+        self.assertEqual(row["mapping_plot_aware_ob_index_error"], 1.0)
         self.assertEqual(
             row["quality_added_warnings"],
             "ENTRY_DISTANCE_ABOVE_1_5_ATR",
@@ -284,7 +316,7 @@ class DecisionCoverageAuditServiceTest(unittest.TestCase):
             },
         )
 
-        self.assertEqual(summary["schema_version"], 2)
+        self.assertEqual(summary["schema_version"], 3)
         self.assertEqual(summary["population"]["successful_responses"], 2)
         self.assertEqual(summary["population"]["failed_responses"], 1)
         self.assertEqual(

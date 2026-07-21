@@ -103,6 +103,7 @@ python ai\scripts\audit_decision_coverage.py `
 ```
 
 Resume is rejected if the sample, threshold, timeframe, context size, or UTC offset differs from the original run.
+It is also rejected when the plot-aware mapping mode differs.
 
 ## Output Contract
 
@@ -120,9 +121,11 @@ decision_coverage_summary.md
 - request status and latency;
 - regime label/confidence;
 - OB, FVG, pairing, and valid preliminary-setup counts;
+- evaluated/rejected pairing combinations and X/Y rejection reasons;
 - internal and public decisions;
 - execution status and actionable flag;
 - mapping status/confidence and entry distance in ATR;
+- plot geometry plus legacy/plot-aware indices and index errors;
 - detector composition, right-edge gap, and mapped candles from chart end;
 - advanced, HTF, session, RR, and pre-quality execution telemetry;
 - quality-added blockers/warnings and artifact verification fields;
@@ -135,6 +138,8 @@ The summary also reports mean, p50, p95, and maximum end-to-end request latency.
 The JSON and Markdown summaries report the denominator explicitly. Failed or missing images are never silently counted as `NO_TRADE`; they are reported separately and excluded from successful-response coverage rates.
 
 For exact image-ID selection plus raw response JSON and verified annotated PNG export, follow [`E2_1_DIAGNOSTIC_REVIEW_PACK.md`](E2_1_DIAGNOSTIC_REVIEW_PACK.md). The review-pack mode is targeted forensic telemetry and does not change any model or decision rule.
+
+Audit schema version 3 supports the opt-in `--plot-aware-mapping` flag. Use it only in a controlled A/B with identical sample lineage; omitting the flag preserves the legacy full-image mapping path. The complete development-first protocol is [`E2_2_PLOT_MAPPING_CALIBRATION.md`](E2_2_PLOT_MAPPING_CALIBRATION.md).
 
 ## Interpretation Rules
 

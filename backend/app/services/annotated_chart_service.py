@@ -82,6 +82,25 @@ class AnnotatedChartService:
 
         return f"{display_name} {confidence:.0%}"
 
+    @staticmethod
+    def _label_x(
+        x1: float,
+        text_width: int,
+        canvas_width: int,
+    ) -> float:
+        maximum = max(
+            0.0,
+            float(
+                canvas_width
+                - text_width
+                - 9
+            ),
+        )
+        return max(
+            0.0,
+            min(x1, maximum),
+        )
+
     @classmethod
     def render(
         cls,
@@ -134,22 +153,27 @@ class AnnotatedChartService:
             text_width = text_bounds[2] - text_bounds[0]
             text_height = text_bounds[3] - text_bounds[1]
             x1, y1, _, _ = coordinates
+            label_x = cls._label_x(
+                x1=x1,
+                text_width=text_width,
+                canvas_width=canvas.width,
+            )
             label_y = max(0.0, y1 - text_height - 6)
 
             draw.rectangle(
                 (
-                    x1,
+                    label_x,
                     label_y,
                     min(
                         float(canvas.width - 1),
-                        x1 + text_width + 8,
+                        label_x + text_width + 8,
                     ),
                     label_y + text_height + 6,
                 ),
                 fill=color,
             )
             draw.text(
-                (x1 + 4, label_y + 3),
+                (label_x + 4, label_y + 3),
                 label,
                 fill=(255, 255, 255),
                 font=font,

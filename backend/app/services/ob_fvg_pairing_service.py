@@ -5,6 +5,8 @@ from typing import Any
 
 
 class OBFVGPairingService:
+    MAX_REJECTION_DETAILS = 50
+
     def __init__(
         self,
         max_x_distance: float = 0.12,
@@ -67,6 +69,12 @@ class OBFVGPairingService:
         candidates: list[
             dict[str, Any]
         ] = []
+        rejected_combinations = 0
+        rejection_counts = {
+            "X_DISTANCE_EXCEEDS_MAX": 0,
+            "Y_DISTANCE_EXCEEDS_MAX": 0,
+        }
+        rejections: list[dict[str, Any]] = []
 
         for ob in order_blocks:
             ob_box = self._normalized_box(ob)
@@ -86,16 +94,48 @@ class OBFVGPairingService:
                     - fvg_box["y"]
                 )
 
+                rejection_reasons: list[str] = []
+
                 if (
                     x_distance
                     > self.max_x_distance
                 ):
-                    continue
+                    rejection_reasons.append(
+                        "X_DISTANCE_EXCEEDS_MAX"
+                    )
 
                 if (
                     y_distance
                     > self.max_y_distance
                 ):
+                    rejection_reasons.append(
+                        "Y_DISTANCE_EXCEEDS_MAX"
+                    )
+
+                if rejection_reasons:
+                    rejected_combinations += 1
+
+                    for reason in rejection_reasons:
+                        rejection_counts[reason] += 1
+
+                    if (
+                        len(rejections)
+                        < self.MAX_REJECTION_DETAILS
+                    ):
+                        rejections.append(
+                            {
+                                "ob_detection_id": ob.get(
+                                    "detection_id"
+                                ),
+                                "fvg_detection_id": fvg.get(
+                                    "detection_id"
+                                ),
+                                "x_distance": x_distance,
+                                "y_distance": y_distance,
+                                "reasons": rejection_reasons,
+                            }
+                        )
+
                     continue
 
                 spatial_distance = hypot(
@@ -242,6 +282,21 @@ class OBFVGPairingService:
             ),
             "candidate_combinations": len(
                 candidates
+            ),
+            "evaluated_combinations": (
+                len(order_blocks)
+                * len(fair_value_gaps)
+            ),
+            "rejected_combinations": (
+                rejected_combinations
+            ),
+            "rejection_counts": (
+                rejection_counts
+            ),
+            "rejections": rejections,
+            "rejection_details_truncated": (
+                rejected_combinations
+                > len(rejections)
             ),
             "total_pairs": len(
                 selected_pairs

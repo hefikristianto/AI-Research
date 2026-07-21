@@ -197,6 +197,41 @@ Gate:
 - spread/slippage assumption dibekukan;
 - reason code dan model version tersimpan untuk setiap event.
 
+### E2.2 — Plot-Aware Mapping Calibration
+
+**Tujuan:** menguji koreksi deterministik koordinat YOLO terhadap area plot candle, tanpa retraining atau perubahan threshold.
+
+Jalankan baseline dan `--plot-aware-mapping` pada sampel GBPUSD 2024 yang identik. Kedua run wajib memakai seed, sample digest, threshold, commit, dan context size yang sama. Bandingkan error indeks OB/FVG, mapping confidence, fallback geometry, keputusan yang berubah, dan request failure. Jumlah sinyal bukan acceptance metric.
+
+Legacy full-image mapping tetap menjadi default. Hanya setelah A/B development 2020–2024 lulus, aturan boleh dibekukan untuk satu perbandingan final 2025. Protokol dan command lengkap berada di [`E2_2_PLOT_MAPPING_CALIBRATION.md`](E2_2_PLOT_MAPPING_CALIBRATION.md).
+
+Gate:
+
+- geometry yang tidak pasti selalu fallback ke full-image mapping;
+- mean/median error indeks OB dan FVG membaik pada development set;
+- default-mode parity terjaga;
+- tidak ada threshold detector, pairing, session, RR, atau execution yang dipilih dari 2025;
+- tidak ada training model.
+
+### E2.3 — High-Risk Daily Coverage
+
+**Tujuan:** menambah tier kandidat high risk secara terpisah untuk mengukur peluang harian tanpa melemahkan policy standard.
+
+E2.3 baru dimulai setelah mapping E2.2 dibekukan. Audit 165 screenshot tahun 2025 bukan populasi harian lengkap, sehingga langkah pertama adalah membuat manifest snapshot GBPUSD per trading day pada slot London dan London–New York overlap. Unit evaluasi adalah hari, dengan maksimal satu kandidat terbaik per tier agar window yang overlap tidak menggandakan frekuensi.
+
+Policy memisahkan `data_quality` dari `risk_tier`. Mapping/OHLCV tidak valid, entry side salah, zona invalid, konflik struktur berat, extreme volatility, dan risk calculation yang hilang tetap menjadi hard blocker. Hanya kondisi market yang lebih lunak—seperti confluence, session suitability, warning entry distance, atau RR—yang boleh membentuk `HIGH_RISK_CANDIDATE`.
+
+Development menggunakan 2020–2023, lalu aturan dibekukan untuk holdout 2024. Satu evaluasi final 2025 hanya dilakukan setelah gate 2024 lulus. Standard-only dan standard+high-risk harus dinilai pada event yang sama, dan metrik setiap tier dilaporkan terpisah. Protokol lengkap berada di [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](E2_3_HIGH_RISK_DAILY_COVERAGE.md).
+
+Gate:
+
+- daily analysis tersedia; daily trade tidak dipaksakan;
+- standard tier tidak berubah dibanding kontrol;
+- tidak ada hard data-quality gate yang dilonggarkan;
+- tambahan candidate-day coverage harus disertai precision, expectancy, drawdown, dan jumlah outcome terverifikasi;
+- hasil high risk tetap `WATCHLIST` bila promotion gate gagal;
+- threshold tidak dipilih dari 2025.
+
 ### E3 — Ablation Study
 
 **Tujuan:** mengukur kontribusi modul, bukan sekadar membandingkan jumlah sinyal.
@@ -344,4 +379,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-Urutan kerja aktif adalah E0 → E1 → implementasi journal/feedback/Excel → E2 → E3. Vertical slice web dan annotated chart sudah tersedia, tetapi E5 baru dinyatakan lulus setelah journal serta Excel ikut memenuhi acceptance gate. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+Urutan kerja aktif adalah E2.2 mapping calibration → E2.3 high-risk daily coverage → journal/feedback/Excel → E3 ablation → E5 product acceptance. E2.3 tidak dimulai sebelum mapping dibekukan, dan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
