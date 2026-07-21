@@ -40,7 +40,7 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - Pipeline FastAPI CNN→YOLO→OHLCV→structure→risk→execution gate sudah terintegrasi.
 - Halaman upload React sudah memakai `/api/analysis/full` dan menampilkan keputusan publik, parameter risiko, reason codes, ringkasan regime/detection, serta annotated chart OB/FVG.
 - Runner audit lokal tersedia untuk mengukur detection, pairing, `WATCHLIST`, actionable, `NO_TRADE`, dan distribusi blocker pada seluruh test window 2025 tanpa retraining.
-- Kalibrasi plot-aware tersedia sebagai eksperimen opt-in dengan fallback ke mapping lama; default API belum berubah.
+- Kalibrasi plot-aware lulus A/B development GBPUSD 2024 dan dibekukan untuk satu paired comparison 2025; fitur tetap opt-in dan default API belum berubah.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -116,7 +116,7 @@ Runner menyimpan checkpoint CSV setelah setiap gambar dan dapat dilanjutkan meng
 
 Targeted E2.1 review dapat memilih exact `image_id`, menyimpan full response JSON, dan memverifikasi annotated PNG tanpa mengubah keputusan produksi. Panduan: [`docs/experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md`](docs/experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md).
 
-E2.2 membandingkan mapping full-image dengan plot-aware pada GBPUSD 2020–2024 sebelum final test dibuka kembali. Panduan: [`docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md`](docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md).
+E2.2 membandingkan mapping full-image dengan plot-aware pada GBPUSD 2024. Gate development telah lulus, tetapi kandidat belum menjadi default produksi. Protokol: [`docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md`](docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md). Bukti dan freeze: [`docs/experiments/E2_2_PLOT_MAPPING_RESULT.md`](docs/experiments/E2_2_PLOT_MAPPING_RESULT.md).
 
 Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada populasi per trading day. Tier ini tidak boleh melewati kegagalan metadata, OHLCV, mapping, entry side, atau invalidasi zona. Panduan: [`docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md`](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
@@ -127,6 +127,7 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 - [Decision coverage audit](docs/experiments/DECISION_COVERAGE_AUDIT.md)
 - [E2.1 diagnostic review pack](docs/experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md)
 - [E2.2 plot-aware mapping calibration](docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md)
+- [E2.2 result and freeze](docs/experiments/E2_2_PLOT_MAPPING_RESULT.md)
 - [E2.3 high-risk daily coverage](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
@@ -137,9 +138,9 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 
 ## Urutan Pengembangan Berikutnya
 
-1. Jalankan E2.2 A/B mapping pada GBPUSD 2024 dan bekukan keputusan kalibrasi.
-2. Bangun manifest harian lalu jalankan E2.3 standard vs high-risk pada 2020–2024.
-3. Jalankan satu frozen 2025 comparison hanya jika development gate lulus.
+1. Terapkan freeze E2.2, lalu jalankan tepat satu paired full-image vs plot-aware comparison pada GBPUSD 2025 dan validasi lineage kedua run.
+2. Arsipkan keputusan mapping tanpa mengubah konstanta berdasarkan hasil 2025.
+3. Bangun manifest harian lalu jalankan E2.3 standard vs high-risk pada 2020–2024 dengan policy mapping yang telah dipilih.
 4. Simpan setiap hasil analisis, termasuk tier high risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.
 5. Implementasikan feedback outcome terverifikasi dan unduhan workbook Excel empat sheet.
 6. Jalankan product acceptance, outcome baseline, ablation, dan incremental experiment sesuai evaluation gate.

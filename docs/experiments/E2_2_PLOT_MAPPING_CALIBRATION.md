@@ -6,6 +6,9 @@
 - **Frozen final test:** 2025
 - **Training:** prohibited
 - **Default production behavior:** unchanged
+- **Development result:** frozen for one paired 2025 comparison
+
+The complete 165-image GBPUSD 2024 A/B passed the development gate on 21 July 2026. The implementation, constants, evidence, changed cases, and final-test command are frozen in [`E2_2_PLOT_MAPPING_RESULT.md`](E2_2_PLOT_MAPPING_RESULT.md). This protocol remains the method specification; the result document is the evidence record.
 
 ## Purpose
 
@@ -123,7 +126,9 @@ Freeze plot-aware mapping for the single 2025 comparison only if all conditions 
 5. no detector, pairing, session, RR, or execution threshold was tuned using 2025;
 6. the implementation and decision rule are committed before reopening the final-test population.
 
-The frozen 2025 comparison may estimate the generalization effect, but it must not be used to iterate constants. Outcome accuracy and profitability remain separate experiments requiring verified future outcomes.
+The development gate passed: both modes completed 165/165 requests with matching lineage, plot-aware mapping reduced paired OB/FVG index error, and all 19 blocker changes were solely removal of `LOW_MAPPING_CONFIDENCE`. The candidate produced three explained `WATCHLIST → BUY` transitions while detection, pairing, valid-setup, and `NO_TRADE` counts remained unchanged. This freezes the candidate for the single 2025 comparison; it does not make plot-aware mapping the production default.
+
+The frozen 2025 comparison may estimate the generalization effect, but it must not be used to iterate constants. Outcome accuracy and profitability remain separate experiments requiring verified future outcomes. Validate the two final run configurations with `ai/scripts/validate_e2_2_final_comparison.py` before interpreting their summaries.
 
 After the mapping policy is frozen, the next workflow is [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](E2_3_HIGH_RISK_DAILY_COVERAGE.md). E2.3 must inherit the approved mapping policy so low mapping quality cannot be relabeled as market risk.
 
