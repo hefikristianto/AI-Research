@@ -22,12 +22,21 @@ FREEZE_PATH = (
     / "experiments"
     / "e2_2_plot_mapping_freeze.json"
 )
+DECISION_PATH = (
+    PROJECT_ROOT
+    / "config"
+    / "experiments"
+    / "e2_2_plot_mapping_decision.json"
+)
 
 
 class E22MappingFreezeTest(unittest.TestCase):
     def setUp(self) -> None:
         self.freeze = json.loads(
             FREEZE_PATH.read_text(encoding="utf-8")
+        )
+        self.decision = json.loads(
+            DECISION_PATH.read_text(encoding="utf-8")
         )
 
     def test_freeze_contract_is_valid(self) -> None:
@@ -80,6 +89,64 @@ class E22MappingFreezeTest(unittest.TestCase):
                 source,
             )
         )
+
+    def test_final_decision_promotes_only_canonical_mapping(self) -> None:
+        evidence = self.decision["final_comparison_evidence"]
+        review = self.decision["targeted_review_evidence"]
+        policy = self.decision["selected_policy"]
+        guardrails = self.decision["interpretation_guardrails"]
+
+        self.assertEqual(
+            self.decision["decision_status"],
+            "PROMOTED_FOR_CANONICAL_PIPELINE",
+        )
+        self.assertEqual(
+            self.decision["freeze_contract"],
+            "config/experiments/e2_2_plot_mapping_freeze.json",
+        )
+        self.assertFalse(self.decision["training_performed"])
+        self.assertEqual(evidence["population"], 165)
+        self.assertEqual(evidence["successful_responses_per_mode"], 165)
+        self.assertEqual(evidence["failed_responses_per_mode"], 0)
+        self.assertEqual(
+            evidence["git_commit"],
+            "9e3d33ff6bcb3664bcc98fb13ea6c7e4b4ee80af",
+        )
+        self.assertEqual(
+            evidence["sample_digest_sha256"],
+            "cae8c845214492a1085dfd93e6979b28e0dee1867ed6b4e168b1988a2a95c9f3",
+        )
+        self.assertEqual(
+            evidence["public_decisions"]["full_image"],
+            {"NO_TRADE": 153, "WATCHLIST": 12, "BUY": 0, "SELL": 0},
+        )
+        self.assertEqual(
+            evidence["public_decisions"]["plot_aware"],
+            {"NO_TRADE": 150, "WATCHLIST": 14, "BUY": 0, "SELL": 1},
+        )
+        self.assertEqual(evidence["paired_ob_error"]["worsened"], 0)
+        self.assertEqual(evidence["paired_fvg_error"]["worsened"], 2)
+        self.assertEqual(
+            evidence["actionable_candidate"]["image_id"],
+            "GBPUSD_H4_2025_20250522_000000_0007",
+        )
+        self.assertFalse(evidence["actionable_candidate"]["outcome_verified"])
+        self.assertEqual(policy["canonical_generated_chart_mapping"], "PLOT_AWARE")
+        self.assertEqual(policy["e2_3_canonical_experiment_mapping"], "PLOT_AWARE")
+        self.assertEqual(policy["arbitrary_user_upload_api_default"], "FULL_IMAGE")
+        self.assertEqual(policy["uncertain_geometry_fallback"], "FULL_IMAGE")
+        self.assertTrue(policy["global_default_promotion_deferred"])
+        self.assertGreaterEqual(
+            len(policy["external_screenshot_validation_required"]),
+            4,
+        )
+        self.assertEqual(review["selected_cases_per_mode"], 7)
+        self.assertEqual(review["rendered_and_sha256_verified_per_mode"], 7)
+        self.assertEqual(review["artifact_errors"], 0)
+        self.assertTrue(review["annotated_chart_boxes_unchanged_between_modes"])
+        self.assertEqual(review["changed_pixels_below_decision_banner"], 0)
+        self.assertFalse(guardrails["actionable_candidate_outcome_verified"])
+        self.assertFalse(guardrails["global_upload_robustness_established"])
 
     def test_final_pair_rejects_lineage_or_parameter_drift(self) -> None:
         final = self.freeze["final_comparison_protocol"]

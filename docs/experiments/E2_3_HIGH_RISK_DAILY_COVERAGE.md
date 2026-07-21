@@ -14,6 +14,12 @@ E2.3 evaluates whether AI-TDSS can provide a clearly separated high-risk analysi
 
 The previous 2025 decision audit contained 165 sampled chart images. Its number of detected or valid setups must not be interpreted as the number of opportunities in every trading day of the year. E2.3 therefore creates a complete day-level evaluation population before estimating daily candidate coverage.
 
+## Locked Mapping Dependency
+
+E2.2 selected `PLOT_AWARE` for canonical generated charts after matched 2024 development and 2025 frozen comparisons. Every E2.3 canonical run must therefore request `plot_aware_mapping=true`, record the mapping mode in its manifest, and preserve the `FULL_IMAGE` fail-closed fallback when plot geometry is uncertain.
+
+The standard-only control and standard+high-risk candidate must consume the same inference event and the same mapping result. Mapping mode may not vary between policy arms. A failed, provisional, direction-mismatched, or low-confidence mapping remains a data-quality blocker and cannot be reclassified as high market risk. The arbitrary user-upload API default remains outside E2.3 scope and stays full-image until external screenshot validation passes.
+
 ## Decision Tiers
 
 | Tier | Internal status | Intended public presentation |
@@ -105,7 +111,7 @@ Daily output is not evidence of daily trading quality. An increase in coverage i
 
 ## Implementation Workflow
 
-1. Complete E2.2 plot-aware mapping and freeze the mapping policy.
+1. Load the selected E2.2 canonical policy and assert `plot_aware_mapping=true` with full-image fallback.
 2. Build and validate the day-level snapshot manifest for 2020–2024.
 3. Add `data_quality`, `risk_tier`, and `HIGH_RISK_CANDIDATE` internally without changing the standard path.
 4. Implement a shadow-mode audit that records both standard-only and combined policies from the same inference event.
@@ -134,7 +140,7 @@ Each artifact records the Git commit, dataset version, sample digest, session po
 
 ## Promotion Gate
 
-- E2.2 mapping policy is already frozen;
+- E2.2 canonical mapping policy is `PLOT_AWARE`, both policy arms use it, and uncertain geometry falls back to full-image;
 - standard-tier decisions are identical to the standard-only control;
 - no hard data-quality blocker is bypassed;
 - 2024 contains no unexplained request failure or lineage mismatch;

@@ -203,7 +203,7 @@ Gate:
 
 Jalankan baseline dan `--plot-aware-mapping` pada sampel GBPUSD 2024 yang identik. Kedua run wajib memakai seed, sample digest, threshold, commit, dan context size yang sama. Bandingkan error indeks OB/FVG, mapping confidence, fallback geometry, keputusan yang berubah, dan request failure. Jumlah sinyal bukan acceptance metric.
 
-Legacy full-image mapping tetap menjadi default. A/B lengkap GBPUSD 2024 telah lulus dan kandidat dibekukan pada 21 Juli 2026 untuk satu perbandingan final 2025. Bukti, konstanta, dan command final berada di [`E2_2_PLOT_MAPPING_RESULT.md`](E2_2_PLOT_MAPPING_RESULT.md); kontrak machine-readable berada di `config/experiments/e2_2_plot_mapping_freeze.json`.
+E2.2 selesai pada 21 Juli 2026. A/B lengkap GBPUSD 2024 dan frozen comparison GBPUSD 2025 lulus dengan lineage identik serta nol request failure. Plot-aware dipilih untuk chart kanonis dan E2.3; legacy full-image tetap menjadi default upload umum sampai validasi screenshot eksternal lulus. Bukti dan keputusan berada di [`E2_2_PLOT_MAPPING_RESULT.md`](E2_2_PLOT_MAPPING_RESULT.md); kontrak freeze dan keputusan machine-readable berada di `config/experiments/e2_2_plot_mapping_freeze.json` serta `config/experiments/e2_2_plot_mapping_decision.json`.
 
 Gate:
 
@@ -217,7 +217,7 @@ Gate:
 
 **Tujuan:** menambah tier kandidat high risk secara terpisah untuk mengukur peluang harian tanpa melemahkan policy standard.
 
-E2.3 baru dimulai setelah mapping E2.2 dibekukan. Audit 165 screenshot tahun 2025 bukan populasi harian lengkap, sehingga langkah pertama adalah membuat manifest snapshot GBPUSD per trading day pada slot London dan London–New York overlap. Unit evaluasi adalah hari, dengan maksimal satu kandidat terbaik per tier agar window yang overlap tidak menggandakan frekuensi.
+E2.3 memakai plot-aware mapping yang telah dipilih E2.2 untuk seluruh chart kanonis. Audit 165 screenshot tahun 2025 bukan populasi harian lengkap, sehingga langkah pertama adalah membuat manifest snapshot GBPUSD per trading day pada slot London dan London–New York overlap. Unit evaluasi adalah hari, dengan maksimal satu kandidat terbaik per tier agar window yang overlap tidak menggandakan frekuensi.
 
 Policy memisahkan `data_quality` dari `risk_tier`. Mapping/OHLCV tidak valid, entry side salah, zona invalid, konflik struktur berat, extreme volatility, dan risk calculation yang hilang tetap menjadi hard blocker. Hanya kondisi market yang lebih lunak—seperti confluence, session suitability, warning entry distance, atau RR—yang boleh membentuk `HIGH_RISK_CANDIDATE`.
 
@@ -379,4 +379,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-Urutan kerja aktif adalah single frozen E2.2 comparison 2025 → keputusan mapping → E2.3 high-risk daily coverage → journal/feedback/Excel → E3 ablation → E5 product acceptance. E2.2 tidak boleh dituning ulang dari hasil 2025. E2.3 memakai policy mapping yang telah dipilih, dan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+Urutan kerja aktif adalah E2.3 manifest harian → E2.3 shadow policy standard/high-risk → holdout 2024 → journal/feedback/Excel → E3 ablation → E5 product acceptance. E2.2 telah selesai dan tidak boleh dituning ulang dari hasil 2025. E2.3 memakai plot-aware mapping untuk chart kanonis, sedangkan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

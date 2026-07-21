@@ -17,6 +17,7 @@
 - Added the E2.2 development-first A/B protocol; no model training or production-threshold change is included.
 - Added the machine-readable E2.2 freeze contract, paired final-run validator, and regression tests for frozen geometry constants and opt-in behavior.
 - Documented the complete 165-image GBPUSD 2024 E2.2 result, targeted artifact verification, three explained decision transitions, and single-run 2025 protocol.
+- Recorded the completed frozen 165-image GBPUSD 2025 comparison and SHA256-verified seven-case review pack, selecting plot-aware mapping for canonical charts and E2.3 while preserving the full-image default for arbitrary uploads.
 - Added E2.3 high-risk daily-coverage workflow with separate data-quality and market-risk gates, day-level evaluation, and development-first promotion rules.
 - Documented the frozen 165-window GBPUSD 2025 coverage funnel and seven-case diagnostic protocol without changing model thresholds or execution gates.
 - Added a machine-readable canonical project contract.
