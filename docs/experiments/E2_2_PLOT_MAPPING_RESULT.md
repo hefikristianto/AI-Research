@@ -1,21 +1,22 @@
-# E2.2 Plot-Aware Mapping Result and Freeze
+# E2.2 Plot-Aware Mapping Result and Decision
 
-- **Decision:** `FROZEN_FOR_SINGLE_FINAL_COMPARISON`
-- **Frozen:** 21 July 2026
+- **Decision:** `PROMOTED_FOR_CANONICAL_PIPELINE`
+- **Decided:** 21 July 2026
 - **Primary pair:** GBPUSD
 - **Development evidence:** 2024
-- **Final comparison:** 2025, one run per mode
+- **Final comparison:** 2025, completed once per mode
 - **Training performed:** no
-- **Production default:** `FULL_IMAGE` remains unchanged
-- **Candidate:** opt-in `PLOT_AWARE`
+- **Canonical generated charts and E2.3:** `PLOT_AWARE`
+- **Arbitrary user-upload API default:** `FULL_IMAGE` remains unchanged
+- **Uncertain geometry fallback:** `FULL_IMAGE`
 
 ## Decision
 
-The plot-aware coordinate transform passed the E2.2 development gate and is frozen for one paired 2025 comparison. This is not yet a production-default promotion. Requests that omit `plot_aware_mapping=true` continue to use full-image mapping, and uncertain plot geometry continues to fail closed to the legacy transform.
+The frozen paired GBPUSD 2025 comparison confirms the plot-aware coordinate transform on canonical generated charts. Plot-aware mapping is therefore the selected policy for the canonical research pipeline and for E2.3. The change corrects a systematic horizontal offset without changing detection, pairing, or setup coverage.
 
-The freeze covers the geometry constants, detector threshold, sample construction, mapping comparison, and interpretation rules. Results from 2025 may estimate generalization, but they may not be used to retune this implementation.
+This is deliberately not a global upload-default promotion. Requests that omit `plot_aware_mapping=true` continue to use full-image mapping, and uncertain geometry continues to fail closed to that transform. Arbitrary TradingView/MT5 screenshots with variable themes, chrome, panels, crops, and aspect ratios require a separate external-screenshot validation before the default may change.
 
-The machine-readable contract is [`config/experiments/e2_2_plot_mapping_freeze.json`](../../config/experiments/e2_2_plot_mapping_freeze.json).
+The frozen constants remain in [`config/experiments/e2_2_plot_mapping_freeze.json`](../../config/experiments/e2_2_plot_mapping_freeze.json). The final evidence and selected scope are recorded in [`config/experiments/e2_2_plot_mapping_decision.json`](../../config/experiments/e2_2_plot_mapping_decision.json).
 
 ## Development Lineage
 
@@ -63,7 +64,51 @@ Across 30 rows with observable canonical matches:
 
 Mapping status did not change on any of the 165 rows. Nineteen rows lost only the `LOW_MAPPING_CONFIDENCE` quality blocker; no detector, pairing, session, risk-reward, or execution threshold changed.
 
-## Decision Changes
+## Frozen 2025 Comparison
+
+Both final runs processed the complete available 165-image GBPUSD 2025 population with zero request failures. Their clean code commit, data hashes, seed, sample digest, detector threshold, and chart/context sizes matched; only timestamps and the requested mapping mode differed.
+
+| Field | Final value |
+|---|---|
+| Code commit | `9e3d33ff6bcb3664bcc98fb13ea6c7e4b4ee80af` |
+| Sample seed | `42` |
+| Sample digest | `cae8c845214492a1085dfd93e6979b28e0dee1867ed6b4e168b1988a2a95c9f3` |
+| Successful/failed per mode | `165 / 0` |
+| Geometry detected | `165 / 165` in both modes |
+| Calibration applied | `0 / 37` for full-image / plot-aware |
+| Full comparison ZIP SHA256 | `be7e46ceed448228d151287bf163b9ddd93c8f82e48154fa99422412548c825c` |
+
+Upstream coverage was identical in both modes: 70 images had a YOLO detection, 39 contained both classes, 37 had an OB/FVG pair, and 37 had a valid scored setup.
+
+| Public decision | Full-image | Plot-aware |
+|---|---:|---:|
+| `NO_TRADE` | 153 | 150 |
+| `WATCHLIST` | 12 | 14 |
+| `BUY` | 0 | 0 |
+| `SELL` | 0 | 1 |
+
+Decision transitions were 150 `NO_TRADE → NO_TRADE`, 11 `WATCHLIST → WATCHLIST`, three `NO_TRADE → WATCHLIST`, and one `WATCHLIST → SELL`.
+
+| Image ID | Last chart candle (UTC) | Transition | Primary effect | Remaining state |
+|---|---|---|---|---|
+| `GBPUSD_H1_2025_20250529_010000_0026` | 2025-06-04 05:00 | `NO_TRADE → WATCHLIST` | RR 0.142 → 3.045 | entry distance 5.65 ATR remains a blocker |
+| `GBPUSD_H4_2025_20250218_080000_0003` | 2025-03-12 20:00 | `NO_TRADE → WATCHLIST` | `DIRECTION_MISMATCH → MAPPED` | entry distance 2.10 ATR remains a warning |
+| `GBPUSD_H4_2025_20250522_000000_0007` | 2025-06-13 12:00 | `WATCHLIST → SELL` | mapping confidence 0.271 → 0.813 | all execution gates pass; outcome unverified |
+| `GBPUSD_M5_2025_20250109_142000_0017` | 2025-01-09 22:35 | `NO_TRADE → WATCHLIST` | RR 0.630 → 4.703 | entry distance 17.32 ATR remains a blocker |
+
+Across 35 paired rows with observable canonical matches:
+
+| Metric | Legacy mean/median | Plot-aware mean/median | Improved | Same | Worse |
+|---|---:|---:|---:|---:|---:|
+| OB index error | 2.714 / 3 | 0.000 / 0 | 31 | 4 | 0 |
+| FVG index error | 2.771 / 3 | 0.971 / 1 | 25 | 8 | 2 |
+| Mapping confidence | 0.6558 mean | 0.8988 mean | 31 | 4 | 0 |
+
+The two FVG regressions were one-candle shifts in adjacent impulse/FVG interpretation. Neither changed the public decision. One M15 row changed from `MAPPED` to `NO_LOCAL_OB_FVG_MATCH`; it stayed `NO_TRADE` and added `PRICE_MAPPING_PROVISIONAL`, which is the intended fail-closed behavior when no supported local match exists.
+
+Twenty-one rows changed blocker sets. Plot-aware mapping removed `LOW_MAPPING_CONFIDENCE` 18 times, `RISK_REWARD_BELOW_1_5` twice, and `PRICE_MAPPING_PROVISIONAL` once; it added `PRICE_MAPPING_PROVISIONAL` on the safe M15 regression. No detector, pairing, session, risk, or execution threshold changed.
+
+## Development Decision Changes
 
 Exactly three rows changed from `WATCHLIST` to `BUY`:
 
@@ -96,9 +141,9 @@ This verifies the frontend-to-backend path. It does not verify whether the trade
 
 Tests bind these values to `ChartPlotGeometryService`. A later code change that silently drifts from the freeze contract must fail CI.
 
-## Single 2025 Comparison
+## Executed Frozen 2025 Comparison
 
-Run this only after the freeze commit is merged and the backend is running from a clean `main`. Do not add `--sample-size`; both modes must process the complete available 2025 population.
+The following frozen commands produced the archived comparison above. They are retained for reproducibility, not as permission to rerun E2.2 and tune constants from another 2025 result. Both modes processed the complete available population; no `--sample-size` was used.
 
 ```powershell
 Set-Location "C:\Users\ASUS\Documents\Project\AI-TDSS"
@@ -126,9 +171,7 @@ python ai\scripts\audit_decision_coverage.py `
   --output-dir "$E22Final\plot_aware"
 ```
 
-If a run is interrupted, repeat only its original command with `--resume` and the same output directory. Do not create a replacement configuration or a second completed run.
-
-Validate the paired lineage before interpreting any decision count:
+The completed configurations were validated before interpreting any decision count:
 
 ```powershell
 python ai\scripts\validate_e2_2_final_comparison.py `
@@ -136,15 +179,24 @@ python ai\scripts\validate_e2_2_final_comparison.py `
   --candidate "$E22Final\plot_aware\run_config.json"
 ```
 
-The validator requires matching code, dataset, metadata, project-contract, ensemble, sample digest, population, and run parameters. It also requires a clean tree, complete processing, baseline `false`, and candidate `true`.
+The validator confirmed matching code, dataset, metadata, project-contract, ensemble, sample digest, population, and run parameters. It also confirmed a clean tree, complete processing, baseline `false`, and candidate `true`.
+
+## Final Targeted Review
+
+Seven predetermined diagnostic cases were rendered in both modes. All 14 annotated PNGs reported `RENDERED`, matched their recorded SHA256 values, and had no artifact errors. The review sample digest was `6efdb4138fdeb79ce52fce4ceb1b84851b8c7327a78ff195fbc68f4c8f8eb349`; the review ZIP SHA256 was `6d013ddcc498439618a98050d8bb5108250802b425e91d8ec3f943391bff2d8e`.
+
+Pixel comparison showed that the detected boxes and chart content were identical between modes. On the four public-decision changes, all differing pixels were confined to the decision banner; every pixel below row 32 was unchanged. Right-edge labels stayed within image bounds. This review supports the coordinate-policy decision on canonical generated charts, but it does not validate arbitrary broker-platform screenshots.
+
+The only actionable final transition was `GBPUSD_H4_2025_20250522_000000_0007`: `WATCHLIST → SELL`, entry `1.35977`, stop loss `1.362394642857143`, take profit `1.352275`, and RR `2.8556`. Its outcome has not been verified, so it is not evidence of accuracy or profitability.
 
 ## Interpretation Boundary
 
 - The local nearest-candle matcher is diagnostic telemetry, not independently reviewed ground truth.
 - Better index localization does not establish setup accuracy, expectancy, or profitability.
-- The three development `BUY` cases have no verified outcome labels in this experiment.
-- No `SELL` transition was observed, so directional generalization remains unproven.
+- The three development `BUY` cases and the final `SELL` case have no verified outcome labels in this experiment.
+- One `SELL` transition demonstrates execution-path coverage, not directional accuracy or profitability.
 - Earlier 2025 audits informed the defect investigation; the locked E2.2 comparison must therefore be reported as a final comparison for this calibration, not as an untouched test set for the entire project.
 - Whatever the 2025 result, geometry constants and thresholds stay frozen. Any future revision requires a new experiment ID and a new development/validation split.
+- Canonical generated charts use plot-aware mapping in E2.3. The public arbitrary-upload default remains full-image until external TradingView/MT5 screenshot validation passes.
 
-After the paired 2025 report is archived, E2.3 may inherit the chosen mapping policy and begin its separate development-first high-risk daily-coverage workflow.
+E2.2 is complete. The active next workflow is E2.3 high-risk daily coverage, using the selected plot-aware mapping policy for its canonical chart population.

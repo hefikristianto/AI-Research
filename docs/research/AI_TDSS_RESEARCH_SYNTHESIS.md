@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.5
+**Versi:** 1.6
 **Tanggal:** 21 Juli 2026
-**Status:** E2.2 development gate lulus dan dibekukan untuk satu paired comparison 2025; E2.3 menunggu keputusan mapping final
+**Status:** E2.2 selesai; plot-aware dipilih untuk chart kanonis dan E2.3, sedangkan default upload umum tetap full-image
 
 ## 1. Ringkasan Penelitian
 
@@ -211,7 +211,9 @@ Request failure dan gambar lokal yang hilang dipisahkan dari denominator respons
 
 Jika summary agregat belum cukup menjelaskan transisi keputusan, E2.1 memakai targeted case review yang telah ditentukan sebelumnya. Telemetry memisahkan kondisi sebelum dan sesudah quality normalization, mengukur recency zona terhadap sisi kanan gambar dan akhir window OHLCV, serta menyimpan raw response dan annotated image dengan verifikasi hash. Review ini bersifat forensik; perubahan algoritme berikutnya tetap dikembangkan pada periode development/validation, bukan dituning pada tujuh kasus final-test. Protokol berada di [`E2_1_DIAGNOSTIC_REVIEW_PACK.md`](../experiments/E2_1_DIAGNOSTIC_REVIEW_PACK.md).
 
-E2.1 mengidentifikasi kemungkinan bias horizontal pada mapping pixel→candle karena koordinat YOLO sebelumnya ditafsirkan terhadap lebar seluruh gambar. E2.2 menguji transformasi terhadap area plot yang dideteksi secara color-agnostic. Fitur ini opt-in dan gagal aman ke mapping lama. Konstanta tidak dipilih dari tujuh kasus 2025; A/B lengkap pada 165 chart GBPUSD 2024 memiliki lineage identik dan nol request failure. Pada 30 pasangan yang dapat diobservasi, error OB membaik pada 28 kasus tanpa regresi, sedangkan error FVG membaik pada 22, sama pada 5, dan memburuk pada 3. Tiga keputusan berubah dari `WATCHLIST` menjadi `BUY` karena `LOW_MAPPING_CONFIDENCE` hilang; upstream detection, pairing, valid setup, dan jumlah `NO_TRADE` tidak berubah. Kandidat telah dibekukan untuk satu paired comparison 2025, tetapi default produksi tetap full-image. Protokol berada di [`E2_2_PLOT_MAPPING_CALIBRATION.md`](../experiments/E2_2_PLOT_MAPPING_CALIBRATION.md) dan bukti di [`E2_2_PLOT_MAPPING_RESULT.md`](../experiments/E2_2_PLOT_MAPPING_RESULT.md).
+E2.1 mengidentifikasi kemungkinan bias horizontal pada mapping pixel→candle karena koordinat YOLO sebelumnya ditafsirkan terhadap lebar seluruh gambar. E2.2 menguji transformasi terhadap area plot yang dideteksi secara color-agnostic. Fitur ini gagal aman ke mapping lama ketika geometry tidak pasti. Konstanta tidak dipilih dari kasus final-test; A/B lengkap pada 165 chart GBPUSD 2024 memiliki lineage identik dan nol request failure. Pada 30 pasangan yang dapat diobservasi, error OB membaik pada 28 kasus tanpa regresi, sedangkan error FVG membaik pada 22, sama pada 5, dan memburuk pada 3. Tiga keputusan berubah dari `WATCHLIST` menjadi `BUY` karena `LOW_MAPPING_CONFIDENCE` hilang, lalu implementasi dibekukan.
+
+Frozen comparison 2025 memproses 165/165 chart per mode tanpa failure dan mempertahankan detection 70, both-class 39, pairing 37, serta valid setup 37 pada kedua mode. Dari 35 match yang dapat diobservasi, mean/median error OB turun dari 2,714/3 menjadi 0/0 dan error FVG dari 2,771/3 menjadi 0,971/1. Keputusan berubah pada empat kasus: tiga `NO_TRADE → WATCHLIST` dan satu `WATCHLIST → SELL`. Tujuh kasus per mode kemudian direview; seluruh 14 PNG lolos verifikasi SHA256 dan box di bawah banner keputusan identik. Dengan bukti tersebut, plot-aware dipilih untuk chart kanonis dan E2.3, tetapi default upload umum tetap full-image sampai variasi screenshot TradingView/MT5 divalidasi. Kasus `SELL` belum memiliki outcome terverifikasi sehingga hasil ini bukan bukti akurasi atau profitabilitas. Protokol berada di [`E2_2_PLOT_MAPPING_CALIBRATION.md`](../experiments/E2_2_PLOT_MAPPING_CALIBRATION.md) dan keputusan di [`E2_2_PLOT_MAPPING_RESULT.md`](../experiments/E2_2_PLOT_MAPPING_RESULT.md).
 
 Setelah mapping dibekukan, E2.3 menguji tier `HIGH_RISK_CANDIDATE` sebagai policy paralel. Data quality dan market risk dipisahkan: entry berisiko tinggi masih wajib memiliki metadata, OHLCV, arah, zona, dan mapping harga yang valid. Populasi evaluasi dibentuk per trading day pada slot sesi yang ditentukan sebelumnya; standard-only dan standard+high-risk dibandingkan pada event yang sama. Target daily berarti analisis tersedia setiap hari, bukan memaksa entry ketika hard gate gagal. Protokol berada di [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](../experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
@@ -265,7 +267,7 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E1 | Validasi OHLCV | Mengukur akurasi liquidity, BOS/CHOCH, candle pattern, dan mapping harga | Rule/config lock |
 | E2 | Baseline end-to-end GBPUSD | Mengukur kualitas entry dan risk gate | Full-system baseline |
 | E2.1 | Diagnostic review pack | Menjelaskan drop-off keputusan tanpa mengubah gate | Defect hypothesis |
-| E2.2 | Plot-aware mapping A/B | Development gate lulus; satu frozen comparison 2025 tersisa | Mapping promotion decision |
+| E2.2 | Plot-aware mapping A/B | Selesai; dipilih untuk chart kanonis/E2.3, default upload umum tetap full-image | Scoped mapping policy |
 | E2.3 | High-risk daily coverage | Menambah tier risiko secara paralel dan mengukur candidate-day coverage | Risk-tier promotion decision |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |

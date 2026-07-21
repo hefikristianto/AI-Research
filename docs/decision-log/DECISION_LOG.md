@@ -120,3 +120,14 @@
 | Impact | Konstanta geometry, seed, threshold, context size, dan aturan interpretasi dikunci dalam kontrak machine-readable. Kedua run 2025 harus identik kecuali flag plot-aware, hanya boleh diselesaikan sekali per mode, dan hasilnya tidak boleh digunakan untuk tuning ulang E2.2 |
 
 ---
+
+## Decision #013
+
+| Item | Description |
+|------|-------------|
+| Date | 21-07-2026 |
+| Decision | Plot-aware mapping dipromosikan untuk chart kanonis dan menjadi policy mapping E2.3; full-image tetap menjadi default API untuk screenshot pengguna umum dan fallback saat geometry tidak pasti |
+| Reason | Frozen comparison GBPUSD 2025 menyelesaikan 165/165 request per mode dengan lineage identik dan upstream coverage yang sama. Pada 35 match kanonis, mean error OB turun dari 2,714 ke 0 dan FVG dari 2,771 ke 0,971. Review tujuh kasus per mode memverifikasi 14 PNG dan menunjukkan box identik; perubahan keputusan terbatas pada banner. Variasi screenshot TradingView/MT5 eksternal belum termasuk scope validasi |
+| Impact | E2.3 wajib menjalankan kedua policy arm dengan plot-aware mapping yang sama serta full-image fallback. Konstanta E2.2 tidak dituning ulang. Default upload umum baru boleh dipertimbangkan setelah validasi lintas tema, chrome, crop, perangkat, dan aspect ratio; satu kandidat SELL yang muncul belum boleh diklaim akurat atau profitable tanpa outcome terverifikasi |
+
+---

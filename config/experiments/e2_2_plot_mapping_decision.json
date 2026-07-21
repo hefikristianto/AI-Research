@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.2",
+  "decision_status": "PROMOTED_FOR_CANONICAL_PIPELINE",
+  "decided_on": "2026-07-21",
+  "freeze_contract": "config/experiments/e2_2_plot_mapping_freeze.json",
+  "training_performed": false,
+  "final_comparison_evidence": {
+    "pair": "GBPUSD",
+    "year": 2025,
+    "timeframes": [
+      "H1",
+      "H4",
+      "M15",
+      "M5"
+    ],
+    "population": 165,
+    "successful_responses_per_mode": 165,
+    "failed_responses_per_mode": 0,
+    "sample_seed": 42,
+    "sample_digest_sha256": "cae8c845214492a1085dfd93e6979b28e0dee1867ed6b4e168b1988a2a95c9f3",
+    "git_commit": "9e3d33ff6bcb3664bcc98fb13ea6c7e4b4ee80af",
+    "git_dirty": false,
+    "metadata_sha256": "78e0e6c2a1273cc2f8e5844e309ada3e740ba6c7b32d016d8cbe7375df11a65d",
+    "project_contract_sha256": "5149b0e8b31b819217f6a44c83373d3a4d2d7faf1f72976592bc3de4cc8694d0",
+    "ensemble_config_sha256": "86e50b207d5b5915c17d321719b83f258aba463159cf476983a2c459928d1a6f",
+    "full_comparison_archive_sha256": "be7e46ceed448228d151287bf163b9ddd93c8f82e48154fa99422412548c825c",
+    "upstream_counts_per_mode": {
+      "at_least_one_detection": 70,
+      "both_detection_classes": 39,
+      "paired_setup": 37,
+      "valid_scored_setup": 37,
+      "geometry_detected": 165
+    },
+    "public_decisions": {
+      "full_image": {
+        "NO_TRADE": 153,
+        "WATCHLIST": 12,
+        "BUY": 0,
+        "SELL": 0
+      },
+      "plot_aware": {
+        "NO_TRADE": 150,
+        "WATCHLIST": 14,
+        "BUY": 0,
+        "SELL": 1
+      }
+    },
+    "decision_transitions": {
+      "NO_TRADE_TO_NO_TRADE": 150,
+      "NO_TRADE_TO_WATCHLIST": 3,
+      "WATCHLIST_TO_WATCHLIST": 11,
+      "WATCHLIST_TO_SELL": 1
+    },
+    "changed_decision_image_ids": [
+      "GBPUSD_H1_2025_20250529_010000_0026",
+      "GBPUSD_H4_2025_20250218_080000_0003",
+      "GBPUSD_H4_2025_20250522_000000_0007",
+      "GBPUSD_M5_2025_20250109_142000_0017"
+    ],
+    "plot_aware_calibration_applied": 37,
+    "observable_mapping_matches": 35,
+    "paired_ob_error": {
+      "legacy_mean": 2.714286,
+      "plot_aware_mean": 0.0,
+      "legacy_median": 3.0,
+      "plot_aware_median": 0.0,
+      "improved": 31,
+      "unchanged": 4,
+      "worsened": 0
+    },
+    "paired_fvg_error": {
+      "legacy_mean": 2.771429,
+      "plot_aware_mean": 0.971429,
+      "legacy_median": 3.0,
+      "plot_aware_median": 1.0,
+      "improved": 25,
+      "unchanged": 8,
+      "worsened": 2
+    },
+    "mapping_confidence": {
+      "legacy_mean": 0.655809,
+      "plot_aware_mean": 0.89885,
+      "improved": 31,
+      "unchanged": 4,
+      "worsened": 0
+    },
+    "blocker_set_changed_rows": 21,
+    "blockers_removed": {
+      "LOW_MAPPING_CONFIDENCE": 18,
+      "RISK_REWARD_BELOW_1_5": 2,
+      "PRICE_MAPPING_PROVISIONAL": 1
+    },
+    "blockers_added": {
+      "PRICE_MAPPING_PROVISIONAL": 1
+    },
+    "mapping_status_transitions": {
+      "NO_SETUP_TO_NO_SETUP": 128,
+      "MAPPED_TO_MAPPED": 34,
+      "DIRECTION_MISMATCH_TO_MAPPED": 1,
+      "MAPPED_TO_NO_LOCAL_OB_FVG_MATCH": 1,
+      "NO_LOCAL_OB_FVG_MATCH_TO_NO_LOCAL_OB_FVG_MATCH": 1
+    },
+    "actionable_candidate": {
+      "image_id": "GBPUSD_H4_2025_20250522_000000_0007",
+      "decision": "SELL",
+      "entry": 1.35977,
+      "stop_loss": 1.362394642857143,
+      "take_profit": 1.352275,
+      "risk_reward": 2.855626615866165,
+      "outcome_verified": false
+    },
+    "safe_mapping_regression": {
+      "image_id": "GBPUSD_M15_2025_20250220_170000_0035",
+      "transition": "MAPPED_TO_NO_LOCAL_OB_FVG_MATCH",
+      "public_decision_before": "NO_TRADE",
+      "public_decision_after": "NO_TRADE",
+      "fail_closed": true
+    }
+  },
+  "targeted_review_evidence": {
+    "selected_cases_per_mode": 7,
+    "successful_responses_per_mode": 7,
+    "rendered_and_sha256_verified_per_mode": 7,
+    "artifact_errors": 0,
+    "sample_digest_sha256": "6efdb4138fdeb79ce52fce4ceb1b84851b8c7327a78ff195fbc68f4c8f8eb349",
+    "review_archive_sha256": "6d013ddcc498439618a98050d8bb5108250802b425e91d8ec3f943391bff2d8e",
+    "image_ids": [
+      "GBPUSD_H1_2025_20250430_010000_0021",
+      "GBPUSD_H1_2025_20250529_010000_0026",
+      "GBPUSD_H4_2025_20250218_080000_0003",
+      "GBPUSD_H4_2025_20250522_000000_0007",
+      "GBPUSD_M15_2025_20250220_170000_0035",
+      "GBPUSD_M5_2025_20250102_000000_0001",
+      "GBPUSD_M5_2025_20250109_142000_0017"
+    ],
+    "annotated_chart_boxes_unchanged_between_modes": true,
+    "changed_pixels_below_decision_banner": 0,
+    "right_edge_labels_within_bounds": true,
+    "chart_scope": "CANONICAL_GENERATED_CHARTS"
+  },
+  "selected_policy": {
+    "canonical_generated_chart_mapping": "PLOT_AWARE",
+    "e2_3_canonical_experiment_mapping": "PLOT_AWARE",
+    "arbitrary_user_upload_api_default": "FULL_IMAGE",
+    "opt_in_query_parameter": "plot_aware_mapping",
+    "uncertain_geometry_fallback": "FULL_IMAGE",
+    "global_default_promotion_deferred": true,
+    "external_screenshot_validation_required": [
+      "TRADINGVIEW_LIGHT_AND_DARK_SCREENSHOTS",
+      "MT5_LIGHT_AND_DARK_SCREENSHOTS",
+      "VARIABLE_CHROME_PANELS_AND_CROPS",
+      "MOBILE_AND_DESKTOP_ASPECT_RATIOS"
+    ]
+  },
+  "interpretation_guardrails": {
+    "coverage_is_accuracy": false,
+    "actionable_coverage_is_profitability": false,
+    "local_matcher_is_independent_ground_truth": false,
+    "raw_predictions_are_ground_truth": false,
+    "actionable_candidate_outcome_verified": false,
+    "geometry_constants_changed_after_final_result": false,
+    "thresholds_changed_after_final_result": false,
+    "global_upload_robustness_established": false
+  }
+}

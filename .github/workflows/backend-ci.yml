@@ -10,6 +10,7 @@ on:
       - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/experiments/e2_2_plot_mapping_freeze.json"
+      - "config/experiments/e2_2_plot_mapping_decision.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   push:
@@ -21,6 +22,7 @@ on:
       - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/experiments/e2_2_plot_mapping_freeze.json"
+      - "config/experiments/e2_2_plot_mapping_decision.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   workflow_dispatch:
