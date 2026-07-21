@@ -19,6 +19,8 @@
 - Documented the complete 165-image GBPUSD 2024 E2.2 result, targeted artifact verification, three explained decision transitions, and single-run 2025 protocol.
 - Recorded the completed frozen 165-image GBPUSD 2025 comparison and SHA256-verified seven-case review pack, selecting plot-aware mapping for canonical charts and E2.3 while preserving the full-image default for arbitrary uploads.
 - Added E2.3 high-risk daily-coverage workflow with separate data-quality and market-risk gates, day-level evaluation, and development-first promotion rules.
+- Added the machine-readable E2.3 daily-manifest contract and deterministic local builder with closed-candle anti-lookahead, source/config hashes, exact-window deduplication, session-target diagnostics, and a hard 2025 lock.
+- Added unit coverage for MT5 timestamp parsing, M5/H4 cutoff semantics, manifest readiness, deduplication, deterministic lineage, and output persistence.
 - Documented the frozen 165-window GBPUSD 2025 coverage funnel and seven-case diagnostic protocol without changing model thresholds or execution gates.
 - Added a machine-readable canonical project contract.
 - Added project-contract validation and unit tests.

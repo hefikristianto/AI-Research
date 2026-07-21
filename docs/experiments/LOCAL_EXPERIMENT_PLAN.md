@@ -217,7 +217,7 @@ Gate:
 
 **Tujuan:** menambah tier kandidat high risk secara terpisah untuk mengukur peluang harian tanpa melemahkan policy standard.
 
-E2.3 memakai plot-aware mapping yang telah dipilih E2.2 untuk seluruh chart kanonis. Audit 165 screenshot tahun 2025 bukan populasi harian lengkap, sehingga langkah pertama adalah membuat manifest snapshot GBPUSD per trading day pada slot London dan London–New York overlap. Unit evaluasi adalah hari, dengan maksimal satu kandidat terbaik per tier agar window yang overlap tidak menggandakan frekuensi.
+E2.3 memakai plot-aware mapping yang telah dipilih E2.2 untuk seluruh chart kanonis. Audit 165 screenshot tahun 2025 bukan populasi harian lengkap, sehingga langkah pertama adalah membuat manifest snapshot GBPUSD per trading day pada slot London dan London–New York overlap. Unit evaluasi adalah hari, dengan maksimal satu kandidat terbaik per tier agar window yang overlap tidak menggandakan frekuensi. Kontrak machine-readable dan builder lokal berada di `config/experiments/e2_3_daily_manifest.json` serta `ai/scripts/build_e2_3_daily_manifest.py`; panduan run berada di [`E2_3_DAILY_MANIFEST.md`](E2_3_DAILY_MANIFEST.md).
 
 Policy memisahkan `data_quality` dari `risk_tier`. Mapping/OHLCV tidak valid, entry side salah, zona invalid, konflik struktur berat, extreme volatility, dan risk calculation yang hilang tetap menjadi hard blocker. Hanya kondisi market yang lebih lunak—seperti confluence, session suitability, warning entry distance, atau RR—yang boleh membentuk `HIGH_RISK_CANDIDATE`.
 
@@ -231,6 +231,7 @@ Gate:
 - tambahan candidate-day coverage harus disertai precision, expectancy, drawdown, dan jumlah outcome terverifikasi;
 - hasil high risk tetap `WATCHLIST` bila promotion gate gagal;
 - threshold tidak dipilih dari 2025.
+- manifest memakai hanya candle yang telah close pada analysis target, mencatat SHA256 sumber, dan menolak 2025 sampai gate holdout 2024 lulus.
 
 ### E3 — Ablation Study
 
@@ -379,4 +380,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-Urutan kerja aktif adalah E2.3 manifest harian → E2.3 shadow policy standard/high-risk → holdout 2024 → journal/feedback/Excel → E3 ablation → E5 product acceptance. E2.2 telah selesai dan tidak boleh dituning ulang dari hasil 2025. E2.3 memakai plot-aware mapping untuk chart kanonis, sedangkan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+Urutan kerja aktif adalah menjalankan/review builder manifest harian E2.3 → renderer dan session-target override → E2.3 shadow policy standard/high-risk → holdout 2024 → journal/feedback/Excel → E3 ablation → E5 product acceptance. E2.2 telah selesai dan tidak boleh dituning ulang dari hasil 2025. E2.3 memakai plot-aware mapping untuk chart kanonis, sedangkan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

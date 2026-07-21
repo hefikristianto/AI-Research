@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.6
+**Versi:** 1.7
 **Tanggal:** 21 Juli 2026
-**Status:** E2.2 selesai; plot-aware dipilih untuk chart kanonis dan E2.3, sedangkan default upload umum tetap full-image
+**Status:** E2.2 selesai; kontrak manifest harian E2.3 telah diimplementasikan untuk development 2020–2024, sedangkan 2025 tetap terkunci
 
 ## 1. Ringkasan Penelitian
 
@@ -215,7 +215,7 @@ E2.1 mengidentifikasi kemungkinan bias horizontal pada mapping pixel→candle ka
 
 Frozen comparison 2025 memproses 165/165 chart per mode tanpa failure dan mempertahankan detection 70, both-class 39, pairing 37, serta valid setup 37 pada kedua mode. Dari 35 match yang dapat diobservasi, mean/median error OB turun dari 2,714/3 menjadi 0/0 dan error FVG dari 2,771/3 menjadi 0,971/1. Keputusan berubah pada empat kasus: tiga `NO_TRADE → WATCHLIST` dan satu `WATCHLIST → SELL`. Tujuh kasus per mode kemudian direview; seluruh 14 PNG lolos verifikasi SHA256 dan box di bawah banner keputusan identik. Dengan bukti tersebut, plot-aware dipilih untuk chart kanonis dan E2.3, tetapi default upload umum tetap full-image sampai variasi screenshot TradingView/MT5 divalidasi. Kasus `SELL` belum memiliki outcome terverifikasi sehingga hasil ini bukan bukti akurasi atau profitabilitas. Protokol berada di [`E2_2_PLOT_MAPPING_CALIBRATION.md`](../experiments/E2_2_PLOT_MAPPING_CALIBRATION.md) dan keputusan di [`E2_2_PLOT_MAPPING_RESULT.md`](../experiments/E2_2_PLOT_MAPPING_RESULT.md).
 
-Setelah mapping dibekukan, E2.3 menguji tier `HIGH_RISK_CANDIDATE` sebagai policy paralel. Data quality dan market risk dipisahkan: entry berisiko tinggi masih wajib memiliki metadata, OHLCV, arah, zona, dan mapping harga yang valid. Populasi evaluasi dibentuk per trading day pada slot sesi yang ditentukan sebelumnya; standard-only dan standard+high-risk dibandingkan pada event yang sama. Target daily berarti analisis tersedia setiap hari, bukan memaksa entry ketika hard gate gagal. Protokol berada di [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](../experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
+Setelah mapping dibekukan, E2.3 menguji tier `HIGH_RISK_CANDIDATE` sebagai policy paralel. Data quality dan market risk dipisahkan: entry berisiko tinggi masih wajib memiliki metadata, OHLCV, arah, zona, dan mapping harga yang valid. Populasi evaluasi dibentuk per trading day pada slot sesi yang ditentukan sebelumnya; standard-only dan standard+high-risk dibandingkan pada event yang sama. Builder manifest menggunakan semantik timestamp bar-open MT5 dan hanya memilih candle yang telah close pada target, mencatat lineage sumber, mendeteksi duplicate window, serta menolak final 2025. Waktu cutoff OHLCV dipisahkan dari waktu target sesi agar H4 tidak menimbulkan look-ahead atau salah klasifikasi sesi. Target daily berarti analisis tersedia setiap hari, bukan memaksa entry ketika hard gate gagal. Panduan manifest berada di [`E2_3_DAILY_MANIFEST.md`](../experiments/E2_3_DAILY_MANIFEST.md), sedangkan protokol policy berada di [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](../experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
 ## 9. Incremental Learning yang Aman
 
@@ -268,7 +268,7 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E2 | Baseline end-to-end GBPUSD | Mengukur kualitas entry dan risk gate | Full-system baseline |
 | E2.1 | Diagnostic review pack | Menjelaskan drop-off keputusan tanpa mengubah gate | Defect hypothesis |
 | E2.2 | Plot-aware mapping A/B | Selesai; dipilih untuk chart kanonis/E2.3, default upload umum tetap full-image | Scoped mapping policy |
-| E2.3 | High-risk daily coverage | Menambah tier risiko secara paralel dan mengukur candidate-day coverage | Risk-tier promotion decision |
+| E2.3 | High-risk daily coverage | Manifest development 2020–2024 diimplementasikan; berikutnya renderer dan shadow policy | Risk-tier promotion decision |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |
 | E5 | Product acceptance | Menguji React upload, annotated image, journal, dan Excel | Release readiness |
