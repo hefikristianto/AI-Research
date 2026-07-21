@@ -158,12 +158,14 @@ The review checks:
 - No threshold may be selected from 2024 holdout outcomes or 2025 final outcomes.
 - Raw predictions and user uploads remain ineligible as automatic ground truth.
 
-## Next Slice
+## Review Result and Next Slice
 
-After the manifest passes review:
+The 2020–2024 manifest passed review with 10,230 ready snapshot rows, zero anti-lookahead failure, and zero duplicate window. The reviewed digest and rendering authorization are recorded in [`E2_3_SNAPSHOT_RENDERING.md`](E2_3_SNAPSHOT_RENDERING.md) and `config/experiments/e2_3_daily_manifest_result.json`.
 
-1. render canonical images from the exact 100-candle windows;
-2. add the explicit analysis-target/session override needed by H4 and other stale endpoints;
+After this review:
+
+1. run the resumable canonical renderer for the exact 10,230 ready 100-candle windows;
+2. use the explicit analysis-target/session override for E2.3 inference while preserving the OHLCV cutoff;
 3. run the existing inference once per manifest event with E2.2 plot-aware mapping;
 4. derive unchanged-standard and candidate-high-risk shadow decisions from the same inference response;
 5. select high-risk policy bands only on 2020–2023, then freeze before 2024.

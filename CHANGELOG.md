@@ -21,6 +21,10 @@
 - Added E2.3 high-risk daily-coverage workflow with separate data-quality and market-risk gates, day-level evaluation, and development-first promotion rules.
 - Added the machine-readable E2.3 daily-manifest contract and deterministic local builder with closed-candle anti-lookahead, source/config hashes, exact-window deduplication, session-target diagnostics, and a hard 2025 lock.
 - Added unit coverage for MT5 timestamp parsing, M5/H4 cutoff semantics, manifest readiness, deduplication, deterministic lineage, and output persistence.
+- Recorded the reviewed E2.3 manifest result: 10,230 ready snapshots from 10,408 rows with zero anti-lookahead failure or duplicate window.
+- Added a deterministic, source-hash-verified, resumable Pillow renderer for reviewed E2.3 canonical snapshots.
+- Added an optional validated analysis-target clock for session evaluation without changing the OHLCV/HTF cutoff or the default upload path.
+- Added unit coverage for renderer determinism/resume and closed-candle/freshness validation of the session target.
 - Documented the frozen 165-window GBPUSD 2025 coverage funnel and seven-case diagnostic protocol without changing model thresholds or execution gates.
 - Added a machine-readable canonical project contract.
 - Added project-contract validation and unit tests.

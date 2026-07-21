@@ -41,7 +41,7 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - Halaman upload React sudah memakai `/api/analysis/full` dan menampilkan keputusan publik, parameter risiko, reason codes, ringkasan regime/detection, serta annotated chart OB/FVG.
 - Runner audit lokal tersedia untuk mengukur detection, pairing, `WATCHLIST`, actionable, `NO_TRADE`, dan distribusi blocker pada seluruh test window 2025 tanpa retraining.
 - E2.2 selesai: plot-aware mapping lulus A/B GBPUSD 2024 dan frozen comparison 2025, lalu dipilih untuk chart kanonis serta E2.3; default API untuk screenshot pengguna tetap full-image sampai validasi eksternal lulus.
-- Kontrak dan builder manifest harian E2.3 tersedia untuk membentuk event GBPUSD 2020–2024 pada dua slot UTC dengan aturan closed-candle anti-lookahead; tahap ini tidak menjalankan inference atau training dan menolak 2025.
+- Manifest harian E2.3 GBPUSD 2020–2024 telah lulus review; renderer kanonis resumable hanya memproses 10.230 row `READY`, memverifikasi lineage sumber, dan tidak menjalankan inference/training. Session-target clock dipisahkan dari cutoff OHLCV, sementara 2025 tetap terkunci.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -119,7 +119,7 @@ Targeted E2.1 review dapat memilih exact `image_id`, menyimpan full response JSO
 
 E2.2 membandingkan mapping full-image dengan plot-aware pada GBPUSD 2024 dan satu frozen comparison 2025. Plot-aware dipilih untuk chart kanonis dan E2.3; default upload umum tetap full-image karena screenshot TradingView/MT5 dengan variasi tema, panel, dan crop belum divalidasi. Protokol: [`docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md`](docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md). Bukti dan keputusan: [`docs/experiments/E2_2_PLOT_MAPPING_RESULT.md`](docs/experiments/E2_2_PLOT_MAPPING_RESULT.md).
 
-Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada populasi per trading day. Tier ini tidak boleh melewati kegagalan metadata, OHLCV, mapping, entry side, atau invalidasi zona. Mulai dari [`docs/experiments/E2_3_DAILY_MANIFEST.md`](docs/experiments/E2_3_DAILY_MANIFEST.md), lalu ikuti protokol lengkap di [`docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md`](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
+Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada populasi per trading day. Tier ini tidak boleh melewati kegagalan metadata, OHLCV, mapping, entry side, atau invalidasi zona. Manifest telah lulus review; jalankan renderer melalui [`docs/experiments/E2_3_SNAPSHOT_RENDERING.md`](docs/experiments/E2_3_SNAPSHOT_RENDERING.md), lalu ikuti protokol lengkap di [`docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md`](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
 ## Dokumen Utama
 
@@ -131,6 +131,7 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 - [E2.2 result and scoped decision](docs/experiments/E2_2_PLOT_MAPPING_RESULT.md)
 - [E2.3 high-risk daily coverage](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md)
 - [E2.3 daily snapshot manifest](docs/experiments/E2_3_DAILY_MANIFEST.md)
+- [E2.3 reviewed manifest and snapshot rendering](docs/experiments/E2_3_SNAPSHOT_RENDERING.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)
@@ -140,7 +141,7 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 
 ## Urutan Pengembangan Berikutnya
 
-1. Jalankan dan review builder manifest snapshot harian E2.3 untuk GBPUSD 2020–2024; 2025 tetap terkunci.
+1. Render 10.230 snapshot `READY` E2.3 dan jalankan inference resumable memakai analysis-target session clock; 2025 tetap terkunci.
 2. Implementasikan shadow policy standard vs high-risk tanpa melemahkan hard data-quality gate.
 3. Bekukan policy dari 2020–2023, lalu jalankan holdout 2024 sebelum membuka evaluasi final 2025.
 4. Simpan setiap hasil analisis, termasuk tier high risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.

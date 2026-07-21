@@ -21,6 +21,9 @@ from app.schemas.full_analysis import (
 from app.services.annotated_chart_service import (
     AnnotatedChartService,
 )
+from app.services.analysis_target_datetime_service import (
+    AnalysisTargetDatetimeService,
+)
 from app.services.chart_metadata_service import (
     ChartMetadataService,
 )
@@ -68,6 +71,10 @@ router = APIRouter(
 )
 
 metadata_service = ChartMetadataService()
+
+analysis_target_service = (
+    AnalysisTargetDatetimeService()
+)
 
 plot_geometry_service = ChartPlotGeometryService()
 
@@ -142,6 +149,15 @@ async def run_full_analysis(
     ),
     chart_datetime: str | None = Query(
         default=None,
+    ),
+    analysis_target_datetime: str | None = Query(
+        default=None,
+        description=(
+            "Optional experiment clock in the same "
+            "market/source timezone as chart_datetime. "
+            "It changes session evaluation only; OHLCV "
+            "cutoff remains chart_datetime."
+        ),
     ),
     chart_candles: int = Query(
         default=100,
@@ -405,6 +421,52 @@ async def run_full_analysis(
         == "LOADED"
         and context_window is not None
     )
+
+    if context_loaded:
+        try:
+            analysis_clock_result = (
+                analysis_target_service.resolve(
+                    chart_end_datetime=(
+                        ohlcv_context_result[
+                            "chart_end_datetime"
+                        ]
+                    ),
+                    timeframe=(
+                        metadata_result[
+                            "timeframe"
+                        ]
+                    ),
+                    analysis_target_datetime=(
+                        analysis_target_datetime
+                    ),
+                )
+            )
+        except ValueError as error:
+            raise HTTPException(
+                status_code=400,
+                detail=str(error),
+            ) from error
+    else:
+        analysis_clock_result = {
+            "status": "SKIPPED",
+            "override_requested": (
+                analysis_target_datetime
+                is not None
+            ),
+            "effective_datetime": None,
+            "datetime_source": None,
+            "chart_end_datetime": None,
+            "analysis_target_datetime": (
+                analysis_target_datetime
+            ),
+            "anti_lookahead_validated": (
+                False
+            ),
+            "reason": (
+                "OHLCV context belum tersedia "
+                "untuk memvalidasi analysis target."
+            ),
+        }
 
     if context_loaded:
         try:
@@ -721,6 +783,16 @@ async def run_full_analysis(
                     chart_end_datetime=(
                         ohlcv_context_result[
                             "chart_end_datetime"
+                        ]
+                    ),
+                    analysis_datetime=(
+                        analysis_clock_result[
+                            "effective_datetime"
+                        ]
+                    ),
+                    analysis_datetime_source=(
+                        analysis_clock_result[
+                            "datetime_source"
                         ]
                     ),
                     setup_direction=(
@@ -1271,6 +1343,9 @@ async def run_full_analysis(
         "scoring": scoring_result,
         "ohlcv_context": (
             ohlcv_context_result
+        ),
+        "analysis_clock": (
+            analysis_clock_result
         ),
         "market_structure": (
             structure_result
