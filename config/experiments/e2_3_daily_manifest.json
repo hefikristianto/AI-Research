@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.3",
+  "stage": "DAILY_MANIFEST",
+  "decision_status": "PREREGISTERED_FOR_DEVELOPMENT",
+  "registered_on": "2026-07-21",
+  "training_performed": false,
+  "pair": "GBPUSD",
+  "timeframes": [
+    "M5",
+    "M15",
+    "H1",
+    "H4"
+  ],
+  "reference_timeframe": "M5",
+  "chart_candles": 100,
+  "context_candles": 300,
+  "mapping_policy": {
+    "decision_contract": "config/experiments/e2_2_plot_mapping_decision.json",
+    "canonical_mode": "PLOT_AWARE",
+    "plot_aware_mapping": true,
+    "uncertain_geometry_fallback": "FULL_IMAGE"
+  },
+  "time_policy": {
+    "source_timestamp_semantics": "MT5_BAR_OPEN_TIME",
+    "market_utc_offset_hours": 0.0,
+    "timezone_assumption": "SOURCE_TIMESTAMPS_ARE_UTC_PROVISIONAL",
+    "timezone_assumption_provisional": true,
+    "closed_candle_rule": "BAR_OPEN_PLUS_TIMEFRAME_DURATION_LTE_TARGET",
+    "session_evaluation_timestamp": "ANALYSIS_TARGET_UTC",
+    "endpoint_session_override_required": true,
+    "slots": [
+      {
+        "name": "LONDON",
+        "utc_time": "09:00:00",
+        "expected_session": "LONDON"
+      },
+      {
+        "name": "LONDON_NEW_YORK_OVERLAP",
+        "utc_time": "14:00:00",
+        "expected_session": "LONDON_NEW_YORK_OVERLAP"
+      }
+    ]
+  },
+  "timeframe_minutes": {
+    "M5": 5,
+    "M15": 15,
+    "H1": 60,
+    "H4": 240
+  },
+  "maximum_staleness_minutes": {
+    "M5": 5,
+    "M15": 15,
+    "H1": 60,
+    "H4": 240
+  },
+  "trading_calendar": {
+    "source": "OBSERVED_REFERENCE_TIMEFRAME_DATES",
+    "weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "holiday_calendar_claimed": false
+  },
+  "deduplication": {
+    "exact_window_key": [
+      "pair",
+      "timeframe",
+      "chart_start_datetime",
+      "chart_end_open_datetime"
+    ],
+    "duplicate_status": "DUPLICATE_WINDOW",
+    "max_candidates_per_tier_per_day": 1
+  },
+  "period_splits": {
+    "POLICY_DEVELOPMENT": [
+      2020,
+      2021,
+      2022
+    ],
+    "POLICY_SELECTION": [
+      2023
+    ],
+    "FROZEN_HOLDOUT": [
+      2024
+    ],
+    "FINAL_TEMPORAL_TEST": [
+      2025
+    ]
+  },
+  "permitted_manifest_years": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "final_temporal_test_locked": true,
+  "source_path_template": "ai/datasets/raw/ohlcv/{pair}/{timeframe}/{year}/{pair}_{timeframe}_{year}_RAW.csv",
+  "output_contract": {
+    "snapshot_manifest": "daily_snapshot_manifest.csv",
+    "summary": "daily_manifest_summary.json",
+    "run_config": "run_config.json",
+    "planned_image_root": "images"
+  },
+  "guardrails": {
+    "manifest_generation_is_inference": false,
+    "manifest_generation_is_training": false,
+    "daily_analysis_implies_daily_trade": false,
+    "final_2025_policy_tuning_allowed": false,
+    "standard_and_high_risk_share_same_event": true,
+    "standard_and_high_risk_share_same_mapping": true,
+    "raw_prediction_is_ground_truth": false
+  }
+}

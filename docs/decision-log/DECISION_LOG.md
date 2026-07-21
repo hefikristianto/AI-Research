@@ -131,3 +131,14 @@
 | Impact | E2.3 wajib menjalankan kedua policy arm dengan plot-aware mapping yang sama serta full-image fallback. Konstanta E2.2 tidak dituning ulang. Default upload umum baru boleh dipertimbangkan setelah validasi lintas tema, chrome, crop, perangkat, dan aspect ratio; satu kandidat SELL yang muncul belum boleh diklaim akurat atau profitable tanpa outcome terverifikasi |
 
 ---
+
+## Decision #014
+
+| Item | Description |
+|------|-------------|
+| Date | 21-07-2026 |
+| Decision | Populasi E2.3 dibentuk dari dua target UTC per observed GBPUSD trading day pada 2020–2024; timestamp MT5 diperlakukan sebagai bar-open dan hanya candle yang telah close boleh masuk manifest. Final 2025 tetap terkunci |
+| Reason | Audit 165 gambar bukan populasi harian lengkap. Selain itu, memakai bar yang baru membuka pada waktu target akan menyebabkan look-ahead, sedangkan memakai timestamp buka H4 sebagai waktu sesi dapat salah mengklasifikasikan target London atau overlap |
+| Impact | Manifest menyimpan analysis target dan cutoff OHLCV secara terpisah, mewajibkan M5/M15/H1/H4 lengkap, mencatat hash sumber, menandai duplicate window, dan membutuhkan session-target override pada runner berikutnya. Tahap ini tidak melakukan inference, training, atau perubahan keputusan produksi |
+
+---

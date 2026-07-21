@@ -14,6 +14,8 @@ E2.3 evaluates whether AI-TDSS can provide a clearly separated high-risk analysi
 
 The previous 2025 decision audit contained 165 sampled chart images. Its number of detected or valid setups must not be interpreted as the number of opportunities in every trading day of the year. E2.3 therefore creates a complete day-level evaluation population before estimating daily candidate coverage.
 
+The operational first slice is specified in [`E2_3_DAILY_MANIFEST.md`](E2_3_DAILY_MANIFEST.md). Its machine-readable contract and builder produce the population only; they perform neither inference nor training.
+
 ## Locked Mapping Dependency
 
 E2.2 selected `PLOT_AWARE` for canonical generated charts after matched 2024 development and 2025 frozen comparisons. Every E2.3 canonical run must therefore request `plot_aware_mapping=true`, record the mapping mode in its manifest, and preserve the `FULL_IMAGE` fail-closed fallback when plot geometry is uncertain.
@@ -76,6 +78,8 @@ The unit of evaluation is one GBPUSD trading day, not one arbitrary screenshot.
 5. Preserve days with only `WATCHLIST` or `NO_TRADE`; they remain part of the denominator.
 6. Deduplicate heavily overlapping windows so repeated snapshots do not inflate candidate frequency.
 
+Raw MT5 timestamps are bar-open timestamps. A candle is eligible only when its open plus its timeframe duration is not later than the analysis target. The OHLCV/chart endpoint timestamp and the analysis/session target are stored separately, because an H4 bar used at a London target can have opened in an earlier session. The later shadow runner must evaluate session from the analysis target and may not include a candle that had not closed.
+
 Initial temporal use:
 
 | Period | Use |
@@ -112,7 +116,7 @@ Daily output is not evidence of daily trading quality. An increase in coverage i
 ## Implementation Workflow
 
 1. Load the selected E2.2 canonical policy and assert `plot_aware_mapping=true` with full-image fallback.
-2. Build and validate the day-level snapshot manifest for 2020–2024.
+2. Run `ai/scripts/build_e2_3_daily_manifest.py` and validate the day-level snapshot manifest for 2020–2024; the builder hard-rejects 2025.
 3. Add `data_quality`, `risk_tier`, and `HIGH_RISK_CANDIDATE` internally without changing the standard path.
 4. Implement a shadow-mode audit that records both standard-only and combined policies from the same inference event.
 5. Select high-risk bands on 2020–2023 only.
