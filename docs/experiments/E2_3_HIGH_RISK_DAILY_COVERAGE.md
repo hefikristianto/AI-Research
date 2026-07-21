@@ -14,7 +14,7 @@ E2.3 evaluates whether AI-TDSS can provide a clearly separated high-risk analysi
 
 The previous 2025 decision audit contained 165 sampled chart images. Its number of detected or valid setups must not be interpreted as the number of opportunities in every trading day of the year. E2.3 therefore creates a complete day-level evaluation population before estimating daily candidate coverage.
 
-The operational first slice is specified in [`E2_3_DAILY_MANIFEST.md`](E2_3_DAILY_MANIFEST.md). Its machine-readable contract and builder produce the population only; they perform neither inference nor training.
+The operational first slice is specified in [`E2_3_DAILY_MANIFEST.md`](E2_3_DAILY_MANIFEST.md). Its machine-readable contract and builder produce the population only; they perform neither inference nor training. The reviewed result and resumable canonical renderer are specified in [`E2_3_SNAPSHOT_RENDERING.md`](E2_3_SNAPSHOT_RENDERING.md).
 
 ## Locked Mapping Dependency
 
@@ -116,14 +116,15 @@ Daily output is not evidence of daily trading quality. An increase in coverage i
 ## Implementation Workflow
 
 1. Load the selected E2.2 canonical policy and assert `plot_aware_mapping=true` with full-image fallback.
-2. Run `ai/scripts/build_e2_3_daily_manifest.py` and validate the day-level snapshot manifest for 2020–2024; the builder hard-rejects 2025.
-3. Add `data_quality`, `risk_tier`, and `HIGH_RISK_CANDIDATE` internally without changing the standard path.
-4. Implement a shadow-mode audit that records both standard-only and combined policies from the same inference event.
-5. Select high-risk bands on 2020–2023 only.
-6. Freeze configuration and evaluate once on 2024.
-7. Promote the public high-risk badge and actionable levels only if the 2024 gate passes.
-8. Commit the policy/config, then run one frozen 2025 final evaluation.
-9. Store every tier, including `WATCHLIST` and `NO_TRADE`, in the journal and Excel export.
+2. Use the validated 2020–2024 manifest and render only its 10,230 `READY` snapshots; the builder and renderer hard-reject policy drift and keep 2025 locked.
+3. Run inference with the manifest OHLCV cutoff and separate analysis-target session clock.
+4. Add `data_quality`, `risk_tier`, and `HIGH_RISK_CANDIDATE` internally without changing the standard path.
+5. Implement a shadow-mode audit that records both standard-only and combined policies from the same inference event.
+6. Select high-risk bands on 2020–2023 only.
+7. Freeze configuration and evaluate once on 2024.
+8. Promote the public high-risk badge and actionable levels only if the 2024 gate passes.
+9. Commit the policy/config, then run one frozen 2025 final evaluation.
+10. Store every tier, including `WATCHLIST` and `NO_TRADE`, in the journal and Excel export.
 
 ## Artifacts
 

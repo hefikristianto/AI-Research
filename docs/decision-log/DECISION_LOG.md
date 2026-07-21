@@ -142,3 +142,14 @@
 | Impact | Manifest menyimpan analysis target dan cutoff OHLCV secara terpisah, mewajibkan M5/M15/H1/H4 lengkap, mencatat hash sumber, menandai duplicate window, dan membutuhkan session-target override pada runner berikutnya. Tahap ini tidak melakukan inference, training, atau perubahan keputusan produksi |
 
 ---
+
+## Decision #015
+
+| Item | Description |
+|------|-------------|
+| Date | 21-07-2026 |
+| Decision | Manifest E2.3 GBPUSD 2020–2024 dinyatakan valid untuk rendering; hanya 10.230 row `READY` yang boleh dirender, sedangkan 178 row non-ready tetap dipertahankan dalam denominator |
+| Reason | Review 10.408 row memverifikasi digest, 20 hash sumber, empat timeframe per event, nol look-ahead, nol duplicate window, dan tidak ada target 2025. Pemisahan cutoff candle dari analysis target diperlukan karena seluruh 2.602 event membutuhkan clock target agar klasifikasi sesi konsisten, terutama pada H4 |
+| Impact | Renderer wajib deterministik, resumable, memverifikasi lineage, dan tidak menjalankan inference/training. Endpoint menerima clock target opsional hanya untuk session evaluation; request upload yang tidak mengirimkannya mempertahankan perilaku lama. High-risk policy dan 2025 tetap terkunci |
+
+---

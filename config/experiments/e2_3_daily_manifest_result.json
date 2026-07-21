@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.3",
+  "stage": "DAILY_MANIFEST_REVIEW",
+  "decision_status": "VALIDATED_FOR_RENDERING",
+  "reviewed_on": "2026-07-21",
+  "training_performed": false,
+  "inference_performed": false,
+  "review_archive": {
+    "filename": "20260721_E2_3_daily_manifest_dev_manifest_review.zip",
+    "sha256": "3bed525f2ab60e8822c8e423f7d0daf2bf20e3a02d99a3106e74830b724fccf9"
+  },
+  "manifest": {
+    "sha256": "1a66cd589a8df5df39fef2ba86be8a0df6e73ffe8e6668fad034fdf0b3dd0519",
+    "git_commit": "882f2b3dfcd706deeceaec7647f428ee36fe79b2",
+    "git_dirty": false,
+    "pair": "GBPUSD",
+    "years": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "snapshot_rows": 10408,
+    "events": 2602,
+    "trading_days": 1301,
+    "ready_snapshot_rows": 10230,
+    "ready_events": 2491,
+    "ready_event_rate": 0.957341,
+    "source_files": 20
+  },
+  "status_counts": {
+    "READY": 10230,
+    "INSUFFICIENT_CONTEXT": 134,
+    "STALE_SOURCE": 44
+  },
+  "validation": {
+    "anti_lookahead_failures": 0,
+    "duplicate_window_rows": 0,
+    "session_override_required_rows": 2635,
+    "session_override_required_events": 2602,
+    "source_hashes_populated": true,
+    "manifest_digest_recomputed": true,
+    "no_2025_target_rows": true,
+    "all_events_have_four_timeframes": true
+  },
+  "render_authorization": {
+    "ready_rows_only": true,
+    "expected_render_count": 10230,
+    "non_ready_rows_must_be_skipped": true,
+    "canonical_width": 691,
+    "canonical_height": 482,
+    "chart_style": "CHARLES_COMPATIBLE_WHITE",
+    "plot_aware_mapping": true,
+    "uncertain_geometry_fallback": "FULL_IMAGE"
+  },
+  "guardrails": {
+    "renderer_may_run_inference": false,
+    "renderer_may_train_models": false,
+    "high_risk_policy_selected": false,
+    "final_2025_unlocked": false,
+    "raw_prediction_is_ground_truth": false
+  }
+}

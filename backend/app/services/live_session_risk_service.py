@@ -1,8 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import Any
-
-import pandas as pd
 
 
 class LiveSessionRiskService:
@@ -65,20 +64,29 @@ class LiveSessionRiskService:
         pair: str,
         chart_end_datetime: str,
         market_utc_offset_hours: float,
+        datetime_source: str = (
+            "CHART_END_DATETIME"
+        ),
+        original_chart_end_datetime: (
+            str | None
+        ) = None,
     ) -> dict[str, Any]:
-        market_timestamp = pd.Timestamp(
-            chart_end_datetime
+        market_timestamp = datetime.fromisoformat(
+            str(chart_end_datetime).replace(
+                "Z",
+                "+00:00",
+            )
         )
 
         if market_timestamp.tzinfo is not None:
             market_timestamp = (
                 market_timestamp
-                .tz_localize(None)
+                .replace(tzinfo=None)
             )
 
         utc_timestamp = (
             market_timestamp
-            - pd.Timedelta(
+            - timedelta(
                 hours=market_utc_offset_hours
             )
         )
@@ -114,6 +122,19 @@ class LiveSessionRiskService:
             "pair": pair,
             "market_datetime": (
                 market_timestamp.isoformat()
+            ),
+            "evaluation_datetime_source": (
+                datetime_source
+            ),
+            "chart_end_datetime": (
+                original_chart_end_datetime
+                or chart_end_datetime
+            ),
+            "analysis_target_datetime": (
+                chart_end_datetime
+                if datetime_source
+                == "ANALYSIS_TARGET_OVERRIDE"
+                else None
             ),
             "market_utc_offset_hours": (
                 market_utc_offset_hours
@@ -475,6 +496,10 @@ class LiveSessionRiskService:
         market_structure: dict[str, Any],
         ohlcv_metrics: dict[str, Any],
         market_utc_offset_hours: float,
+        analysis_datetime: str | None = None,
+        analysis_datetime_source: str = (
+            "CHART_END_DATETIME"
+        ),
     ) -> dict[str, Any]:
         pair = pair.upper().strip()
 
@@ -487,10 +512,19 @@ class LiveSessionRiskService:
         session = self._session_context(
             pair=pair,
             chart_end_datetime=(
-                chart_end_datetime
+                analysis_datetime
+                or chart_end_datetime
             ),
             market_utc_offset_hours=(
                 market_utc_offset_hours
+            ),
+            datetime_source=(
+                analysis_datetime_source
+                if analysis_datetime
+                else "CHART_END_DATETIME"
+            ),
+            original_chart_end_datetime=(
+                chart_end_datetime
             ),
         )
 

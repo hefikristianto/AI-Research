@@ -17,6 +17,7 @@ class FullAnalysisResponse(BaseModel):
     pairing: dict[str, Any]
     scoring: dict[str, Any]
     ohlcv_context: dict[str, Any]
+    analysis_clock: dict[str, Any]
     market_structure: dict[str, Any]
     context_scoring: dict[str, Any]
     htf_volatility: dict[str, Any]
