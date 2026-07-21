@@ -40,6 +40,11 @@ class DecisionCoverageAuditService:
         "yolo_model_path",
         "pair_count",
         "candidate_pair_combinations",
+        "pairing_evaluated_combinations",
+        "pairing_rejected_combinations",
+        "pairing_rejected_x_distance",
+        "pairing_rejected_y_distance",
+        "pairing_rejection_details_truncated",
         "pairing_status",
         "setup_count",
         "valid_setup_count",
@@ -66,12 +71,28 @@ class DecisionCoverageAuditService:
         "quality_status_changed",
         "quality_added_blockers",
         "quality_added_warnings",
+        "chart_geometry_status",
+        "chart_geometry_method",
+        "chart_geometry_confidence",
+        "chart_plot_left_normalized",
+        "chart_plot_right_normalized",
         "mapping_status",
         "mapping_mode",
+        "mapping_index_mode",
+        "plot_aware_mapping_requested",
+        "mapping_calibration_applied",
         "mapping_provisional",
         "mapping_confidence",
         "mapping_ob_index_error",
         "mapping_fvg_index_error",
+        "mapping_legacy_approx_ob_idx",
+        "mapping_plot_aware_approx_ob_idx",
+        "mapping_legacy_approx_fvg_idx",
+        "mapping_plot_aware_approx_fvg_idx",
+        "mapping_legacy_ob_index_error",
+        "mapping_plot_aware_ob_index_error",
+        "mapping_legacy_fvg_index_error",
+        "mapping_plot_aware_fvg_index_error",
         "mapping_distance_from_prediction",
         "mapped_ob_datetime",
         "mapped_fvg_datetime",
@@ -243,12 +264,16 @@ class DecisionCoverageAuditService:
         recommendation = cls._mapping(payload.get("recommendation"))
         execution_gate = cls._mapping(payload.get("execution_gate"))
         price_conversion = cls._mapping(payload.get("price_conversion"))
+        chart_geometry = cls._mapping(payload.get("chart_geometry"))
         annotated_chart = cls._mapping(payload.get("annotated_chart"))
         quality_normalization = cls._mapping(
             execution_gate.get("quality_normalization")
         )
         session = cls._mapping(session_risk.get("session"))
         risk_reward = cls._mapping(session_risk.get("risk_reward"))
+        pairing_rejection_counts = cls._mapping(
+            pairing.get("rejection_counts")
+        )
 
         class_counts = cls._mapping(detection.get("class_counts"))
         detections = detection.get("detections")
@@ -365,6 +390,29 @@ class DecisionCoverageAuditService:
             "candidate_pair_combinations": cls._integer(
                 pairing.get("candidate_combinations")
             ),
+            "pairing_evaluated_combinations": cls._integer(
+                pairing.get("evaluated_combinations")
+            ),
+            "pairing_rejected_combinations": cls._integer(
+                pairing.get("rejected_combinations")
+            ),
+            "pairing_rejected_x_distance": cls._integer(
+                pairing_rejection_counts.get(
+                    "X_DISTANCE_EXCEEDS_MAX"
+                )
+            ),
+            "pairing_rejected_y_distance": cls._integer(
+                pairing_rejection_counts.get(
+                    "Y_DISTANCE_EXCEEDS_MAX"
+                )
+            ),
+            "pairing_rejection_details_truncated": (
+                cls._optional_boolean(
+                    pairing.get(
+                        "rejection_details_truncated"
+                    )
+                )
+            ),
             "pairing_status": pairing.get("pairing_status", "UNKNOWN"),
             "setup_count": cls._integer(scoring.get("total_setups")),
             "valid_setup_count": cls._integer(scoring.get("valid_setups")),
@@ -480,8 +528,43 @@ class DecisionCoverageAuditService:
                     "added_warnings"
                 )
             ),
+            "chart_geometry_status": chart_geometry.get(
+                "status",
+                "UNAVAILABLE",
+            ),
+            "chart_geometry_method": chart_geometry.get(
+                "method",
+                "",
+            ),
+            "chart_geometry_confidence": cls._number(
+                chart_geometry.get("confidence")
+            ),
+            "chart_plot_left_normalized": cls._number(
+                chart_geometry.get(
+                    "plot_left_normalized"
+                )
+            ),
+            "chart_plot_right_normalized": cls._number(
+                chart_geometry.get(
+                    "plot_right_normalized"
+                )
+            ),
             "mapping_status": price_conversion.get("status", "UNKNOWN"),
             "mapping_mode": price_conversion.get("mapping_mode", ""),
+            "mapping_index_mode": price_conversion.get(
+                "mapping_index_mode",
+                "FULL_IMAGE",
+            ),
+            "plot_aware_mapping_requested": cls._optional_boolean(
+                price_conversion.get(
+                    "plot_aware_mapping_requested"
+                )
+            ),
+            "mapping_calibration_applied": cls._optional_boolean(
+                price_conversion.get(
+                    "mapping_calibration_applied"
+                )
+            ),
             "mapping_provisional": cls._optional_boolean(
                 price_conversion.get(
                     "mapping_provisional",
@@ -501,6 +584,38 @@ class DecisionCoverageAuditService:
             ),
             "mapping_fvg_index_error": cls._number(
                 price_conversion.get("fvg_index_error")
+            ),
+            "mapping_legacy_approx_ob_idx": cls._number(
+                price_conversion.get("legacy_approx_ob_idx")
+            ),
+            "mapping_plot_aware_approx_ob_idx": cls._number(
+                price_conversion.get(
+                    "plot_aware_approx_ob_idx"
+                )
+            ),
+            "mapping_legacy_approx_fvg_idx": cls._number(
+                price_conversion.get("legacy_approx_fvg_idx")
+            ),
+            "mapping_plot_aware_approx_fvg_idx": cls._number(
+                price_conversion.get(
+                    "plot_aware_approx_fvg_idx"
+                )
+            ),
+            "mapping_legacy_ob_index_error": cls._number(
+                price_conversion.get("legacy_ob_index_error")
+            ),
+            "mapping_plot_aware_ob_index_error": cls._number(
+                price_conversion.get(
+                    "plot_aware_ob_index_error"
+                )
+            ),
+            "mapping_legacy_fvg_index_error": cls._number(
+                price_conversion.get("legacy_fvg_index_error")
+            ),
+            "mapping_plot_aware_fvg_index_error": cls._number(
+                price_conversion.get(
+                    "plot_aware_fvg_index_error"
+                )
             ),
             "mapping_distance_from_prediction": cls._number(
                 price_conversion.get(
@@ -899,8 +1014,40 @@ class DecisionCoverageAuditService:
             for row in valid_rows
         )
 
+        geometry_detected = sum(
+            str(row.get("chart_geometry_status"))
+            == "DETECTED"
+            for row in successful
+        )
+        calibration_applied = sum(
+            cls._boolean(
+                row.get("mapping_calibration_applied")
+            )
+            for row in successful
+        )
+
+        def observed_mean(field: str) -> dict[str, Any]:
+            values = [
+                value
+                for row in successful
+                if (
+                    value := cls._number(
+                        row.get(field)
+                    )
+                )
+                is not None
+            ]
+            return {
+                "observed": len(values),
+                "mean": (
+                    round(mean(values), 6)
+                    if values
+                    else None
+                ),
+            }
+
         return {
-            "schema_version": 2,
+            "schema_version": 3,
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "run_configuration": run_configuration,
             "population": {
@@ -951,6 +1098,14 @@ class DecisionCoverageAuditService:
                 ),
                 "mapping_status": cls._distribution(
                     row.get("mapping_status") for row in valid_rows
+                ),
+                "chart_geometry_status": cls._distribution(
+                    row.get("chart_geometry_status")
+                    for row in successful
+                ),
+                "mapping_index_mode": cls._distribution(
+                    row.get("mapping_index_mode")
+                    for row in successful
                 ),
                 "session": cls._distribution(
                     row.get("session_name") for row in valid_rows
@@ -1008,6 +1163,68 @@ class DecisionCoverageAuditService:
                     ),
                     "above_3": distance_blocker_band,
                 },
+                "plot_mapping": {
+                    "plot_aware_mapping_requested": bool(
+                        run_configuration.get(
+                            "plot_aware_mapping",
+                            False,
+                        )
+                    ),
+                    "geometry_detected": cls._metric(
+                        geometry_detected,
+                        denominator,
+                    ),
+                    "calibration_applied": cls._metric(
+                        calibration_applied,
+                        denominator,
+                    ),
+                    "legacy_ob_index_error": observed_mean(
+                        "mapping_legacy_ob_index_error"
+                    ),
+                    "plot_aware_ob_index_error": observed_mean(
+                        "mapping_plot_aware_ob_index_error"
+                    ),
+                    "legacy_fvg_index_error": observed_mean(
+                        "mapping_legacy_fvg_index_error"
+                    ),
+                    "plot_aware_fvg_index_error": observed_mean(
+                        "mapping_plot_aware_fvg_index_error"
+                    ),
+                },
+                "pairing_rejections": {
+                    "evaluated_combinations": sum(
+                        cls._integer(
+                            row.get(
+                                "pairing_evaluated_combinations"
+                            )
+                        )
+                        for row in successful
+                    ),
+                    "rejected_combinations": sum(
+                        cls._integer(
+                            row.get(
+                                "pairing_rejected_combinations"
+                            )
+                        )
+                        for row in successful
+                    ),
+                    "x_distance_exceeds_max": sum(
+                        cls._integer(
+                            row.get(
+                                "pairing_rejected_x_distance"
+                            )
+                        )
+                        for row in successful
+                    ),
+                    "y_distance_exceeds_max": sum(
+                        cls._integer(
+                            row.get(
+                                "pairing_rejected_y_distance"
+                            )
+                        )
+                        for row in successful
+                    ),
+                },
             },
             "by_pair_timeframe": by_pair_timeframe,
             "latency": latency_summary,
@@ -1043,6 +1260,8 @@ class DecisionCoverageAuditService:
             f"- Timeframes: `{', '.join(config.get('timeframes', [])) or 'all'}`",
             "- Confidence threshold: "
             f"`{config.get('confidence_threshold', 'unknown')}`",
+            "- Plot-aware mapping: "
+            f"`{bool(config.get('plot_aware_mapping', False))}`",
             f"- Successful responses: `{population.get('successful_responses', 0)}`",
             f"- Failed responses: `{population.get('failed_responses', 0)}`",
             "",
@@ -1077,6 +1296,12 @@ class DecisionCoverageAuditService:
         distance_diagnostics = cls._mapping(
             diagnostics.get("entry_distance_atr")
         )
+        plot_mapping = cls._mapping(
+            diagnostics.get("plot_mapping")
+        )
+        pairing_rejections = cls._mapping(
+            diagnostics.get("pairing_rejections")
+        )
         paired_given_both = cls._mapping(
             coverage.get("paired_given_both_classes")
         )
@@ -1109,6 +1334,23 @@ class DecisionCoverageAuditService:
                 "- Entry distance > 1.5 and <= 3 ATR: "
                 f"`{distance_diagnostics.get('above_1_5_to_3', 0)}`",
                 f"- Entry distance > 3 ATR: `{distance_diagnostics.get('above_3', 0)}`",
+                "- Plot geometry detected: "
+                f"`{cls._mapping(plot_mapping.get('geometry_detected')).get('count', 0)}/"
+                f"{cls._mapping(plot_mapping.get('geometry_detected')).get('denominator', 0)}`",
+                "- Plot-aware calibration applied: "
+                f"`{cls._mapping(plot_mapping.get('calibration_applied')).get('count', 0)}`",
+                "- Mean legacy / plot-aware OB index error: "
+                f"`{cls._mapping(plot_mapping.get('legacy_ob_index_error')).get('mean')}` / "
+                f"`{cls._mapping(plot_mapping.get('plot_aware_ob_index_error')).get('mean')}`",
+                "- Mean legacy / plot-aware FVG index error: "
+                f"`{cls._mapping(plot_mapping.get('legacy_fvg_index_error')).get('mean')}` / "
+                f"`{cls._mapping(plot_mapping.get('plot_aware_fvg_index_error')).get('mean')}`",
+                "- Pairing combinations evaluated / rejected: "
+                f"`{pairing_rejections.get('evaluated_combinations', 0)}` / "
+                f"`{pairing_rejections.get('rejected_combinations', 0)}`",
+                "- Pairing rejection X / Y threshold: "
+                f"`{pairing_rejections.get('x_distance_exceeds_max', 0)}` / "
+                f"`{pairing_rejections.get('y_distance_exceeds_max', 0)}`",
             ]
         )
 

@@ -203,6 +203,11 @@ class LiveExecutionGateService:
                 "LOW_SESSION_SUITABILITY"
             )
 
+        elif session_score < 0.65:
+            warnings.append(
+                "SESSION_BELOW_TRADE_CANDIDATE"
+            )
+
         volatility_regime = str(
             advanced_scoring.get(
                 "volatility_regime",

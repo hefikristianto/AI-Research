@@ -120,3 +120,11 @@ Compress-Archive `
 ## Decision After Review
 
 If a defect is confirmed, implement and tune it only on development/validation periods before running a frozen comparison. Do not use these seven final-test cases to choose a new threshold. Possible follow-up experiments are detector co-detection review, right-edge/zone-recency validation, canonical mapping calibration, or execution-score calibration.
+
+## Completed Review Finding
+
+The seven requested responses and seven annotated PNGs were produced successfully with verified SHA256 values. Review found a repeated horizontal mapping offset caused by interpreting normalized YOLO X coordinates across the complete image instead of the candle-plot span. The strongest diagnostic case was an H4 setup whose pre-quality state was a trade candidate but whose public result became `WATCHLIST` after low mapping confidence was added. This does not establish that the setup was correct or profitable.
+
+The review also found two separate observability gaps: session scores between 0.50 and 0.64 could produce `REVIEW` without a specific session reason, and rejected OB/FVG combinations did not retain their X/Y rejection reason. One no-pair case was only marginally beyond the Y-distance limit; that observation is not authorization to relax the threshold on 2025.
+
+The controlled follow-up is [`E2_2_PLOT_MAPPING_CALIBRATION.md`](E2_2_PLOT_MAPPING_CALIBRATION.md). It keeps legacy mapping as the default, develops the plot-aware transform on synthetic and 2020–2024 data, and permits a single frozen 2025 comparison only after the rule is locked.

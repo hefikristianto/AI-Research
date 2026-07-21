@@ -171,6 +171,14 @@ def parse_args() -> argparse.Namespace:
         help="Request base64 annotated images. Disabled by default for batch speed.",
     )
     parser.add_argument(
+        "--plot-aware-mapping",
+        action="store_true",
+        help=(
+            "Opt in ke kalibrasi koordinat terhadap batas plot candle. "
+            "Default tetap mapping full-image."
+        ),
+    )
+    parser.add_argument(
         "--review-pack",
         action="store_true",
         help=(
@@ -615,6 +623,7 @@ def request_analysis(
     context_candles: int,
     utc_offset: float,
     include_annotated_chart: bool,
+    plot_aware_mapping: bool,
     timeout_seconds: float,
 ) -> tuple[dict[str, Any], int]:
     query = urlencode(
@@ -627,6 +636,7 @@ def request_analysis(
             "context_candles": context_candles,
             "market_utc_offset_hours": utc_offset,
             "include_annotated_chart": str(include_annotated_chart).lower(),
+            "plot_aware_mapping": str(plot_aware_mapping).lower(),
         }
     )
     url = base_url.rstrip("/") + "/api/analysis/full?" + query
@@ -678,7 +688,7 @@ def build_run_configuration(
     samples: list[dict[str, Any]],
 ) -> dict[str, Any]:
     configuration = {
-        "schema_version": 2,
+        "schema_version": 3,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "base_url": args.base_url.rstrip("/"),
         "metadata": str(args.metadata.resolve()),
@@ -700,6 +710,13 @@ def build_run_configuration(
         "include_annotated_chart": bool(
             args.include_annotated_chart
             or args.review_pack
+        ),
+        "plot_aware_mapping": bool(
+            getattr(
+                args,
+                "plot_aware_mapping",
+                False,
+            )
         ),
         "review_pack": bool(
             args.review_pack
@@ -739,6 +756,7 @@ def ensure_resume_compatible(
         "utc_offset",
         "image_ids_requested",
         "include_annotated_chart",
+        "plot_aware_mapping",
         "review_pack",
     )
     mismatched = [key for key in keys if existing.get(key) != current.get(key)]
@@ -875,6 +893,13 @@ def run(args: argparse.Namespace) -> int:
                         include_annotated_chart=bool(
                             args.include_annotated_chart
                             or args.review_pack
+                        ),
+                        plot_aware_mapping=bool(
+                            getattr(
+                                args,
+                                "plot_aware_mapping",
+                                False,
+                            )
                         ),
                         timeout_seconds=args.timeout_seconds,
                     )

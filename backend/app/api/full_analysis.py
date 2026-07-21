@@ -24,6 +24,9 @@ from app.services.annotated_chart_service import (
 from app.services.chart_metadata_service import (
     ChartMetadataService,
 )
+from app.services.chart_plot_geometry_service import (
+    ChartPlotGeometryService,
+)
 from app.services.live_context_scoring_service import (
     LiveContextScoringService,
 )
@@ -65,6 +68,8 @@ router = APIRouter(
 )
 
 metadata_service = ChartMetadataService()
+
+plot_geometry_service = ChartPlotGeometryService()
 
 pairing_service = OBFVGPairingService(
     max_x_distance=0.12,
@@ -160,6 +165,13 @@ async def run_full_analysis(
             "tidak membawa PNG base64."
         ),
     ),
+    plot_aware_mapping: bool = Query(
+        default=False,
+        description=(
+            "Eksperimen opt-in untuk memetakan koordinat "
+            "YOLO terhadap batas plot candle yang terdeteksi."
+        ),
+    ),
 ):
     content_type = (
         file.content_type
@@ -214,6 +226,22 @@ async def run_full_analysis(
                 f"{error}"
             ),
         ) from error
+
+    try:
+        chart_geometry_result = (
+            plot_geometry_service.analyze(image)
+        )
+
+    except Exception as error:
+        chart_geometry_result = {
+            "status": "FALLBACK",
+            "method": "FULL_IMAGE",
+            "reason": "GEOMETRY_SERVICE_ERROR",
+            "plot_left_normalized": 0.0,
+            "plot_right_normalized": 1.0,
+            "confidence": 0.0,
+            "error": str(error),
+        }
 
     try:
         metadata_result = (
@@ -443,6 +471,12 @@ async def run_full_analysis(
                         scoring_result.get(
                             "best_setup"
                         )
+                    ),
+                    plot_geometry=(
+                        chart_geometry_result
+                    ),
+                    use_plot_geometry=(
+                        plot_aware_mapping
                     ),
                 )
             )
@@ -1228,6 +1262,9 @@ async def run_full_analysis(
         "width": image.width,
         "height": image.height,
         "metadata": metadata_result,
+        "chart_geometry": (
+            chart_geometry_result
+        ),
         "regime": regime_result,
         "detection": detection_result,
         "pairing": pairing_result,
