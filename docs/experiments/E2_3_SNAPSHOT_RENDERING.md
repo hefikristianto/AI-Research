@@ -127,4 +127,5 @@ The endpoint rejects a target before the candle close or more than one timeframe
 - Successful rendering is dataset preparation, not evidence of detection accuracy or profitability.
 - The renderer cannot select high-risk thresholds or unlock 2025.
 - The public upload frontend remains unchanged and does not send the experiment-only clock.
-- The next slice is a resumable inference runner that consumes these images and passes each manifest analysis target, followed by the standard/high-risk shadow policy on 2020–2023.
+- The resumable inference runner is implemented in [`run_e2_3_daily_inference.py`](../../ai/scripts/run_e2_3_daily_inference.py). It consumes these images, passes each manifest analysis target, caches one verified raw response per snapshot, and keeps 2024/2025 locked. Its operating guide is [`E2_3_DAILY_INFERENCE_CACHE.md`](E2_3_DAILY_INFERENCE_CACHE.md).
+- The slice after a complete 2020–2023 cache is the offline matched Standard/High Risk shadow policy. Both arms must reuse the same cached response.

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.3",
+  "stage": "DAILY_INFERENCE_CACHE",
+  "decision_status": "PREREGISTERED_FOR_DEVELOPMENT_INFERENCE",
+  "registered_on": "2026-07-29",
+  "training_performed": false,
+  "policy_evaluation_performed": false,
+  "reviewed_manifest": {
+    "result_contract": "config/experiments/e2_3_daily_manifest_result.json",
+    "sha256": "1a66cd589a8df5df39fef2ba86be8a0df6e73ffe8e6668fad034fdf0b3dd0519",
+    "ready_snapshot_rows": 10230,
+    "canonical_width": 691,
+    "canonical_height": 482
+  },
+  "request_contract": {
+    "endpoint": "/api/analysis/full",
+    "confidence_threshold": 0.25,
+    "chart_candles": 100,
+    "context_candles": 300,
+    "market_utc_offset_hours": 0.0,
+    "include_annotated_chart": false,
+    "plot_aware_mapping": true,
+    "chart_datetime_field": "chart_end_open_datetime",
+    "analysis_target_datetime_field": "analysis_target_market_datetime"
+  },
+  "development": {
+    "allowed_splits": [
+      "POLICY_DEVELOPMENT",
+      "POLICY_SELECTION"
+    ],
+    "allowed_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ]
+  },
+  "frozen_holdout": {
+    "split": "FROZEN_HOLDOUT",
+    "year": 2024,
+    "inference_allowed_before_policy_freeze": false
+  },
+  "final_temporal_test": {
+    "split": "FINAL_TEMPORAL_TEST",
+    "year": 2025,
+    "locked": true
+  },
+  "output_contract": {
+    "rows": "inference/daily_snapshot_inference_rows.csv",
+    "summary": "inference/daily_snapshot_inference_summary.json",
+    "run_config": "inference/run_config.json",
+    "raw_response_root": "inference/responses"
+  },
+  "guardrails": {
+    "one_inference_per_snapshot": true,
+    "standard_and_high_risk_reuse_same_response": true,
+    "raw_response_is_not_ground_truth": true,
+    "request_failure_is_not_no_trade": true,
+    "response_contract_failure_is_not_no_trade": true,
+    "high_risk_threshold_selection_allowed": false,
+    "holdout_inspection_allowed": false,
+    "final_2025_inference_allowed": false
+  }
+}
