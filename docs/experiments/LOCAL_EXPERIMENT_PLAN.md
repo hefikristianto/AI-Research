@@ -217,7 +217,7 @@ Gate:
 
 **Tujuan:** menambah tier kandidat high risk secara terpisah untuk mengukur peluang harian tanpa melemahkan policy standard.
 
-E2.3 memakai plot-aware mapping yang telah dipilih E2.2 untuk seluruh chart kanonis. Audit 165 screenshot tahun 2025 bukan populasi harian lengkap, sehingga langkah pertama adalah membuat manifest snapshot GBPUSD per trading day pada slot London dan London–New York overlap. Unit evaluasi adalah hari, dengan maksimal satu kandidat terbaik per tier agar window yang overlap tidak menggandakan frekuensi. Manifest 2020–2024 telah direview: 10.230 dari 10.408 row siap dirender, 178 row non-ready dipertahankan dalam denominator, dan tidak ada kegagalan anti-lookahead atau duplicate window. Kontrak, hasil review, builder, dan renderer berada di `config/experiments/e2_3_daily_manifest.json`, `config/experiments/e2_3_daily_manifest_result.json`, `ai/scripts/build_e2_3_daily_manifest.py`, serta `ai/scripts/render_e2_3_daily_snapshots.py`; panduan run berada di [`E2_3_SNAPSHOT_RENDERING.md`](E2_3_SNAPSHOT_RENDERING.md).
+E2.3 memakai plot-aware mapping yang telah dipilih E2.2 untuk seluruh chart kanonis. Audit 165 screenshot tahun 2025 bukan populasi harian lengkap, sehingga langkah pertama adalah membuat manifest snapshot GBPUSD per trading day pada slot London dan London–New York overlap. Unit evaluasi adalah hari, dengan maksimal satu kandidat terbaik per tier agar window yang overlap tidak menggandakan frekuensi. Manifest 2020–2024 telah direview: 10.230 dari 10.408 row siap dirender, 178 row non-ready dipertahankan dalam denominator, dan tidak ada kegagalan anti-lookahead atau duplicate window. Kontrak, hasil review, builder, dan renderer berada di `config/experiments/e2_3_daily_manifest.json`, `config/experiments/e2_3_daily_manifest_result.json`, `ai/scripts/build_e2_3_daily_manifest.py`, serta `ai/scripts/render_e2_3_daily_snapshots.py`; panduan render berada di [`E2_3_SNAPSHOT_RENDERING.md`](E2_3_SNAPSHOT_RENDERING.md). Runner berikutnya menyimpan satu respons inferensi mentah per snapshot untuk dipakai bersama oleh policy Standard dan High Risk; kontrak dan command berada di [`E2_3_DAILY_INFERENCE_CACHE.md`](E2_3_DAILY_INFERENCE_CACHE.md).
 
 Policy memisahkan `data_quality` dari `risk_tier`. Mapping/OHLCV tidak valid, entry side salah, zona invalid, konflik struktur berat, extreme volatility, dan risk calculation yang hilang tetap menjadi hard blocker. Hanya kondisi market yang lebih lunak—seperti confluence, session suitability, warning entry distance, atau RR—yang boleh membentuk `HIGH_RISK_CANDIDATE`.
 
@@ -232,6 +232,16 @@ Gate:
 - hasil high risk tetap `WATCHLIST` bila promotion gate gagal;
 - threshold tidak dipilih dari 2025.
 - manifest memakai hanya candle yang telah close pada analysis target, mencatat SHA256 sumber, dan menolak 2025 sampai gate holdout 2024 lulus.
+- cache development 2020–2023 harus lengkap tanpa response-contract error sebelum evaluasi policy; 2024 belum boleh dipanggil sampai policy dibekukan.
+
+### Backlog setelah E2.3
+
+1. **Kalibrasi harga upload pengguna:** gunakan dua anchor pada sumbu harga (`pixel_y` dan nilai harga aktual), bukan sekadar high/low candle. OCR hanya membantu mengisi anchor dan tidak menjadi satu-satunya sumber harga. Mapping gagal aman ke `WATCHLIST`/`NO_TRADE` bila dua anchor tidak valid, skalanya nonlinier, atau pair/timeframe/waktu chart tidak dapat diverifikasi.
+2. **Robustness screenshot:** evaluasi TradingView/MT5 lintas tema, warna candle, chrome, crop, panel indikator, resolusi, dan aspect ratio. Color augmentation dan grayscale/edge representation diuji pada development set sebelum default upload umum boleh memakai plot-aware mapping.
+3. **Liquidity v1:** bentuk kandidat pool dari swing high/low, EQH/EQL, range boundary, previous-day/session high-low; validasi sweep melalui penetration lalu reclaim/close, displacement, BOS/CHOCH, dan FVG. Wick panjang sendirian bukan liquidity signal.
+4. **Candlestick pattern:** hitung dari OHLCV ternormalisasi ATR dan konteks lokasi/struktur; jangan menambah kelas YOLO hanya untuk nama pola candle.
+5. **XAUUSD:** jalankan sebagai domain/generalization study terpisah setelah baseline GBPUSD dibekukan.
+6. **Journal, outcome, Excel, dan incremental learning:** simpan semua keputusan, verifikasi outcome, lalu gunakan offline batch champion–challenger; prediksi mentah tidak menjadi label.
 
 ### E3 — Ablation Study
 
@@ -380,4 +390,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-Urutan kerja aktif adalah menyelesaikan render 10.230 snapshot E2.3 → inference resumable dengan session-target clock → shadow policy standard/high-risk → holdout 2024 → journal/feedback/Excel → E3 ablation → E5 product acceptance. Manifest harian sudah lulus review, E2.2 telah selesai, dan keduanya tidak boleh dituning ulang dari hasil 2025. E2.3 memakai plot-aware mapping untuk chart kanonis, sedangkan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+Urutan kerja aktif adalah memverifikasi render lengkap 10.230 snapshot E2.3 → membangun cache inferensi 2020–2023 dengan session-target clock → shadow policy standard/high-risk dari respons yang sama → membekukan policy → holdout 2024 → kalibrasi harga upload/robustness/liquidity → journal/feedback/Excel → E3 ablation → E5 product acceptance. Manifest harian sudah lulus review, E2.2 telah selesai, dan keduanya tidak boleh dituning ulang dari hasil 2025. E2.3 memakai plot-aware mapping untuk chart kanonis, sedangkan tier high risk tidak masuk produksi sebelum holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

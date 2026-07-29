@@ -144,11 +144,16 @@ class DecisionCoverageAuditScriptTest(unittest.TestCase):
                     include_annotated_chart=False,
                     plot_aware_mapping=True,
                     timeout_seconds=30.0,
+                    analysis_target_datetime="2025-01-03 09:20:00",
                 )
 
             request = mocked_urlopen.call_args.args[0]
             self.assertIn("include_annotated_chart=false", request.full_url)
             self.assertIn("plot_aware_mapping=true", request.full_url)
+            self.assertIn(
+                "analysis_target_datetime=2025-01-03+09%3A20%3A00",
+                request.full_url,
+            )
             self.assertIn(b"fake-png", request.data)
             self.assertEqual(status, 200)
             self.assertEqual(result, payload)

@@ -153,3 +153,14 @@
 | Impact | Renderer wajib deterministik, resumable, memverifikasi lineage, dan tidak menjalankan inference/training. Endpoint menerima clock target opsional hanya untuk session evaluation; request upload yang tidak mengirimkannya mempertahankan perilaku lama. High-risk policy dan 2025 tetap terkunci |
 
 ---
+
+## Decision #016
+
+| Item | Description |
+|------|-------------|
+| Date | 29-07-2026 |
+| Decision | Inferensi E2.3 development disimpan satu kali per snapshot sebagai raw response cache; policy Standard dan High Risk wajib diturunkan dari response yang sama |
+| Reason | Menjalankan CNN/YOLO/OHLCV dua kali membuang waktu dan dapat menghasilkan perbandingan yang tidak matched ketika code, model, parameter, atau request clock berubah. Cache juga memungkinkan evaluasi ulang policy tanpa mengulang inference berat |
+| Impact | Runner hanya menerima 2020–2023, mengunci request plot-aware/threshold/window, memverifikasi image dan response lineage, serta memisahkan request/contract error dari `NO_TRADE`. Holdout 2024 tidak boleh diinferensi sebelum policy freeze dan 2025 tetap terkunci |
+
+---

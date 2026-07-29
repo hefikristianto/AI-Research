@@ -14,7 +14,7 @@ E2.3 evaluates whether AI-TDSS can provide a clearly separated high-risk analysi
 
 The previous 2025 decision audit contained 165 sampled chart images. Its number of detected or valid setups must not be interpreted as the number of opportunities in every trading day of the year. E2.3 therefore creates a complete day-level evaluation population before estimating daily candidate coverage.
 
-The operational first slice is specified in [`E2_3_DAILY_MANIFEST.md`](E2_3_DAILY_MANIFEST.md). Its machine-readable contract and builder produce the population only; they perform neither inference nor training. The reviewed result and resumable canonical renderer are specified in [`E2_3_SNAPSHOT_RENDERING.md`](E2_3_SNAPSHOT_RENDERING.md).
+The operational first slice is specified in [`E2_3_DAILY_MANIFEST.md`](E2_3_DAILY_MANIFEST.md). Its machine-readable contract and builder produce the population only; they perform neither inference nor training. The reviewed result and resumable canonical renderer are specified in [`E2_3_SNAPSHOT_RENDERING.md`](E2_3_SNAPSHOT_RENDERING.md). The next stage uses the [resumable development-inference cache](E2_3_DAILY_INFERENCE_CACHE.md), which performs exactly one model request per snapshot and preserves the full response for both policy arms.
 
 ## Locked Mapping Dependency
 
@@ -117,7 +117,7 @@ Daily output is not evidence of daily trading quality. An increase in coverage i
 
 1. Load the selected E2.2 canonical policy and assert `plot_aware_mapping=true` with full-image fallback.
 2. Use the validated 2020–2024 manifest and render only its 10,230 `READY` snapshots; the builder and renderer hard-reject policy drift and keep 2025 locked.
-3. Run inference with the manifest OHLCV cutoff and separate analysis-target session clock.
+3. Build the verified 2020–2023 inference cache with the manifest OHLCV cutoff and separate analysis-target session clock. Do not infer 2024 or 2025 in this stage.
 4. Add `data_quality`, `risk_tier`, and `HIGH_RISK_CANDIDATE` internally without changing the standard path.
 5. Implement a shadow-mode audit that records both standard-only and combined policies from the same inference event.
 6. Select high-risk bands on 2020–2023 only.
@@ -131,6 +131,9 @@ Daily output is not evidence of daily trading quality. An increase in coverage i
 ```text
 local_artifacts/experiments/{E2_3_ID}/
   input/daily_snapshot_manifest.csv
+  inference/daily_snapshot_inference_rows.csv
+  inference/daily_snapshot_inference_summary.json
+  inference/responses/{split}/{year}/{timeframe}/{snapshot_id}.json
   config/high_risk_policy.json
   predictions/daily_decisions.csv
   metrics/daily_coverage.json

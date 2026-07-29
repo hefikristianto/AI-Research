@@ -625,20 +625,24 @@ def request_analysis(
     include_annotated_chart: bool,
     plot_aware_mapping: bool,
     timeout_seconds: float,
+    analysis_target_datetime: str | None = None,
 ) -> tuple[dict[str, Any], int]:
-    query = urlencode(
-        {
-            "confidence_threshold": confidence_threshold,
-            "pair": sample["pair"],
-            "timeframe": sample["timeframe"],
-            "chart_datetime": sample["chart_datetime"],
-            "chart_candles": chart_candles,
-            "context_candles": context_candles,
-            "market_utc_offset_hours": utc_offset,
-            "include_annotated_chart": str(include_annotated_chart).lower(),
-            "plot_aware_mapping": str(plot_aware_mapping).lower(),
-        }
-    )
+    query_parameters = {
+        "confidence_threshold": confidence_threshold,
+        "pair": sample["pair"],
+        "timeframe": sample["timeframe"],
+        "chart_datetime": sample["chart_datetime"],
+        "chart_candles": chart_candles,
+        "context_candles": context_candles,
+        "market_utc_offset_hours": utc_offset,
+        "include_annotated_chart": str(include_annotated_chart).lower(),
+        "plot_aware_mapping": str(plot_aware_mapping).lower(),
+    }
+    if analysis_target_datetime is not None:
+        query_parameters["analysis_target_datetime"] = (
+            analysis_target_datetime
+        )
+    query = urlencode(query_parameters)
     url = base_url.rstrip("/") + "/api/analysis/full?" + query
     image_path = Path(sample["image_path"])
     boundary = "----AITDSSAudit" + uuid.uuid4().hex
