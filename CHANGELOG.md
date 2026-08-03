@@ -27,6 +27,8 @@
 - Added unit coverage for renderer determinism/resume and closed-candle/freshness validation of the session target.
 - Added a preregistered E2.3 development-inference contract and resumable one-response-per-snapshot cache with image/manifest/request lineage, anti-lookahead response validation, orphan recovery, and hard 2024/2025 locks.
 - Added unit coverage for the E2.3 request clock, cache reuse without duplicate inference, response-contract rejection, and frozen-holdout guard.
+- Registered the E2.3 High Risk shadow candidate at RR 1.25 and added an offline matched-policy evaluator with raw-response hash verification, Standard parity, one-candidate-per-tier daily aggregation, and fail-closed direction-conflict handling.
+- Documented the completed 8,158/8,158 development inference cache and the boundary between coverage evaluation and verified outcome evaluation.
 - Documented the post-E2.3 backlog for two-anchor user-upload price calibration, screenshot-theme robustness, structure-based liquidity, OHLCV candlestick patterns, and separate XAUUSD generalization.
 - Documented the frozen 165-window GBPUSD 2025 coverage funnel and seven-case diagnostic protocol without changing model thresholds or execution gates.
 - Added a machine-readable canonical project contract.

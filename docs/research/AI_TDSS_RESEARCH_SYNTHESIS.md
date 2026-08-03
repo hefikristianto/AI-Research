@@ -2,7 +2,7 @@
 
 **Versi:** 1.9
 **Tanggal:** 29 Juli 2026
-**Status:** E2.2 selesai; manifest dan render kanonis E2.3 telah siap, runner cache inferensi development 2020–2023 telah diimplementasikan, sedangkan holdout 2024 dan final 2025 tetap terkunci
+**Status:** E2.2 selesai; manifest/render E2.3 dan cache 8.158 respons development telah selesai; kandidat shadow High Risk RR 1,25 diregistrasikan, sedangkan outcome gate, holdout 2024, dan final 2025 tetap terkunci
 
 ## 1. Ringkasan Penelitian
 
@@ -219,6 +219,8 @@ Setelah mapping dibekukan, E2.3 menguji tier `HIGH_RISK_CANDIDATE` sebagai polic
 
 Runner inferensi E2.3 kemudian memvalidasi render lengkap, hash PNG, parameter request, cutoff, dan jam target sebelum memanggil endpoint. Setiap snapshot development 2020–2023 hanya diinferensi sekali; respons lengkap dibungkus bersama lineage lalu disimpan secara resumable. Policy Standard dan High Risk berikutnya harus membaca cache yang sama, sehingga perbandingan matched dan tidak menggandakan biaya CNN/YOLO. Request failure atau response-contract error dipisahkan dari keputusan `NO_TRADE`. Runner menolak 2024 sebelum policy freeze dan menolak 2025 secara absolut pada tahap ini. Target daily berarti analisis tersedia setiap hari, bukan memaksa entry ketika hard gate gagal. Panduan hasil/renderer berada di [`E2_3_SNAPSHOT_RENDERING.md`](../experiments/E2_3_SNAPSHOT_RENDERING.md), panduan cache berada di [`E2_3_DAILY_INFERENCE_CACHE.md`](../experiments/E2_3_DAILY_INFERENCE_CACHE.md), dan protokol policy berada di [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](../experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
+Cache development selesai pada 8.158/8.158 respons sukses dan seluruh analysis clock tervalidasi. Simulasi eligibility pada 2020–2022 memilih floor RR `1,25`: floor `1,20` hanya menambah empat hari desain dan tidak menambah hari selection 2023. Kandidat ini terdiri dari 184 snapshot pada warning jarak entry 1,5–3 ATR dan 26 snapshot dengan satu-satunya blocker RR di bawah 1,5. Evaluator offline memverifikasi raw response, mempertahankan keputusan Standard, memilih maksimal satu kandidat per tier/hari, dan mengubah konflik arah harian menjadi `WATCHLIST`. Kandidat High Risk tetap telemetry sampai outcome forward terverifikasi dan holdout 2024 lulus; coverage bukan bukti profitabilitas. Protokol evaluator berada di [`E2_3_SHADOW_POLICY_EVALUATION.md`](../experiments/E2_3_SHADOW_POLICY_EVALUATION.md).
+
 ## 9. Incremental Learning yang Aman
 
 ### 9.1 Unit pembelajaran
@@ -270,7 +272,7 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E2 | Baseline end-to-end GBPUSD | Mengukur kualitas entry dan risk gate | Full-system baseline |
 | E2.1 | Diagnostic review pack | Menjelaskan drop-off keputusan tanpa mengubah gate | Defect hypothesis |
 | E2.2 | Plot-aware mapping A/B | Selesai; dipilih untuk chart kanonis/E2.3, default upload umum tetap full-image | Scoped mapping policy |
-| E2.3 | High-risk daily coverage | Manifest/render siap; cache inferensi 2020–2023 diimplementasikan, berikutnya complete run dan shadow policy | Risk-tier promotion decision |
+| E2.3 | High-risk daily coverage | Cache 8.158/8.158 selesai; kandidat shadow RR 1,25 diregistrasikan, berikutnya evaluator dan outcome forward | Risk-tier promotion decision |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |
 | E5 | Product acceptance | Menguji React upload, annotated image, journal, dan Excel | Release readiness |

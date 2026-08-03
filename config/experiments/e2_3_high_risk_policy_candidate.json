@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.3",
+  "stage": "SHADOW_POLICY_EVALUATION",
+  "policy_version": "e2_3_high_risk_candidate_v1",
+  "decision_status": "DEVELOPMENT_CANDIDATE_REGISTERED_BEFORE_HOLDOUT",
+  "registered_on": "2026-08-03",
+  "training_performed": false,
+  "outcome_evaluation_performed": false,
+  "production_policy_changed": false,
+  "lineage": {
+    "manifest_digest_sha256": "1a66cd589a8df5df39fef2ba86be8a0df6e73ffe8e6668fad034fdf0b3dd0519",
+    "inference_contract_sha256": "2aec61284f01a6de795972a6fafb428d8c062616f8eeae63f00cc8711325ac88",
+    "allowed_splits": [
+      "POLICY_DEVELOPMENT",
+      "POLICY_SELECTION"
+    ],
+    "allowed_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "frozen_holdout_year": 2024,
+    "final_temporal_test_year": 2025
+  },
+  "standard_control": {
+    "source": "cached production recommendation",
+    "eligible_public_decisions": [
+      "BUY",
+      "SELL"
+    ],
+    "required_execution_status": "TRADE_CANDIDATE",
+    "required_final_decision_ready": true,
+    "unchanged": true
+  },
+  "high_risk_candidate": {
+    "public_label": "HIGH RISK",
+    "internal_status": "HIGH_RISK_CANDIDATE",
+    "minimum_advanced_score": 0.6,
+    "minimum_session_score": 0.65,
+    "minimum_risk_reward_ratio": 1.25,
+    "standard_risk_reward_ratio": 1.5,
+    "warning_entry_distance_atr": 1.5,
+    "maximum_entry_distance_atr": 3.0,
+    "minimum_mapping_confidence": 0.65,
+    "required_mapping_status": "MAPPED",
+    "required_mapping_mode": "PLOT_AWARE",
+    "required_mapping_calibration_applied": true,
+    "mapping_provisional_allowed": false,
+    "required_pair_count_minimum": 1,
+    "allowed_source_execution_statuses": [
+      "REVIEW",
+      "WAIT"
+    ],
+    "allowed_soft_blockers": [
+      "RISK_REWARD_BELOW_1_5"
+    ],
+    "allowed_soft_warnings": [
+      "ENTRY_DISTANCE_ABOVE_1_5_ATR"
+    ],
+    "candidate_rules": [
+      "ENTRY_DISTANCE_WARNING",
+      "RR_RELAXATION"
+    ]
+  },
+  "daily_selection": {
+    "maximum_candidates_per_tier_per_day": 1,
+    "standard_precedes_high_risk": true,
+    "direction_conflict_action": "FAIL_CLOSED_TO_WATCHLIST",
+    "ranking": [
+      "advanced_score_desc",
+      "mapping_confidence_desc",
+      "risk_reward_ratio_desc",
+      "entry_distance_atr_asc",
+      "timeframe_minutes_desc",
+      "analysis_target_datetime_asc",
+      "snapshot_id_asc"
+    ]
+  },
+  "selection_evidence": {
+    "unit": "planned GBPUSD trading day",
+    "policy_design": {
+      "years": "2020-2022",
+      "planned_days": 781,
+      "ready_days": 777,
+      "standard_candidate_days_before_daily_conflict_gate": 65,
+      "additional_high_risk_days_before_direction_conflict_gate": 119,
+      "combined_days_before_direction_conflict_gate": 184
+    },
+    "policy_selection": {
+      "year": 2023,
+      "planned_days": 260,
+      "ready_days": 259,
+      "standard_candidate_days_before_daily_conflict_gate": 32,
+      "additional_high_risk_days_before_direction_conflict_gate": 40,
+      "combined_days_before_direction_conflict_gate": 72
+    },
+    "eligible_high_risk_snapshots": 210,
+    "source_status_distribution": {
+      "REVIEW": 184,
+      "WAIT": 26
+    },
+    "known_standard_direction_conflict_days": 1,
+    "rr_floor_sensitivity": {
+      "1.25": {
+        "additional_design_days": 119,
+        "additional_selection_days": 40
+      },
+      "1.20": {
+        "additional_design_days": 123,
+        "additional_selection_days": 40
+      }
+    },
+    "selection_reason": "Lowering the RR floor from 1.25 to 1.20 added four design days and zero 2023 selection days, so the extra relaxation was rejected."
+  },
+  "guardrails": {
+    "same_cached_response_for_both_arms": true,
+    "unknown_blocker_is_hard": true,
+    "raw_response_is_not_ground_truth": true,
+    "request_failure_is_not_no_trade": true,
+    "no_model_inference": true,
+    "no_model_training": true,
+    "no_outcome_claim": true,
+    "holdout_inspection_allowed": false,
+    "final_2025_inspection_allowed": false,
+    "production_promotion_allowed": false
+  }
+}
