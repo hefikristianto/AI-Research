@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added a preregistered E2.3 M5 forward-outcome evaluator for the 250 frozen Standard and High Risk daily candidates.
+- Added explicit LIMIT order lineage, conservative same-bar handling, friction sensitivity, uncertainty intervals, and pre-holdout gates.
 - Added a public recommendation boundary for `BUY`, `SELL`, `WATCHLIST`, and `NO_TRADE` that fails closed when execution gates are incomplete or inconsistent.
 - Added server-side annotated PNG rendering for YOLO Order Block and Fair Value Gap detections.
 - Added the React full-analysis result view with risk levels, reason codes, regime probabilities, detection summary, and annotated chart.

@@ -20,7 +20,7 @@ DEFAULT_POLICY = (
     / "experiments"
     / "e2_3_high_risk_policy_candidate.json"
 )
-EVALUATOR_VERSION = "1.0.0"
+EVALUATOR_VERSION = "1.1.0"
 ALLOWED_SPLITS = {"POLICY_DEVELOPMENT", "POLICY_SELECTION"}
 ALLOWED_YEARS = {2020, 2021, 2022, 2023}
 TIMEFRAME_MINUTES = {"M5": 5, "M15": 15, "H1": 60, "H4": 240}
@@ -43,6 +43,7 @@ SNAPSHOT_FIELDS = [
     "high_risk_rule",
     "candidate_decision",
     "setup_direction",
+    "order_type",
     "advanced_score",
     "session_score",
     "risk_reward_ratio",
@@ -86,6 +87,7 @@ DAILY_FIELDS = [
     "selected_slot",
     "selected_timeframe",
     "selected_analysis_target_datetime",
+    "selected_order_type",
     "selected_advanced_score",
     "selected_mapping_confidence",
     "selected_risk_reward_ratio",
@@ -590,6 +592,11 @@ def evaluate_snapshot(
     final_ready = bool(execution.get("final_decision_ready", False))
     direction = str(execution.get("setup_direction") or "")
     candidate_decision = _direction_to_decision(direction)
+    order_type = str(execution.get("order_type") or "")
+    expected_order_type = {
+        "BUY": "BUY_LIMIT",
+        "SELL": "SELL_LIMIT",
+    }.get(candidate_decision, "")
     advanced_score = _optional_float(execution.get("advanced_score"))
     session_score = _optional_float(execution.get("session_score"))
     risk_reward = _optional_float(execution.get("risk_reward_ratio"))
@@ -615,6 +622,8 @@ def evaluate_snapshot(
             standard_errors.append("direction")
         if not levels_valid:
             standard_errors.append("levels")
+        if order_type != expected_order_type:
+            standard_errors.append("order type")
         if standard_errors:
             raise ValueError(
                 f"Standard control inconsistent {row['snapshot_id']}: "
@@ -650,6 +659,8 @@ def evaluate_snapshot(
         rejection_reasons.append("EXECUTION_LEVELS_UNAVAILABLE")
     if not candidate_decision:
         rejection_reasons.append("SETUP_DIRECTION_UNAVAILABLE")
+    if not expected_order_type or order_type != expected_order_type:
+        rejection_reasons.append("ORDER_TYPE_INVALID")
     if advanced_score is None or advanced_score < _as_float(
         candidate["minimum_advanced_score"]
     ):
@@ -721,6 +732,7 @@ def evaluate_snapshot(
         "MAPPING_CALIBRATION_NOT_APPLIED",
         "EXECUTION_LEVELS_UNAVAILABLE",
         "SETUP_DIRECTION_UNAVAILABLE",
+        "ORDER_TYPE_INVALID",
     }
     data_quality = (
         "INVALID"
@@ -746,6 +758,7 @@ def evaluate_snapshot(
         "high_risk_rule": high_risk_rule,
         "candidate_decision": candidate_decision if expose_levels else "",
         "setup_direction": direction if expose_levels else "",
+        "order_type": order_type if expose_levels else "",
         "advanced_score": advanced_score if advanced_score is not None else "",
         "session_score": session_score if session_score is not None else "",
         "risk_reward_ratio": risk_reward if risk_reward is not None else "",
@@ -885,6 +898,7 @@ def build_daily_rows(
             "selected_analysis_target_datetime": (
                 selected["analysis_target_datetime"] if selected else ""
             ),
+            "selected_order_type": selected["order_type"] if selected else "",
             "selected_advanced_score": selected["advanced_score"] if selected else "",
             "selected_mapping_confidence": (
                 selected["mapping_confidence"] if selected else ""

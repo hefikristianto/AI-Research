@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.9
-**Tanggal:** 29 Juli 2026
-**Status:** E2.2 selesai; manifest/render E2.3 dan cache 8.158 respons development telah selesai; kandidat shadow High Risk RR 1,25 diregistrasikan, sedangkan outcome gate, holdout 2024, dan final 2025 tetap terkunci
+**Versi:** 1.10
+**Tanggal:** 4 Agustus 2026
+**Status:** E2.2 selesai; manifest/render E2.3, cache 8.158 respons, dan seleksi 250 kandidat harian telah selesai; protokol forward outcome M5 diregistrasikan, sedangkan hasil outcome, holdout 2024, dan final 2025 tetap terkunci
 
 ## 1. Ringkasan Penelitian
 
@@ -221,6 +221,8 @@ Runner inferensi E2.3 kemudian memvalidasi render lengkap, hash PNG, parameter r
 
 Cache development selesai pada 8.158/8.158 respons sukses dan seluruh analysis clock tervalidasi. Simulasi eligibility pada 2020–2022 memilih floor RR `1,25`: floor `1,20` hanya menambah empat hari desain dan tidak menambah hari selection 2023. Kandidat ini terdiri dari 184 snapshot pada warning jarak entry 1,5–3 ATR dan 26 snapshot dengan satu-satunya blocker RR di bawah 1,5. Evaluator offline memverifikasi raw response, mempertahankan keputusan Standard, memilih maksimal satu kandidat per tier/hari, dan mengubah konflik arah harian menjadi `WATCHLIST`. Kandidat High Risk tetap telemetry sampai outcome forward terverifikasi dan holdout 2024 lulus; coverage bukan bukti profitabilitas. Protokol evaluator berada di [`E2_3_SHADOW_POLICY_EVALUATION.md`](../experiments/E2_3_SHADOW_POLICY_EVALUATION.md).
 
+Seleksi harian menghasilkan 96 hari Standard dan 154 hari tambahan High Risk, total 250 kandidat pada 1.041 hari terencana. Protokol outcome yang dibekukan memakai M5 mulai bar-open pertama pada atau setelah analysis target, pending LIMIT 24 jam, `0R` untuk order yang tidak terisi, exit pada close terakhir sebelum expiry, dan friction utama 1,5 pip. Ketidakpastian intrabar dinilai konservatif: TP pada entry bar tidak langsung dikreditkan dan bar yang menyentuh TP serta SL dihitung SL pada hasil utama, dengan hasil optimistis disimpan sebagai sensitivity bound. Evaluator memisahkan fill rate, resolved win rate, expectancy per candidate/per filled trade, profit factor, event-level drawdown, Wilson interval, bootstrap expectancy, serta Standard/High Risk. Protokol dan gate sebelum holdout berada di [`E2_3_FORWARD_OUTCOME_EVALUATION.md`](../experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md).
+
 ## 9. Incremental Learning yang Aman
 
 ### 9.1 Unit pembelajaran
@@ -272,7 +274,7 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E2 | Baseline end-to-end GBPUSD | Mengukur kualitas entry dan risk gate | Full-system baseline |
 | E2.1 | Diagnostic review pack | Menjelaskan drop-off keputusan tanpa mengubah gate | Defect hypothesis |
 | E2.2 | Plot-aware mapping A/B | Selesai; dipilih untuk chart kanonis/E2.3, default upload umum tetap full-image | Scoped mapping policy |
-| E2.3 | High-risk daily coverage | Cache 8.158/8.158 selesai; kandidat shadow RR 1,25 diregistrasikan, berikutnya evaluator dan outcome forward | Risk-tier promotion decision |
+| E2.3 | High-risk daily coverage | Cache 8.158/8.158 dan seleksi 250 hari kandidat selesai; forward outcome M5 diregistrasikan sebelum holdout | Risk-tier promotion decision |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |
 | E5 | Product acceptance | Menguji React upload, annotated image, journal, dan Excel | Release readiness |

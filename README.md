@@ -123,6 +123,8 @@ E2.2 membandingkan mapping full-image dengan plot-aware pada GBPUSD 2024 dan sat
 
 Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada populasi per trading day. Tier ini tidak boleh melewati kegagalan metadata, OHLCV, mapping, entry side, atau invalidasi zona. Manifest, render, dan cache development telah selesai. Jalankan matched evaluator melalui [`docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md`](docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md); protokol keseluruhan tetap berada di [`docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md`](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
+Forward outcome untuk 250 kandidat harian Standard/High Risk 2020–2023 dievaluasi offline dari source M5 yang SHA256-nya sudah dibekukan. Protokol LIMIT 24 jam, same-bar conservative handling, friction sensitivity, dan gate sebelum holdout 2024 dijelaskan di [`docs/experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md`](docs/experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md). Tahap ini tidak menjalankan inference/training dan tetap mengunci 2024/2025.
+
 ## Dokumen Utama
 
 - [Research synthesis](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md)
@@ -136,6 +138,7 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 - [E2.3 reviewed manifest and snapshot rendering](docs/experiments/E2_3_SNAPSHOT_RENDERING.md)
 - [E2.3 resumable daily inference cache](docs/experiments/E2_3_DAILY_INFERENCE_CACHE.md)
 - [E2.3 Standard/High Risk shadow-policy evaluator](docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md)
+- [E2.3 forward outcome evaluation](docs/experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)
@@ -145,8 +148,8 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 
 ## Urutan Pengembangan Berikutnya
 
-1. Jalankan evaluator shadow Standard vs High Risk pada 8.158 cached response development 2020–2023.
-2. Pasangkan kandidat harian dengan outcome forward terverifikasi dan hitung metrik per tier tanpa menuning ulang floor RR 1,25.
+1. Re-export evaluator shadow Standard vs High Risk v1.1 dari 8.158 cached response agar order LIMIT tercatat eksplisit.
+2. Jalankan evaluator forward outcome M5 pada 250 kandidat harian tanpa menuning ulang floor RR 1,25.
 3. Jika outcome gate development lulus, bekukan policy lalu jalankan holdout 2024 sebelum membuka evaluasi final 2025.
 4. Validasi kalibrasi harga upload pengguna, robustness warna/platform, liquidity berbasis struktur, dan candlestick berbasis OHLCV.
 5. Simpan setiap hasil analisis, termasuk tier High Risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.

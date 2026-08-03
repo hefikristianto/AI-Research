@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.3",
+  "stage": "FORWARD_OUTCOME_EVALUATION",
+  "policy_version": "e2_3_forward_outcome_v1",
+  "registered_on": "2026-08-04",
+  "input_shadow_policy_version": "e2_3_high_risk_candidate_v1",
+  "lineage": {
+    "allowed_splits": [
+      "POLICY_DEVELOPMENT",
+      "POLICY_SELECTION"
+    ],
+    "allowed_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "frozen_holdout_year": 2024,
+    "final_temporal_test_year": 2025,
+    "manifest_digest_sha256": "1a66cd589a8df5df39fef2ba86be8a0df6e73ffe8e6668fad034fdf0b3dd0519",
+    "inference_contract_sha256": "2aec61284f01a6de795972a6fafb428d8c062616f8eeae63f00cc8711325ac88",
+    "shadow_policy_sha256": "08c768de611616ea5d098c8dfb21ab56c9badd92585ec05ca247929d88205898",
+    "expected_selected_candidate_days": 250,
+    "expected_selected_tier_counts": {
+      "HIGH_RISK": 154,
+      "STANDARD": 96
+    },
+    "expected_selected_direction_counts": {
+      "BUY": 137,
+      "SELL": 113
+    },
+    "expected_high_risk_rule_counts": {
+      "ENTRY_DISTANCE_WARNING": 132,
+      "RR_RELAXATION": 22
+    }
+  },
+  "execution_model": {
+    "outcome_timeframe": "M5",
+    "source_timestamp_semantics": "BAR_OPEN",
+    "first_eligible_bar_rule": "BAR_OPEN_GTE_ANALYSIS_TARGET",
+    "horizon_calendar_hours": 24,
+    "supported_order_types": [
+      "BUY_LIMIT",
+      "SELL_LIMIT"
+    ],
+    "nominal_limit_fill": true,
+    "entry_bar_target_rule": "PRIMARY_IGNORE_TARGET_AND_CONTINUE_OPTIMISTIC_TP",
+    "same_bar_both_rule": "PRIMARY_STOP_FIRST_OPTIMISTIC_TARGET_FIRST",
+    "unfilled_result_r": 0.0,
+    "horizon_exit_rule": "LAST_AVAILABLE_CLOSE_BEFORE_EXPIRY",
+    "right_censored_result_rule": "EXCLUDE_FROM_PRIMARY_METRICS"
+  },
+  "cost_model": {
+    "pip_size": 0.0001,
+    "primary_round_trip_friction_pips": 1.5,
+    "sensitivity_round_trip_friction_pips": [
+      0.0,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "friction_application": "DEDUCT_TOTAL_PIPS_DIVIDED_BY_INITIAL_RISK_PIPS_FROM_EACH_FILLED_TRADE"
+  },
+  "uncertainty": {
+    "bootstrap_samples": 10000,
+    "bootstrap_seed": 23032026,
+    "confidence_level": 0.95,
+    "resolved_win_rate_interval": "WILSON"
+  },
+  "pre_holdout_acceptance_gates": {
+    "target_tier": "HIGH_RISK",
+    "minimum_combined_filled_trades": 30,
+    "minimum_selection_filled_trades": 15,
+    "minimum_selection_net_expectancy_r": 0.0,
+    "minimum_selection_net_profit_factor": 1.0,
+    "minimum_selection_resolved_win_rate": 0.45,
+    "maximum_selection_event_drawdown_r": 15.0,
+    "maximum_selection_ambiguous_filled_rate": 0.1,
+    "require_positive_development_net_expectancy": true,
+    "require_no_data_error": true,
+    "require_no_unresolved_right_censoring": true
+  },
+  "guardrails": {
+    "model_training_allowed": false,
+    "model_inference_allowed": false,
+    "raw_prediction_is_ground_truth": false,
+    "production_promotion_allowed": false,
+    "holdout_2024_access_allowed": false,
+    "final_2025_access_allowed": false,
+    "coverage_is_profitability_evidence": false,
+    "event_level_curve_is_portfolio_backtest": false
+  }
+}
