@@ -43,6 +43,7 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - E2.2 selesai: plot-aware mapping lulus A/B GBPUSD 2024 dan frozen comparison 2025, lalu dipilih untuk chart kanonis serta E2.3; default API untuk screenshot pengguna tetap full-image sampai validasi eksternal lulus.
 - Manifest harian E2.3 GBPUSD 2020–2024 telah lulus review; renderer kanonis resumable hanya memproses 10.230 row `READY`, memverifikasi lineage sumber, dan tidak menjalankan inference/training. Session-target clock dipisahkan dari cutoff OHLCV, sementara 2025 tetap terkunci.
 - Runner cache inferensi E2.3 memproses development 2020–2023 sekali per snapshot, memverifikasi cutoff/session clock serta SHA256 respons, dan menyediakan raw response yang sama untuk policy Standard dan High Risk. Holdout 2024 dan final 2025 ditolak pada tahap ini.
+- Cache development E2.3 selesai pada 8.158/8.158 respons sukses. Kandidat shadow High Risk diregistrasikan pada RR minimum `1,25`; evaluator offline mempertahankan Standard, membatasi satu kandidat per tier/hari, dan fail closed pada konflik BUY/SELL. Tahap ini belum menilai outcome atau mengubah produksi.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -120,7 +121,7 @@ Targeted E2.1 review dapat memilih exact `image_id`, menyimpan full response JSO
 
 E2.2 membandingkan mapping full-image dengan plot-aware pada GBPUSD 2024 dan satu frozen comparison 2025. Plot-aware dipilih untuk chart kanonis dan E2.3; default upload umum tetap full-image karena screenshot TradingView/MT5 dengan variasi tema, panel, dan crop belum divalidasi. Protokol: [`docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md`](docs/experiments/E2_2_PLOT_MAPPING_CALIBRATION.md). Bukti dan keputusan: [`docs/experiments/E2_2_PLOT_MAPPING_RESULT.md`](docs/experiments/E2_2_PLOT_MAPPING_RESULT.md).
 
-Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada populasi per trading day. Tier ini tidak boleh melewati kegagalan metadata, OHLCV, mapping, entry side, atau invalidasi zona. Manifest telah lulus review; jalankan renderer melalui [`docs/experiments/E2_3_SNAPSHOT_RENDERING.md`](docs/experiments/E2_3_SNAPSHOT_RENDERING.md), bangun satu cache response per snapshot melalui [`docs/experiments/E2_3_DAILY_INFERENCE_CACHE.md`](docs/experiments/E2_3_DAILY_INFERENCE_CACHE.md), lalu ikuti protokol policy di [`docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md`](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
+Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada populasi per trading day. Tier ini tidak boleh melewati kegagalan metadata, OHLCV, mapping, entry side, atau invalidasi zona. Manifest, render, dan cache development telah selesai. Jalankan matched evaluator melalui [`docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md`](docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md); protokol keseluruhan tetap berada di [`docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md`](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
 ## Dokumen Utama
 
@@ -134,6 +135,7 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 - [E2.3 daily snapshot manifest](docs/experiments/E2_3_DAILY_MANIFEST.md)
 - [E2.3 reviewed manifest and snapshot rendering](docs/experiments/E2_3_SNAPSHOT_RENDERING.md)
 - [E2.3 resumable daily inference cache](docs/experiments/E2_3_DAILY_INFERENCE_CACHE.md)
+- [E2.3 Standard/High Risk shadow-policy evaluator](docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)
@@ -143,9 +145,9 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 
 ## Urutan Pengembangan Berikutnya
 
-1. Jalankan smoke lalu selesaikan cache inferensi E2.3 development 2020–2023 memakai analysis-target session clock.
-2. Implementasikan shadow policy Standard vs High Risk dari raw response yang sama tanpa melemahkan hard data-quality gate.
-3. Bekukan policy dari 2020–2023, lalu jalankan holdout 2024 sebelum membuka evaluasi final 2025.
+1. Jalankan evaluator shadow Standard vs High Risk pada 8.158 cached response development 2020–2023.
+2. Pasangkan kandidat harian dengan outcome forward terverifikasi dan hitung metrik per tier tanpa menuning ulang floor RR 1,25.
+3. Jika outcome gate development lulus, bekukan policy lalu jalankan holdout 2024 sebelum membuka evaluasi final 2025.
 4. Validasi kalibrasi harga upload pengguna, robustness warna/platform, liquidity berbasis struktur, dan candlestick berbasis OHLCV.
 5. Simpan setiap hasil analisis, termasuk tier High Risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.
 6. Implementasikan feedback outcome terverifikasi dan unduhan workbook Excel empat sheet.

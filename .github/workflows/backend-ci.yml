@@ -10,6 +10,7 @@ on:
       - "ai/scripts/build_e2_3_daily_manifest.py"
       - "ai/scripts/render_e2_3_daily_snapshots.py"
       - "ai/scripts/run_e2_3_daily_inference.py"
+      - "ai/scripts/evaluate_e2_3_shadow_policy.py"
       - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/experiments/e2_2_plot_mapping_freeze.json"
@@ -17,6 +18,7 @@ on:
       - "config/experiments/e2_3_daily_manifest.json"
       - "config/experiments/e2_3_daily_manifest_result.json"
       - "config/experiments/e2_3_daily_inference.json"
+      - "config/experiments/e2_3_high_risk_policy_candidate.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   push:
@@ -28,6 +30,7 @@ on:
       - "ai/scripts/build_e2_3_daily_manifest.py"
       - "ai/scripts/render_e2_3_daily_snapshots.py"
       - "ai/scripts/run_e2_3_daily_inference.py"
+      - "ai/scripts/evaluate_e2_3_shadow_policy.py"
       - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/experiments/e2_2_plot_mapping_freeze.json"
@@ -35,6 +38,7 @@ on:
       - "config/experiments/e2_3_daily_manifest.json"
       - "config/experiments/e2_3_daily_manifest_result.json"
       - "config/experiments/e2_3_daily_inference.json"
+      - "config/experiments/e2_3_high_risk_policy_candidate.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   workflow_dispatch:
@@ -92,4 +96,5 @@ jobs:
           ai/scripts/build_e2_3_daily_manifest.py
           ai/scripts/render_e2_3_daily_snapshots.py
           ai/scripts/run_e2_3_daily_inference.py
+          ai/scripts/evaluate_e2_3_shadow_policy.py
           ai/scripts/validate_e2_2_final_comparison.py

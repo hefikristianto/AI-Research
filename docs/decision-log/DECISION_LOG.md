@@ -164,3 +164,14 @@
 | Impact | Runner hanya menerima 2020–2023, mengunci request plot-aware/threshold/window, memverifikasi image dan response lineage, serta memisahkan request/contract error dari `NO_TRADE`. Holdout 2024 tidak boleh diinferensi sebelum policy freeze dan 2025 tetap terkunci |
 
 ---
+
+## Decision #017
+
+| Item | Description |
+|------|-------------|
+| Date | 03-08-2026 |
+| Decision | Kandidat shadow High Risk E2.3 diregistrasikan dengan RR minimum 1,25, advanced/session score minimum 0,60/0,65, mapping confidence minimum 0,65, dan entry distance maksimum 3 ATR; Standard tetap identik dengan cached production decision |
+| Reason | Pada 8.158 response development, penurunan RR dari 1,25 ke 1,20 hanya menambah empat hari desain dan nol hari selection 2023. Score tidak memisahkan kasus lunak yang valid. RR 1,25 memberi relaksasi lebih kecil dan incremental coverage yang stabil tanpa melewati hard data-quality blocker |
+| Impact | Evaluator membaca response cache yang sama tanpa inference/training, membatasi satu kandidat per tier/hari, dan fail closed ke `WATCHLIST` jika BUY/SELL konflik. Hasil masih coverage; High Risk tidak boleh masuk produksi sebelum outcome forward dan holdout 2024 lulus. Final 2025 tetap terkunci |
+
+---

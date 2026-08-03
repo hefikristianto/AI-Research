@@ -154,4 +154,4 @@ The development cache is complete only when the summary reports:
 - one model path and one locked request contract;
 - raw responses remain explicitly marked as not ground truth.
 
-After this gate, the next slice is the offline matched Standard/High Risk shadow-policy evaluator. It may read these cached responses but may not rerun model inference, inspect 2024, or alter the production Standard policy while selecting development thresholds.
+After this gate, run the offline matched Standard/High Risk evaluator in [`E2_3_SHADOW_POLICY_EVALUATION.md`](E2_3_SHADOW_POLICY_EVALUATION.md). It verifies every response hash, preserves the production Standard arm, applies the registered RR `1.25` High Risk candidate, and aggregates at most one candidate per tier per day. It may not rerun model inference, inspect 2024/2025, or promote High Risk to production.
