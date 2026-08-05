@@ -1,5 +1,6 @@
 # E2.3.1 M1 Intrabar Adjudication
 
+- **Reviewed result:** `FAIL` — High Risk remains shadow-only
 - **Baseline:** frozen E2.3 forward-outcome result, 250 selected days
 - **Review population:** 55 pre-existing M5 ambiguity observations
 - **Outcome-sensitive subset:** 40 observations
@@ -109,9 +110,51 @@ Import-Csv "$E23\outcomes\m1_ambiguity_adjudications.csv" |
 Get-Content "$E23\metrics\e2_3_1_m1_adjudication_metrics.json" -Raw
 ```
 
+## Recorded reviewed result
+
+The reviewed run used clean commit `f1984f53a94ecea3077f6272ae9f573a9aeaebee`. All seven archived artifact hashes matched their manifest, all 55 registered ambiguity observations were processed, 56 required M1/M5 source windows passed exact OHLC reconciliation, and no M1 data error occurred. The review archive SHA256 is `4542cd5945ab3392360d11500dc0c44cc5167b3ad4a8329b657c37d0eb6584b1`.
+
+| M1 resolution | Count |
+|---|---:|
+| Target first | 17 |
+| Target before limit fill | 11 |
+| Stop first | 2 |
+| Stop and target remain in one M1 bar | 17 |
+| Entry and target remain in one M1 bar | 8 |
+
+Fifteen primary outcomes changed. Ambiguity fell from 55 to 25 observations, while outcome-sensitive ambiguity fell from 40 to 18.
+
+| Combined primary metric | M5 conservative | M1 adjudicated |
+|---|---:|---:|
+| Filled | 172 | 172 |
+| TP / SL | 53 / 117 | 66 / 104 |
+| Resolved win rate | 31.1765% | 38.8235% |
+| Net expectancy / candidate | -0.1153R | +0.0584R |
+| Net profit factor | 0.8119 | 1.1097 |
+| Maximum event drawdown | 39.3268R | 21.5338R |
+| Ambiguity observations | 55 | 25 |
+
+The registered decision is nevertheless **FAIL**. The only failed check is `maximum_selection_ambiguous_filled_rate`: the High Risk policy-selection split retains 5 ambiguous outcomes among 20 fills (`25%`), above the preregistered `10%` maximum. Every other registered gate and every M1 integrity check passed.
+
+| High Risk metric | Development | Policy selection |
+|---|---:|---:|
+| Candidates / filled | 117 / 70 | 37 / 20 |
+| Ambiguous / filled | 14 / 70 (20%) | 5 / 20 (25%) |
+| Resolved win rate | 36.2319% | 45.0000% |
+| Net expectancy / candidate at 1.5 pips | +0.0056R | +0.0139R |
+| Net profit factor | 1.0117 | 1.0359 |
+| Expectancy bootstrap 95% interval | [-0.2588R, +0.2871R] | [-0.3351R, +0.3885R] |
+| Net expectancy / candidate at 2.0 pips | -0.0551R | -0.0447R |
+
+The positive point estimates are too small and too friction-sensitive to support a profitability or promotion claim. They also have wide uncertainty intervals crossing zero. Diagnostics such as stronger BUY than SELL performance or stronger RR-relaxation than entry-distance-warning performance are recorded only as hypotheses; they must not be converted into post-hoc filters on this result.
+
+The machine-readable review decision is [`config/experiments/e2_3_1_m1_adjudication_result.json`](../../config/experiments/e2_3_1_m1_adjudication_result.json).
+
 ## Interpretation boundary
 
 The ambiguity observation rate and the outcome-sensitive ambiguity rate are reported separately. A resolved ordering is reviewed OHLCV-derived evidence, not permission to relabel raw model predictions automatically. A PASS still does not unlock 2024 and does not expose High Risk in production; it only supports a separate freeze decision.
+
+Because the recorded result is `FAIL`, High Risk remains shadow-only and neither 2024 nor 2025 may be opened. The `10%` ambiguity limit must not be relaxed after observing the result. Any tick-level follow-up requires a separately preregistered experiment and is not automatically authorized by this run.
 
 ## Next registered engineering slice
 

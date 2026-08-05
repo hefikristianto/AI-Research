@@ -2,7 +2,7 @@
 
 **Versi:** 1.11
 **Tanggal:** 5 Agustus 2026
-**Status:** E2.2 selesai; E2.3 development outcome M5 telah selesai dan gagal pada gate pra-holdout; E2.3.1 M1 intrabar adjudication diregistrasikan untuk 55 observasi ambigu, sementara High Risk, holdout 2024, dan final 2025 tetap terkunci
+**Status:** E2.2 selesai; E2.3.1 telah mengadjudikasi 55 observasi ambigu tetapi tetap gagal pada gate pra-holdout; High Risk tetap shadow-only, holdout 2024 dan final 2025 tetap terkunci, dan workflow aktif beralih ke kalibrasi sumbu harga screenshot pengguna
 
 ## 1. Ringkasan Penelitian
 
@@ -223,7 +223,9 @@ Cache development selesai pada 8.158/8.158 respons sukses dan seluruh analysis c
 
 Seleksi harian menghasilkan 96 hari Standard dan 154 hari tambahan High Risk, total 250 kandidat pada 1.041 hari terencana. Protokol outcome yang dibekukan memakai M5 mulai bar-open pertama pada atau setelah analysis target, pending LIMIT 24 jam, `0R` untuk order yang tidak terisi, exit pada close terakhir sebelum expiry, dan friction utama 1,5 pip. Ketidakpastian intrabar dinilai konservatif: TP pada entry bar tidak langsung dikreditkan dan bar yang menyentuh TP serta SL dihitung SL pada hasil utama, dengan hasil optimistis disimpan sebagai sensitivity bound. Evaluator memisahkan fill rate, resolved win rate, expectancy per candidate/per filled trade, profit factor, event-level drawdown, Wilson interval, bootstrap expectancy, serta Standard/High Risk. Protokol dan gate sebelum holdout berada di [`E2_3_FORWARD_OUTCOME_EVALUATION.md`](../experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md).
 
-Evaluasi M5 development menyelesaikan seluruh 250 kandidat tanpa data error atau right censoring. Hasil utama Standard mencatat 82/96 order terisi, expectancy `-0,0587R` per kandidat, dan profit factor `0,9219`; High Risk mencatat 90/154 order terisi, expectancy `-0,1506R` per kandidat, dan profit factor `0,7139`; Combined menghasilkan expectancy `-0,1153R` dan profit factor `0,8119`. Gate pra-holdout **FAIL** karena ambiguity rate dan syarat positive development expectancy tidak lulus. Hasil optimistis tidak menggantikan hasil utama karena 55 observasi ambigu menghasilkan delta expectancy Combined `0,5791R`; 40 observasi benar-benar outcome-sensitive. Oleh karena itu E2.3.1 membatasi adjudikasi pada observasi ambigu tersebut menggunakan M1 2020–2023 yang diverifikasi hash, row count, dan agregasi OHLC terhadap M5. Kandidat, policy, threshold, horizon, dan friction tetap beku; ketidakpastian dalam satu M1 tetap dinilai konservatif. Protokol berada di [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](../experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md). Holdout 2024 dan final 2025 tidak boleh dibaca sebelum review dan freeze decision baru.
+Evaluasi M5 development menyelesaikan seluruh 250 kandidat tanpa data error atau right censoring. Hasil utama Standard mencatat 82/96 order terisi, expectancy `-0,0587R` per kandidat, dan profit factor `0,9219`; High Risk mencatat 90/154 order terisi, expectancy `-0,1506R` per kandidat, dan profit factor `0,7139`; Combined menghasilkan expectancy `-0,1153R` dan profit factor `0,8119`. Gate pra-holdout **FAIL** karena ambiguity rate dan syarat positive development expectancy tidak lulus. Hasil optimistis tidak menggantikan hasil utama karena 55 observasi ambigu menghasilkan delta expectancy Combined `0,5791R`; 40 observasi benar-benar outcome-sensitive.
+
+E2.3.1 kemudian mengadjudikasi tepat 55 observasi tersebut menggunakan M1 2020–2023. Semua tujuh hash artefak, 56 window sumber M1/M5, candidate lineage, dan guardrail 2024/2025 lolos; tidak ada data error. Lima belas outcome utama berubah, TP/SL bergeser dari 53/117 menjadi 66/104, ambiguity turun dari 55 menjadi 25, expectancy Combined menjadi `+0,0584R`, profit factor menjadi `1,1097`, dan maximum event drawdown turun dari `39,3268R` menjadi `21,5338R`. Meski demikian, High Risk policy-selection masih menyisakan 5 ambiguity dari 20 fill (`25%`) terhadap maksimum terdaftar `10%`, sehingga keputusan resmi tetap **FAIL**. Expectancy High Risk selection hanya `+0,0139R/kandidat`, interval bootstrap 95% `[-0,3351R, +0,3885R]`, dan menjadi `-0,0447R` pada friction 2 pip. Karena itu High Risk tetap shadow-only, threshold tidak dituning, dan subgroup BUY/SELL atau rule tidak boleh dijadikan filter post-hoc. Protokol serta hasil berada di [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](../experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md); keputusan machine-readable berada di `config/experiments/e2_3_1_m1_adjudication_result.json`. Holdout 2024 dan final 2025 tetap terkunci.
 
 ## 9. Incremental Learning yang Aman
 
@@ -277,7 +279,7 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E2.1 | Diagnostic review pack | Menjelaskan drop-off keputusan tanpa mengubah gate | Defect hypothesis |
 | E2.2 | Plot-aware mapping A/B | Selesai; dipilih untuk chart kanonis/E2.3, default upload umum tetap full-image | Scoped mapping policy |
 | E2.3 | High-risk daily coverage | Cache 8.158/8.158 dan 250 outcome M5 selesai; gate pra-holdout gagal sehingga High Risk tetap shadow | Risk-tier rejection/continuation decision |
-| E2.3.1 | M1 intrabar adjudication | Mengurangi ketidakpastian urutan event hanya pada 55 observasi M5 ambigu tanpa retuning | Reviewed ambiguity decision sebelum holdout |
+| E2.3.1 | M1 intrabar adjudication | Selesai; 15 outcome berubah tetapi ambiguity High Risk selection 25% melewati batas 10% | High Risk tetap shadow; holdout tetap terkunci |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |
 | E5 | Product acceptance | Menguji React upload, annotated image, journal, dan Excel | Release readiness |
@@ -320,7 +322,7 @@ Export harus mempertahankan timestamp UTC, analysis ID, model version, blockers,
 | Analysis ID dan lineage model belum dipersistenkan pada event journal | Audit end-to-end belum lengkap | P1 |
 | Timezone broker dataset masih bersifat asumsi provisional | Penyelarasan screenshot lintas platform perlu divalidasi | P1 |
 | Endpoint full analysis belum memiliki fixture integration test dengan model stub | Risiko regresi orkestrasi masih lebih tinggi daripada service-level unit test | P1 |
-| E2.3.1 M1 intrabar adjudication belum dijalankan pada workstation | Besar bias konservatif dari 55 observasi M5 ambigu belum diketahui | P0 |
+| E2.3.1 gagal pada gate ambiguity High Risk selection | High Risk belum layak dipromosikan dan 2024/2025 tetap terkunci | CLOSED — reject promotion |
 | Robustness tema warna/platform belum dievaluasi | Recall dapat turun pada TradingView/MT5 yang berbeda dari renderer dataset | P1 |
 | Harga pada screenshot pengguna belum memiliki kalibrasi sumbu multi-tick yang tervalidasi | Entry/SL/TP tidak dapat dipetakan secara auditable tanpa OCR minimal tiga tick, robust fit, dan quality gate | P0 |
 | Liquidity masih memerlukan validasi rule-level terhadap swing/EQH-EQL dan sweep-reclaim | Wick panjang dapat salah dianggap liquidity bila konteks struktur tidak diwajibkan | P1 |

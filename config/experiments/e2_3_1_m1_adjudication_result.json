@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.3.1",
+  "stage": "M1_INTRABAR_ADJUDICATION_REVIEW",
+  "decision_status": "FAILED_PRE_HOLDOUT_GATE",
+  "reviewed_on": "2026-08-05",
+  "training_performed": false,
+  "model_inference_performed": false,
+  "candidate_reselection_performed": false,
+  "threshold_tuning_performed": false,
+  "review_archive": {
+    "filename": "e2_3_1_20260805_200214.zip",
+    "sha256": "4542cd5945ab3392360d11500dc0c44cc5167b3ad4a8329b657c37d0eb6584b1",
+    "artifact_hashes_verified": 7
+  },
+  "lineage": {
+    "git_commit": "f1984f53a94ecea3077f6272ae9f573a9aeaebee",
+    "git_dirty": false,
+    "baseline_outcomes_sha256": "b0fc31a8c91d87f648f06d83b6e0a2a9e4ebf2d169b3b9d9ea1fe012e6bcd837",
+    "m1_source_manifest_sha256": "6543f20b49ddb26cd5931808dd1118239be4097a7c8956c5cfb170677a31f85b",
+    "candidate_count": 250,
+    "policy_development_count": 181,
+    "policy_selection_count": 69,
+    "standard_count": 96,
+    "high_risk_count": 154,
+    "buy_count": 137,
+    "sell_count": 113,
+    "m1_source_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "required_m1_m5_windows_verified": 56,
+    "m1_data_errors": 0
+  },
+  "adjudication": {
+    "required_observations": 55,
+    "outcome_sensitive_before": 40,
+    "primary_outcomes_changed": 15,
+    "remaining_ambiguity_observations": 25,
+    "remaining_outcome_sensitive_observations": 18,
+    "resolution_status_counts": {
+      "RESOLVED_TARGET_FIRST": 17,
+      "RESOLVED_TARGET_BEFORE_FILL": 11,
+      "RESOLVED_STOP_FIRST": 2,
+      "M1_UNRESOLVED_STOP_AND_TARGET_SAME_BAR": 17,
+      "M1_UNRESOLVED_ENTRY_AND_TARGET_SAME_BAR": 8
+    }
+  },
+  "combined_before_after": {
+    "filled": 172,
+    "before": {
+      "take_profit": 53,
+      "stop_loss": 117,
+      "resolved_win_rate_pct": 31.1765,
+      "net_expectancy_r_candidate": -0.1153,
+      "net_profit_factor": 0.8119,
+      "maximum_event_drawdown_r": 39.3268,
+      "ambiguity_observations": 55
+    },
+    "after": {
+      "take_profit": 66,
+      "stop_loss": 104,
+      "resolved_win_rate_pct": 38.8235,
+      "net_expectancy_r_candidate": 0.058393,
+      "net_profit_factor": 1.109749,
+      "maximum_event_drawdown_r": 21.533841,
+      "ambiguity_observations": 25
+    }
+  },
+  "high_risk_gate_evidence": {
+    "development": {
+      "candidate_count": 117,
+      "filled_count": 70,
+      "ambiguous_count": 14,
+      "ambiguous_filled_rate_pct": 20.0,
+      "resolved_win_rate_pct": 36.231884,
+      "net_expectancy_r_candidate": 0.005582,
+      "net_profit_factor": 1.011713,
+      "maximum_event_drawdown_r": 19.507836,
+      "expectancy_bootstrap_95_r": {
+        "lower": -0.258809,
+        "upper": 0.287115
+      },
+      "net_expectancy_r_candidate_at_2_pips": -0.055113
+    },
+    "selection": {
+      "candidate_count": 37,
+      "filled_count": 20,
+      "ambiguous_count": 5,
+      "ambiguous_filled_rate_pct": 25.0,
+      "maximum_registered_ambiguous_filled_rate_pct": 10.0,
+      "resolved_win_rate_pct": 45.0,
+      "net_expectancy_r_candidate": 0.013932,
+      "net_profit_factor": 1.035857,
+      "maximum_event_drawdown_r": 6.952758,
+      "expectancy_bootstrap_95_r": {
+        "lower": -0.335136,
+        "upper": 0.388528
+      },
+      "net_expectancy_r_candidate_at_2_pips": -0.044672
+    }
+  },
+  "registered_gate": {
+    "status": "FAIL",
+    "failed_checks": [
+      "maximum_selection_ambiguous_filled_rate"
+    ],
+    "all_other_registered_checks_passed": true,
+    "all_m1_integrity_checks_passed": true
+  },
+  "decision": {
+    "high_risk_production_promotion_allowed": false,
+    "high_risk_remains_shadow_only": true,
+    "holdout_2024_unlocked": false,
+    "final_2025_unlocked": false,
+    "post_result_threshold_relaxation_allowed": false,
+    "tick_level_follow_up_automatically_authorized": false,
+    "next_engineering_slice": "USER_SCREENSHOT_PRICE_AXIS_CALIBRATION"
+  },
+  "interpretation_guardrails": {
+    "positive_point_estimate_establishes_robust_profitability": false,
+    "combined_result_can_promote_high_risk": false,
+    "subgroup_diagnostics_can_be_used_for_post_hoc_filtering": false,
+    "event_level_drawdown_is_live_portfolio_drawdown": false,
+    "raw_prediction_is_ground_truth": false
+  }
+}

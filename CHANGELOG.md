@@ -9,6 +9,8 @@
 - Recorded the failed E2.3 development outcome gate: primary cost-adjusted expectancy was negative and 55 M5 observations remained intrabar-ambiguous; 2024/2025 and production High Risk remain locked.
 - Added the E2.3.1 M1 intrabar adjudicator with exact baseline/M5 hashes, manifest-verified M1 hashes, M1→M5 OHLC reconciliation, deterministic event ordering, conservative unresolved handling, and hard 2024/2025 locks.
 - Added regression tests and a local-only run contract for adjudicating exactly the frozen 55 ambiguous observations without model inference, training, candidate reselection, or policy tuning.
+- Recorded the reviewed E2.3.1 result: 15 primary outcomes changed and combined expectancy became positive, but the registered gate still failed because High Risk selection retained 25% ambiguity against the 10% maximum.
+- Kept High Risk shadow-only and 2024/2025 locked; moved the active engineering workflow to user-screenshot price-axis calibration without post-result threshold tuning.
 - Added a public recommendation boundary for `BUY`, `SELL`, `WATCHLIST`, and `NO_TRADE` that fails closed when execution gates are incomplete or inconsistent.
 - Added server-side annotated PNG rendering for YOLO Order Block and Fair Value Gap detections.
 - Added the React full-analysis result view with risk levels, reason codes, regime probabilities, detection summary, and annotated chart.

@@ -186,3 +186,14 @@
 | Impact | Kandidat, arah, LIMIT order, horizon 24 jam, friction 1,5 pip, threshold, serta policy tidak boleh dipilih ulang. E2.3.1 wajib memverifikasi hash/row count M1 dan kesetaraan agregasi M1→M5; ambiguity yang masih terjadi dalam satu M1 tetap konservatif. High Risk tetap shadow dan 2024/2025 tetap terkunci sampai hasil adjudikasi direview serta freeze decision terpisah dicatat |
 
 ---
+
+## Decision #019
+
+| Item | Description |
+|------|-------------|
+| Date | 05-08-2026 |
+| Decision | Hasil E2.3.1 dinyatakan `FAIL`; High Risk tetap shadow-only, holdout 2024 dan final 2025 tetap terkunci, dan workflow aktif berpindah ke kalibrasi sumbu harga screenshot pengguna |
+| Reason | Adjudikasi M1 memproses seluruh 55 observasi, memverifikasi 56 window M1/M5 tanpa data error, mengubah 15 outcome, dan memperbaiki expectancy Combined dari `-0,1153R` menjadi `+0,0584R`. Namun High Risk policy-selection masih memiliki 5 ambiguity dari 20 fill (`25%`), melewati batas terdaftar `10%`. Expectancy High Risk hanya `+0,0139R/kandidat`, interval bootstrap melintasi nol, dan berubah negatif pada friction 2 pip |
+| Impact | Threshold ambiguity tidak boleh dilonggarkan dan subgroup tidak boleh dijadikan filter post-hoc. Tick-level follow-up memerlukan eksperimen baru yang diregistrasikan terlebih dahulu. High Risk tidak dipromosikan, 2024/2025 tidak dibaca, sedangkan kalibrasi harga upload dapat dikembangkan secara terpisah karena tidak menggunakan holdout outcome E2.3 |
+
+---

@@ -122,4 +122,4 @@ The exact selected-day counts can be lower than the compact coverage simulation 
 
 ## Next Gate
 
-Do not run the 2024 holdout after coverage evaluation alone. The next slice attaches verified M5 forward outcomes to the frozen daily selections and reports fill rate, conservative win rate, expectancy in R, profit factor, event-level drawdown, ambiguity, and result counts separately for Standard and High Risk. The registered protocol is [`E2_3_FORWARD_OUTCOME_EVALUATION.md`](E2_3_FORWARD_OUTCOME_EVALUATION.md). If the registered High Risk candidate fails those development gates, it remains research telemetry and no alternative floor is tuned from 2024 or 2025.
+The verified M5 forward-outcome evaluation and its registered M1 ambiguity adjudication are complete. The final E2.3.1 gate remains `FAIL` because High Risk policy-selection ambiguity is `25%` against the `10%` maximum. High Risk therefore remains research telemetry, no alternative floor is tuned, and 2024/2025 remain locked. See [`E2_3_FORWARD_OUTCOME_EVALUATION.md`](E2_3_FORWARD_OUTCOME_EVALUATION.md) and [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).
