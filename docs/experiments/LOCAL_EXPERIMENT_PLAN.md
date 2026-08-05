@@ -223,6 +223,10 @@ Policy memisahkan `data_quality` dari `risk_tier`. Mapping/OHLCV tidak valid, en
 
 Development menggunakan 2020–2023, lalu aturan dibekukan untuk holdout 2024. Satu evaluasi final 2025 hanya dilakukan setelah gate 2024 lulus. Standard-only dan standard+high-risk harus dinilai pada event yang sama, dan metrik setiap tier dilaporkan terpisah. Protokol lengkap berada di [`E2_3_HIGH_RISK_DAILY_COVERAGE.md`](E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
+Forward outcome M5 development telah selesai pada 250 kandidat: 96 Standard dan 154 High Risk. Hasil utama setelah friction 1,5 pip menunjukkan expectancy per kandidat `-0,0587R` untuk Standard, `-0,1506R` untuk High Risk, dan `-0,1153R` untuk Combined, dengan profit factor masing-masing `0,9219`, `0,7139`, dan `0,8119`. Gate pra-holdout **FAIL** karena ambiguity rate dan positive development expectancy tidak lulus. Dengan demikian High Risk tetap shadow dan holdout 2024 serta final 2025 tetap terkunci.
+
+Sebanyak 55 observasi memiliki ketidakpastian urutan intrabar M5 dan 40 di antaranya outcome-sensitive. E2.3.1 hanya mengadjudikasi observasi tersebut menggunakan GBPUSD M1 2020–2023 yang hash, row count, serta agregasi OHLC M1→M5-nya diverifikasi. Kandidat, order, horizon, friction, threshold, dan policy tidak boleh berubah. Ketidakpastian yang masih terjadi dalam satu M1 dipertahankan konservatif. Protokol berada di [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).
+
 Gate:
 
 - daily analysis tersedia; daily trade tidak dipaksakan;
@@ -236,7 +240,7 @@ Gate:
 
 ### Backlog setelah E2.3
 
-1. **Kalibrasi harga upload pengguna:** gunakan dua anchor pada sumbu harga (`pixel_y` dan nilai harga aktual), bukan sekadar high/low candle. OCR hanya membantu mengisi anchor dan tidak menjadi satu-satunya sumber harga. Mapping gagal aman ke `WATCHLIST`/`NO_TRADE` bila dua anchor tidak valid, skalanya nonlinier, atau pair/timeframe/waktu chart tidak dapat diverifikasi.
+1. **Kalibrasi harga upload pengguna:** deteksi area plot dan sumbu harga, OCR minimal tiga tick berbeda, lalu estimasi relasi `pixel_y → price` dengan robust linear fit. Validasi harus memeriksa monotonisitas, residu, konsistensi jumlah digit/desimal, jarak tick, dan kecocokan metadata pair/timeframe. Sistem gagal aman ke `WATCHLIST`/`NO_TRADE` bila axis terpotong, tick valid kurang dari tiga, skala log/persen terdeteksi, fit tidak stabil, atau pair/timeframe/waktu chart tidak dapat diverifikasi. CNN menerima crop candle yang dinormalisasi (target awal sekitar 30 candle terakhir), sedangkan YOLO tetap menerima plot yang lebih luas agar struktur zona tidak hilang.
 2. **Robustness screenshot:** evaluasi TradingView/MT5 lintas tema, warna candle, chrome, crop, panel indikator, resolusi, dan aspect ratio. Color augmentation dan grayscale/edge representation diuji pada development set sebelum default upload umum boleh memakai plot-aware mapping.
 3. **Liquidity v1:** bentuk kandidat pool dari swing high/low, EQH/EQL, range boundary, previous-day/session high-low; validasi sweep melalui penetration lalu reclaim/close, displacement, BOS/CHOCH, dan FVG. Wick panjang sendirian bukan liquidity signal.
 4. **Candlestick pattern:** hitung dari OHLCV ternormalisasi ATR dan konteks lokasi/struktur; jangan menambah kelas YOLO hanya untuk nama pola candle.
@@ -390,4 +394,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-Urutan kerja aktif adalah menjalankan evaluator forward outcome M5 pada 250 kandidat harian Standard/High Risk yang sudah dibekukan → mereview gate dan mencatat freeze decision → holdout 2024 → kalibrasi harga upload/robustness/liquidity → journal/feedback/Excel → E3 ablation → E5 product acceptance. Manifest, render, cache 8.158 response, dan seleksi shadow E2.3 sudah selesai; E2.2 juga telah selesai, dan semuanya tidak boleh dituning ulang dari hasil 2025. Protokol outcome terdaftar di `E2_3_FORWARD_OUTCOME_EVALUATION.md`; tier high risk tidak masuk produksi sebelum outcome gate dan holdout 2024 lulus. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+Urutan kerja aktif adalah menjalankan E2.3.1 pada tepat 55 observasi ambigu yang dibekukan → mereview gate dan mencatat freeze decision → hanya jika gate lulus, membuka holdout 2024 → kalibrasi harga upload/robustness/liquidity → journal/feedback/Excel → E3 ablation → E5 product acceptance. Manifest, render, cache 8.158 response, seleksi shadow, dan forward outcome M5 E2.3 sudah selesai. Gate M5 saat ini gagal, sehingga High Risk tetap shadow dan 2024/2025 tetap terkunci; E2.3.1 bukan izin untuk memilih ulang kandidat atau menuning policy. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

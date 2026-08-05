@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.3.1",
+  "stage": "M1_INTRABAR_ADJUDICATION",
+  "policy_version": "e2_3_1_m1_intrabar_adjudication_v1",
+  "registered_on": "2026-08-05",
+  "baseline_forward_policy_version": "e2_3_forward_outcome_v1",
+  "lineage": {
+    "allowed_splits": [
+      "POLICY_DEVELOPMENT",
+      "POLICY_SELECTION"
+    ],
+    "allowed_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "frozen_holdout_year": 2024,
+    "final_temporal_test_year": 2025,
+    "baseline_candidate_days": 250,
+    "baseline_tier_counts": {
+      "HIGH_RISK": 154,
+      "STANDARD": 96
+    },
+    "baseline_direction_counts": {
+      "BUY": 137,
+      "SELL": 113
+    },
+    "baseline_ambiguity_observations": 55,
+    "baseline_outcome_sensitive_ambiguity_observations": 40,
+    "baseline_outcomes_sha256": "b0fc31a8c91d87f648f06d83b6e0a2a9e4ebf2d169b3b9d9ea1fe012e6bcd837",
+    "baseline_outcome_manifest_sha256": "c84a41de9ada4ede89b3393abcf94d5d3898785e42949b0e967e200a134ad251",
+    "baseline_forward_policy_file_sha256": "0e2d0ed8664ecd9de308005292b1e49b544a45c783bec5aa7508b18062bc20e8",
+    "baseline_forward_policy_object_sha256": "39c83a9e6fdb0142269f141570f93fbc44a297ce2eac5f658c9a72dcd25ab361",
+    "expected_m5_source_sha256s": {
+      "GBPUSD/M5/2020/GBPUSD_M5_2020_RAW.csv": "36aad41526001aee36ca6826e684c7972aa1a72fe33b60eacc28be6d1703c5de",
+      "GBPUSD/M5/2021/GBPUSD_M5_2021_RAW.csv": "ea96b0a82b9897ded8b41dac71c4052560bd9babeb979c36c626f9b713dc215a",
+      "GBPUSD/M5/2022/GBPUSD_M5_2022_RAW.csv": "c62ae720d2b53b195ea8bdcd43f69fb187803bc8cdeeca4a24a787b6f44b2262",
+      "GBPUSD/M5/2023/GBPUSD_M5_2023_RAW.csv": "f07982de73e71c8eaf5a653a13cf85ed7ee7430904f5e3b51bd858d0b98dce93"
+    },
+    "expected_m1_row_counts": {
+      "2020": 373047,
+      "2021": 373170,
+      "2022": 372759,
+      "2023": 371316
+    }
+  },
+  "adjudication_model": {
+    "source_pair": "GBPUSD",
+    "source_timeframe": "M1",
+    "source_timestamp_semantics": "BAR_OPEN",
+    "ambiguous_m5_window_minutes": 5,
+    "required_m1_manifest_status": "VALID_CANDIDATE",
+    "require_m1_m5_ohlc_match": true,
+    "ohlc_absolute_tolerance": 1e-09,
+    "entry_target_same_m1_rule": "UNRESOLVED_UNLESS_LIMIT_IS_MARKETABLE_AT_M1_OPEN",
+    "same_m1_stop_and_target_rule": "M1_UNRESOLVED_RETAIN_CONSERVATIVE_PRIMARY",
+    "resolved_target_before_fill_rule": "RETAIN_BASELINE_CONTINUATION",
+    "primary_friction_unchanged": true,
+    "horizon_unchanged": true,
+    "entry_stop_target_unchanged": true
+  },
+  "guardrails": {
+    "model_training_allowed": false,
+    "model_inference_allowed": false,
+    "candidate_reselection_allowed": false,
+    "threshold_tuning_allowed": false,
+    "baseline_non_ambiguous_mutation_allowed": false,
+    "holdout_2024_access_allowed": false,
+    "final_2025_access_allowed": false,
+    "production_promotion_allowed": false,
+    "unresolved_intrabar_ordering_is_ground_truth": false,
+    "require_all_required_windows_verified": true
+  }
+}

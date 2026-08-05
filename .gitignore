@@ -30,9 +30,8 @@ frontend/AGENTS.md
 frontend/CLAUDE.md
 frontend/__pycache__/
 
-# AI-TDSS Dataset Raw Files
-ai/datasets/raw/ohlcv/**/*.csv
-ai/datasets/raw/charts/**/*.png
+# AI-TDSS raw datasets and local lineage manifests
+/ai/datasets/raw/
 
 # AI-TDSS Annotation Samples
 ai/datasets/annotation/samples/images/**/*.png

@@ -6,6 +6,9 @@
 
 - Added a preregistered E2.3 M5 forward-outcome evaluator for the 250 frozen Standard and High Risk daily candidates.
 - Added explicit LIMIT order lineage, conservative same-bar handling, friction sensitivity, uncertainty intervals, and pre-holdout gates.
+- Recorded the failed E2.3 development outcome gate: primary cost-adjusted expectancy was negative and 55 M5 observations remained intrabar-ambiguous; 2024/2025 and production High Risk remain locked.
+- Added the E2.3.1 M1 intrabar adjudicator with exact baseline/M5 hashes, manifest-verified M1 hashes, M1→M5 OHLC reconciliation, deterministic event ordering, conservative unresolved handling, and hard 2024/2025 locks.
+- Added regression tests and a local-only run contract for adjudicating exactly the frozen 55 ambiguous observations without model inference, training, candidate reselection, or policy tuning.
 - Added a public recommendation boundary for `BUY`, `SELL`, `WATCHLIST`, and `NO_TRADE` that fails closed when execution gates are incomplete or inconsistent.
 - Added server-side annotated PNG rendering for YOLO Order Block and Fair Value Gap detections.
 - Added the React full-analysis result view with risk levels, reason codes, regime probabilities, detection summary, and annotated chart.
@@ -31,7 +34,7 @@
 - Added unit coverage for the E2.3 request clock, cache reuse without duplicate inference, response-contract rejection, and frozen-holdout guard.
 - Registered the E2.3 High Risk shadow candidate at RR 1.25 and added an offline matched-policy evaluator with raw-response hash verification, Standard parity, one-candidate-per-tier daily aggregation, and fail-closed direction-conflict handling.
 - Documented the completed 8,158/8,158 development inference cache and the boundary between coverage evaluation and verified outcome evaluation.
-- Documented the post-E2.3 backlog for two-anchor user-upload price calibration, screenshot-theme robustness, structure-based liquidity, OHLCV candlestick patterns, and separate XAUUSD generalization.
+- Documented the post-E2.3 backlog for robust multi-tick user-upload price-axis calibration, screenshot-theme robustness, structure-based liquidity, OHLCV candlestick patterns, and separate XAUUSD generalization.
 - Documented the frozen 165-window GBPUSD 2025 coverage funnel and seven-case diagnostic protocol without changing model thresholds or execution gates.
 - Added a machine-readable canonical project contract.
 - Added project-contract validation and unit tests.

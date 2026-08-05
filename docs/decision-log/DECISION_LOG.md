@@ -175,3 +175,14 @@
 | Impact | Evaluator membaca response cache yang sama tanpa inference/training, membatasi satu kandidat per tier/hari, dan fail closed ke `WATCHLIST` jika BUY/SELL konflik. Hasil masih coverage; High Risk tidak boleh masuk produksi sebelum outcome forward dan holdout 2024 lulus. Final 2025 tetap terkunci |
 
 ---
+
+## Decision #018
+
+| Item | Description |
+|------|-------------|
+| Date | 05-08-2026 |
+| Decision | Gate pra-holdout High Risk E2.3 dinyatakan `FAIL`; E2.3.1 hanya boleh mengadjudikasi 55 observasi intrabar M5 yang telah dibekukan menggunakan GBPUSD M1 2020–2023 terverifikasi |
+| Reason | Outcome utama 250 kandidat menghasilkan expectancy negatif untuk Standard (`-0,0587R/kandidat`), High Risk (`-0,1506R/kandidat`), dan Combined (`-0,1153R/kandidat`). Gate ambiguity dan positive development expectancy gagal, sementara 55 observasi ambigu—40 di antaranya outcome-sensitive—menciptakan selisih besar antara hasil konservatif dan optimistis |
+| Impact | Kandidat, arah, LIMIT order, horizon 24 jam, friction 1,5 pip, threshold, serta policy tidak boleh dipilih ulang. E2.3.1 wajib memverifikasi hash/row count M1 dan kesetaraan agregasi M1→M5; ambiguity yang masih terjadi dalam satu M1 tetap konservatif. High Risk tetap shadow dan 2024/2025 tetap terkunci sampai hasil adjudikasi direview serta freeze decision terpisah dicatat |
+
+---

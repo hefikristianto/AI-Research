@@ -97,6 +97,22 @@ The registered High Risk gate is evaluated on the 2023 policy-selection split an
 
 A `PASS` does not itself unlock 2024 and never promotes High Risk to production. A separate freeze decision must record the reviewed results. A `FAIL` stops progression to holdout; it is not permission to tune using 2024 or 2025.
 
+## Recorded development result
+
+The frozen 2020–2023 run completed all 250 candidates with no data error and no right censoring. Its primary, cost-adjusted result was:
+
+| Metric | Standard | High Risk | Combined |
+|---|---:|---:|---:|
+| Candidates | 96 | 154 | 250 |
+| Filled | 82 | 90 | 172 |
+| Net expectancy / candidate | -0.0587R | -0.1506R | -0.1153R |
+| Net profit factor | 0.9219 | 0.7139 | 0.8119 |
+| Ambiguous observations | 19 | 36 | 55 |
+
+The pre-holdout gate is **FAIL** because the maximum ambiguity rate and positive development expectancy requirements failed. High Risk therefore remains shadow-only, and 2024/2025 remain locked.
+
+Forty ambiguous observations are outcome-sensitive. E2.3.1 is a preregistered refinement that reads verified M1 data only for the frozen 55 ambiguous observations, preserving every candidate, order, policy threshold, horizon, and friction assumption. See [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).
+
 ## Interpretation boundaries
 
 - An unfilled limit is neither a win nor a loss and contributes `0R` to candidate-level expectancy.
