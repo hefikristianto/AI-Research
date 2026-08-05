@@ -115,10 +115,11 @@ Expected integrity conditions:
 - Standard decisions unchanged at snapshot level;
 - every daily direction conflict converted to `WATCHLIST`;
 - entry/SL/TP exposed only for selected Standard or High Risk candidates;
+- snapshot `order_type` and daily `selected_order_type` explicitly match `BUY_LIMIT`/`SELL_LIMIT` from the cached response;
 - `training_performed=false`, `model_inference_performed=false`, and `outcome_evaluation_performed=false`.
 
 The exact selected-day counts can be lower than the compact coverage simulation because the final evaluator reads setup direction from raw responses and fails closed on daily High Risk direction conflicts.
 
 ## Next Gate
 
-Do not run the 2024 holdout after coverage evaluation alone. The next slice attaches verified forward outcomes to the frozen daily selections and reports win rate, expectancy in R, profit factor, drawdown, and result counts separately for Standard and High Risk. If the registered High Risk candidate fails those development gates, it remains research telemetry and no alternative floor is tuned from 2024 or 2025.
+Do not run the 2024 holdout after coverage evaluation alone. The next slice attaches verified M5 forward outcomes to the frozen daily selections and reports fill rate, conservative win rate, expectancy in R, profit factor, event-level drawdown, ambiguity, and result counts separately for Standard and High Risk. The registered protocol is [`E2_3_FORWARD_OUTCOME_EVALUATION.md`](E2_3_FORWARD_OUTCOME_EVALUATION.md). If the registered High Risk candidate fails those development gates, it remains research telemetry and no alternative floor is tuned from 2024 or 2025.

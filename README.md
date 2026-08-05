@@ -43,7 +43,8 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - E2.2 selesai: plot-aware mapping lulus A/B GBPUSD 2024 dan frozen comparison 2025, lalu dipilih untuk chart kanonis serta E2.3; default API untuk screenshot pengguna tetap full-image sampai validasi eksternal lulus.
 - Manifest harian E2.3 GBPUSD 2020–2024 telah lulus review; renderer kanonis resumable hanya memproses 10.230 row `READY`, memverifikasi lineage sumber, dan tidak menjalankan inference/training. Session-target clock dipisahkan dari cutoff OHLCV, sementara 2025 tetap terkunci.
 - Runner cache inferensi E2.3 memproses development 2020–2023 sekali per snapshot, memverifikasi cutoff/session clock serta SHA256 respons, dan menyediakan raw response yang sama untuk policy Standard dan High Risk. Holdout 2024 dan final 2025 ditolak pada tahap ini.
-- Cache development E2.3 selesai pada 8.158/8.158 respons sukses. Kandidat shadow High Risk diregistrasikan pada RR minimum `1,25`; evaluator offline mempertahankan Standard, membatasi satu kandidat per tier/hari, dan fail closed pada konflik BUY/SELL. Tahap ini belum menilai outcome atau mengubah produksi.
+- Cache development E2.3 selesai pada 8.158/8.158 respons sukses. Kandidat shadow High Risk diregistrasikan pada RR minimum `1,25`; evaluator offline mempertahankan Standard, membatasi satu kandidat per tier/hari, dan fail closed pada konflik BUY/SELL.
+- Forward outcome M5 pada 250 kandidat development menghasilkan expectancy utama negatif untuk Standard (`-0,0587R/kandidat`), High Risk (`-0,1506R/kandidat`), dan Combined (`-0,1153R/kandidat`). Gate pra-holdout **gagal**, sehingga High Risk tetap shadow dan 2024/2025 tetap terkunci. E2.3.1 hanya mengadjudikasi 55 observasi ambigu memakai M1 yang lineage-nya terverifikasi; tidak ada retuning, inference, atau training.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -123,6 +124,10 @@ E2.2 membandingkan mapping full-image dengan plot-aware pada GBPUSD 2024 dan sat
 
 Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada populasi per trading day. Tier ini tidak boleh melewati kegagalan metadata, OHLCV, mapping, entry side, atau invalidasi zona. Manifest, render, dan cache development telah selesai. Jalankan matched evaluator melalui [`docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md`](docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md); protokol keseluruhan tetap berada di [`docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md`](docs/experiments/E2_3_HIGH_RISK_DAILY_COVERAGE.md).
 
+Forward outcome untuk 250 kandidat harian Standard/High Risk 2020–2023 dievaluasi offline dari source M5 yang SHA256-nya sudah dibekukan. Protokol LIMIT 24 jam, same-bar conservative handling, friction sensitivity, dan gate sebelum holdout 2024 dijelaskan di [`docs/experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md`](docs/experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md). Tahap ini tidak menjalankan inference/training dan tetap mengunci 2024/2025.
+
+Hasil M5 utama gagal pada gate ambiguity dan positive development expectancy. E2.3.1 mempertahankan seluruh kandidat, order, threshold, serta horizon yang sama, lalu membaca M1 hanya untuk 55 observasi yang memiliki ketidakpastian intrabar. Kontrak dan cara menjalankannya berada di [`docs/experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md`](docs/experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md).
+
 ## Dokumen Utama
 
 - [Research synthesis](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md)
@@ -136,6 +141,8 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 - [E2.3 reviewed manifest and snapshot rendering](docs/experiments/E2_3_SNAPSHOT_RENDERING.md)
 - [E2.3 resumable daily inference cache](docs/experiments/E2_3_DAILY_INFERENCE_CACHE.md)
 - [E2.3 Standard/High Risk shadow-policy evaluator](docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md)
+- [E2.3 forward outcome evaluation](docs/experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md)
+- [E2.3.1 M1 intrabar adjudication](docs/experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)
@@ -145,10 +152,10 @@ Setelah mapping dibekukan, E2.3 mengevaluasi tier `HIGH_RISK_CANDIDATE` pada pop
 
 ## Urutan Pengembangan Berikutnya
 
-1. Jalankan evaluator shadow Standard vs High Risk pada 8.158 cached response development 2020–2023.
-2. Pasangkan kandidat harian dengan outcome forward terverifikasi dan hitung metrik per tier tanpa menuning ulang floor RR 1,25.
-3. Jika outcome gate development lulus, bekukan policy lalu jalankan holdout 2024 sebelum membuka evaluasi final 2025.
-4. Validasi kalibrasi harga upload pengguna, robustness warna/platform, liquidity berbasis struktur, dan candlestick berbasis OHLCV.
+1. Jalankan E2.3.1 pada 55 observasi ambigu dengan GBPUSD M1 2020–2023 yang terverifikasi terhadap M5, tanpa membaca 2024/2025.
+2. Review perubahan outcome dan gate. Bila gate tetap gagal, pertahankan High Risk sebagai shadow; bila lulus, catat freeze decision terpisah sebelum menyentuh holdout 2024.
+3. Bangun kalibrasi harga screenshot pengguna dari sumbu harga: OCR minimal tiga tick, robust linear fit, pemeriksaan residu/monotonisitas/digit, serta fail-closed untuk axis terpotong, skala log, atau persen.
+4. Validasi robustness warna/platform, liquidity berbasis struktur, dan candlestick berbasis OHLCV.
 5. Simpan setiap hasil analisis, termasuk tier High Risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.
 6. Implementasikan feedback outcome terverifikasi dan unduhan workbook Excel empat sheet.
 7. Jalankan product acceptance, outcome baseline, ablation, dan incremental experiment sesuai evaluation gate.

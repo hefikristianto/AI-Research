@@ -72,6 +72,9 @@ class E23ShadowPolicyTest(unittest.TestCase):
                 "execution_status": execution_status,
                 "final_decision_ready": final_ready,
                 "setup_direction": direction,
+                "order_type": (
+                    "BUY_LIMIT" if direction == "bullish" else "SELL_LIMIT"
+                ),
                 "advanced_score": advanced_score,
                 "session_score": session_score,
                 "risk_reward_ratio": risk_reward,
@@ -108,7 +111,18 @@ class E23ShadowPolicyTest(unittest.TestCase):
         self.assertEqual(result["high_risk_eligible"], 1)
         self.assertEqual(result["high_risk_rule"], "RR_RELAXATION")
         self.assertEqual(result["candidate_decision"], "BUY")
+        self.assertEqual(result["order_type"], "BUY_LIMIT")
         self.assertEqual(result["data_quality"], "VALID")
+
+    def test_non_limit_order_cannot_enter_shadow_policy(self) -> None:
+        row, payload = self._fixture()
+        payload["execution_gate"]["order_type"] = "BUY_MARKET"  # type: ignore[index]
+        result = evaluate_snapshot(row=row, payload=payload, policy=self.policy)
+        self.assertEqual(result["high_risk_eligible"], 0)
+        self.assertIn(
+            "ORDER_TYPE_INVALID",
+            result["high_risk_rejection_reasons_json"],
+        )
 
     def test_entry_distance_review_becomes_high_risk_candidate(self) -> None:
         row, payload = self._fixture(
@@ -191,6 +205,7 @@ class E23ShadowPolicyTest(unittest.TestCase):
         )[0]
         self.assertEqual(daily["selected_tier"], "STANDARD")
         self.assertEqual(daily["combined_policy_decision"], "BUY")
+        self.assertEqual(daily["selected_order_type"], "BUY_LIMIT")
         self.assertEqual(daily["high_risk_added"], 0)
 
     def test_standard_direction_conflict_fails_closed(self) -> None:

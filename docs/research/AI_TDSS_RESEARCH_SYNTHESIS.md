@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.9
-**Tanggal:** 29 Juli 2026
-**Status:** E2.2 selesai; manifest/render E2.3 dan cache 8.158 respons development telah selesai; kandidat shadow High Risk RR 1,25 diregistrasikan, sedangkan outcome gate, holdout 2024, dan final 2025 tetap terkunci
+**Versi:** 1.11
+**Tanggal:** 5 Agustus 2026
+**Status:** E2.2 selesai; E2.3 development outcome M5 telah selesai dan gagal pada gate pra-holdout; E2.3.1 M1 intrabar adjudication diregistrasikan untuk 55 observasi ambigu, sementara High Risk, holdout 2024, dan final 2025 tetap terkunci
 
 ## 1. Ringkasan Penelitian
 
@@ -221,6 +221,10 @@ Runner inferensi E2.3 kemudian memvalidasi render lengkap, hash PNG, parameter r
 
 Cache development selesai pada 8.158/8.158 respons sukses dan seluruh analysis clock tervalidasi. Simulasi eligibility pada 2020–2022 memilih floor RR `1,25`: floor `1,20` hanya menambah empat hari desain dan tidak menambah hari selection 2023. Kandidat ini terdiri dari 184 snapshot pada warning jarak entry 1,5–3 ATR dan 26 snapshot dengan satu-satunya blocker RR di bawah 1,5. Evaluator offline memverifikasi raw response, mempertahankan keputusan Standard, memilih maksimal satu kandidat per tier/hari, dan mengubah konflik arah harian menjadi `WATCHLIST`. Kandidat High Risk tetap telemetry sampai outcome forward terverifikasi dan holdout 2024 lulus; coverage bukan bukti profitabilitas. Protokol evaluator berada di [`E2_3_SHADOW_POLICY_EVALUATION.md`](../experiments/E2_3_SHADOW_POLICY_EVALUATION.md).
 
+Seleksi harian menghasilkan 96 hari Standard dan 154 hari tambahan High Risk, total 250 kandidat pada 1.041 hari terencana. Protokol outcome yang dibekukan memakai M5 mulai bar-open pertama pada atau setelah analysis target, pending LIMIT 24 jam, `0R` untuk order yang tidak terisi, exit pada close terakhir sebelum expiry, dan friction utama 1,5 pip. Ketidakpastian intrabar dinilai konservatif: TP pada entry bar tidak langsung dikreditkan dan bar yang menyentuh TP serta SL dihitung SL pada hasil utama, dengan hasil optimistis disimpan sebagai sensitivity bound. Evaluator memisahkan fill rate, resolved win rate, expectancy per candidate/per filled trade, profit factor, event-level drawdown, Wilson interval, bootstrap expectancy, serta Standard/High Risk. Protokol dan gate sebelum holdout berada di [`E2_3_FORWARD_OUTCOME_EVALUATION.md`](../experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md).
+
+Evaluasi M5 development menyelesaikan seluruh 250 kandidat tanpa data error atau right censoring. Hasil utama Standard mencatat 82/96 order terisi, expectancy `-0,0587R` per kandidat, dan profit factor `0,9219`; High Risk mencatat 90/154 order terisi, expectancy `-0,1506R` per kandidat, dan profit factor `0,7139`; Combined menghasilkan expectancy `-0,1153R` dan profit factor `0,8119`. Gate pra-holdout **FAIL** karena ambiguity rate dan syarat positive development expectancy tidak lulus. Hasil optimistis tidak menggantikan hasil utama karena 55 observasi ambigu menghasilkan delta expectancy Combined `0,5791R`; 40 observasi benar-benar outcome-sensitive. Oleh karena itu E2.3.1 membatasi adjudikasi pada observasi ambigu tersebut menggunakan M1 2020–2023 yang diverifikasi hash, row count, dan agregasi OHLC terhadap M5. Kandidat, policy, threshold, horizon, dan friction tetap beku; ketidakpastian dalam satu M1 tetap dinilai konservatif. Protokol berada di [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](../experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md). Holdout 2024 dan final 2025 tidak boleh dibaca sebelum review dan freeze decision baru.
+
 ## 9. Incremental Learning yang Aman
 
 ### 9.1 Unit pembelajaran
@@ -272,7 +276,8 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E2 | Baseline end-to-end GBPUSD | Mengukur kualitas entry dan risk gate | Full-system baseline |
 | E2.1 | Diagnostic review pack | Menjelaskan drop-off keputusan tanpa mengubah gate | Defect hypothesis |
 | E2.2 | Plot-aware mapping A/B | Selesai; dipilih untuk chart kanonis/E2.3, default upload umum tetap full-image | Scoped mapping policy |
-| E2.3 | High-risk daily coverage | Cache 8.158/8.158 selesai; kandidat shadow RR 1,25 diregistrasikan, berikutnya evaluator dan outcome forward | Risk-tier promotion decision |
+| E2.3 | High-risk daily coverage | Cache 8.158/8.158 dan 250 outcome M5 selesai; gate pra-holdout gagal sehingga High Risk tetap shadow | Risk-tier rejection/continuation decision |
+| E2.3.1 | M1 intrabar adjudication | Mengurangi ketidakpastian urutan event hanya pada 55 observasi M5 ambigu tanpa retuning | Reviewed ambiguity decision sebelum holdout |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |
 | E5 | Product acceptance | Menguji React upload, annotated image, journal, dan Excel | Release readiness |
@@ -315,9 +320,9 @@ Export harus mempertahankan timestamp UTC, analysis ID, model version, blockers,
 | Analysis ID dan lineage model belum dipersistenkan pada event journal | Audit end-to-end belum lengkap | P1 |
 | Timezone broker dataset masih bersifat asumsi provisional | Penyelarasan screenshot lintas platform perlu divalidasi | P1 |
 | Endpoint full analysis belum memiliki fixture integration test dengan model stub | Risiko regresi orkestrasi masih lebih tinggi daripada service-level unit test | P1 |
-| Baseline coverage 2025 belum selesai dijalankan | Selectivity dan blocker dominan belum dapat diklaim secara kuantitatif | P0 |
+| E2.3.1 M1 intrabar adjudication belum dijalankan pada workstation | Besar bias konservatif dari 55 observasi M5 ambigu belum diketahui | P0 |
 | Robustness tema warna/platform belum dievaluasi | Recall dapat turun pada TradingView/MT5 yang berbeda dari renderer dataset | P1 |
-| Harga pada screenshot pengguna belum memiliki dua anchor sumbu yang tervalidasi | Entry/SL/TP tidak dapat dipetakan secara auditable tanpa OHLCV atau kalibrasi pengguna | P0 |
+| Harga pada screenshot pengguna belum memiliki kalibrasi sumbu multi-tick yang tervalidasi | Entry/SL/TP tidak dapat dipetakan secara auditable tanpa OCR minimal tiga tick, robust fit, dan quality gate | P0 |
 | Liquidity masih memerlukan validasi rule-level terhadap swing/EQH-EQL dan sweep-reclaim | Wick panjang dapat salah dianggap liquidity bila konteks struktur tidak diwajibkan | P1 |
 
 ## 14. Batas Klaim Akademik

@@ -159,3 +159,9 @@ Each artifact records the Git commit, dataset version, sample digest, session po
 - 2025 has not been used to adjust thresholds.
 
 If the quality gate fails, the high-risk results remain `WATCHLIST` research telemetry. The project must not force a daily actionable entry merely to satisfy a product-frequency target.
+
+## Current development decision
+
+The frozen M5 forward-outcome run on 250 candidates failed the preregistered pre-holdout gate. Primary net expectancy per candidate was `-0.0587R` for Standard, `-0.1506R` for High Risk, and `-0.1153R` combined. The result also contained 55 intrabar-ambiguous observations, of which 40 were outcome-sensitive.
+
+High Risk therefore remains shadow telemetry. E2.3.1 may adjudicate only those frozen ambiguous observations using verified GBPUSD M1 2020–2023; it may not alter candidate selection, thresholds, or execution assumptions. Holdout 2024 and final 2025 remain locked. See [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).
