@@ -23,6 +23,7 @@ class FullAnalysisResponse(BaseModel):
     htf_volatility: dict[str, Any]
     advanced_scoring: dict[str, Any]
     price_conversion: dict[str, Any]
+    price_axis_calibration: dict[str, Any]
     session_risk: dict[str, Any]
     execution_gate: dict[str, Any]
     recommendation: dict[str, Any]

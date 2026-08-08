@@ -23,6 +23,7 @@ on:
       - "config/experiments/e2_3_high_risk_policy_candidate.json"
       - "config/experiments/e2_3_forward_outcome_policy.json"
       - "config/experiments/e2_3_1_m1_intrabar_adjudication.json"
+      - "config/experiments/e2_4_user_screenshot_price_axis_calibration.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   push:
@@ -47,6 +48,7 @@ on:
       - "config/experiments/e2_3_high_risk_policy_candidate.json"
       - "config/experiments/e2_3_forward_outcome_policy.json"
       - "config/experiments/e2_3_1_m1_intrabar_adjudication.json"
+      - "config/experiments/e2_4_user_screenshot_price_axis_calibration.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   workflow_dispatch:
