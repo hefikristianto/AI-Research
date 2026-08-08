@@ -78,11 +78,22 @@
       {
         "profile_id": "GRAY_INVERT_AUTOCONTRAST_2X_PSM11",
         "preprocessing_profile": "GRAYSCALE_INVERT_AUTOCONTRAST_2X"
+      },
+      {
+        "profile_id": "GRAY_FOOTER_TRIM_AUTOCONTRAST_2X_PSM11",
+        "preprocessing_profile": "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X",
+        "candidate_added_after_partial_review": true,
+        "candidate_rationale": "Bright chart screenshots can include a contiguous dark platform footer that suppresses faint static price ticks during global autocontrast."
       }
     ]
   },
   "matching_contract": {
     "minimum_ocr_confidence": 0.5,
+    "percent_axis_detection": {
+      "minimum_well_formed_labels": 3,
+      "minimum_label_confidence": 0.1,
+      "malformed_percent_tokens_are_not_axis_evidence": true
+    },
     "maximum_tick_y_error_pixels": 12.0,
     "maximum_tick_price_error": {
       "GBPUSD": 0.00001,

@@ -10,15 +10,18 @@
 
 ## Tujuan
 
-E2.4 core telah memiliki adapter OCR dan robust linear fit, tetapi belum ada bukti bahwa backend OCR dapat membaca sumbu harga beragam. E2.4.1 membandingkan tiga profil Tesseract yang dibekukan:
+E2.4 core telah memiliki adapter OCR dan robust linear fit, tetapi belum ada bukti bahwa backend OCR dapat membaca sumbu harga beragam. E2.4.1 membandingkan profil Tesseract yang terdaftar berikut:
 
 | Profile ID | Preprocessing |
 |---|---|
 | `RAW_RGB_PSM11` | RGB asli |
 | `GRAY_AUTOCONTRAST_2X_PSM11` | grayscale, autocontrast, 2× resize |
 | `GRAY_INVERT_AUTOCONTRAST_2X_PSM11` | grayscale, invert, autocontrast, 2× resize |
+| `GRAY_FOOTER_TRIM_AUTOCONTRAST_2X_PSM11` | untuk chart terang, trim footer gelap yang kontigu di bawah; lalu grayscale, autocontrast, 2× resize |
 
 Semua profil memakai Tesseract 5, English language data, OEM 1, PSM 11, dan whitelist `0123456789.,-%`. Koordinat hasil OCR 2× dikembalikan ke koordinat screenshot asli sebelum matching dan kalibrasi.
+
+Profil footer-trim ditambahkan sebagai kandidat eksplisit setelah partial review 8 fixture menemukan footer hitam TradingView menekan kontras label sumbu abu-abu pada chart terang. Profil lama tidak diubah. Deteksi sumbu persen juga diperketat: sekurangnya tiga label persen berformat valid dengan confidence ≥ 0,10 harus ditemukan. Ambang khusus ini memakai pengulangan struktur label sebagai bukti sumbu; token `%` tunggal, malformed, atau confidence nol tetap dicatat sebagai telemetry tetapi tidak lagi menjadi bukti sumbu persen.
 
 Kontrak machine-readable berada di [`config/experiments/e2_4_1_ocr_benchmark.json`](../../config/experiments/e2_4_1_ocr_benchmark.json).
 

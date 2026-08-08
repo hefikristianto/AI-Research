@@ -129,6 +129,32 @@ class E241OCRBenchmarkTest(unittest.TestCase):
         self.assertFalse(
             contract["output_contract"]["production_promotion_possible"]
         )
+        profiles = {
+            profile["profile_id"]: profile
+            for profile in contract["ocr_engine"]["profiles"]
+        }
+        self.assertEqual(len(profiles), 4)
+        self.assertEqual(
+            profiles[
+                "GRAY_FOOTER_TRIM_AUTOCONTRAST_2X_PSM11"
+            ]["preprocessing_profile"],
+            "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X",
+        )
+        self.assertTrue(
+            profiles[
+                "GRAY_FOOTER_TRIM_AUTOCONTRAST_2X_PSM11"
+            ]["candidate_added_after_partial_review"]
+        )
+        percent_contract = contract["matching_contract"][
+            "percent_axis_detection"
+        ]
+        self.assertEqual(percent_contract["minimum_well_formed_labels"], 3)
+        self.assertEqual(percent_contract["minimum_label_confidence"], 0.1)
+        self.assertTrue(
+            percent_contract[
+                "malformed_percent_tokens_are_not_axis_evidence"
+            ]
+        )
 
     def test_generator_creates_hashed_smoke_fixture_matrix(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
