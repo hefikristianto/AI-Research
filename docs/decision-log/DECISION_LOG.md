@@ -197,3 +197,14 @@
 | Impact | Threshold ambiguity tidak boleh dilonggarkan dan subgroup tidak boleh dijadikan filter post-hoc. Tick-level follow-up memerlukan eksperimen baru yang diregistrasikan terlebih dahulu. High Risk tidak dipromosikan, 2024/2025 tidak dibaca, sedangkan kalibrasi harga upload dapat dikembangkan secara terpisah karena tidak menggunakan holdout outcome E2.3 |
 
 ---
+
+## Decision #020
+
+| Item | Description |
+|------|-------------|
+| Date | 08-08-2026 |
+| Decision | E2.4 meregistrasikan kalibrasi sumbu harga screenshot pengguna sebagai telemetry opt-in dengan minimal tiga tick OCR, robust linear `price(y)`, dan fail-closed validation |
+| Reason | Screenshot TradingView/MT5 memiliki jumlah candle, tema, locale, crop, dan sumbu harga yang beragam. Koordinat pixel vertikal tidak dapat diterjemahkan menjadi harga yang dapat diaudit tanpa membaca beberapa label harga dan memvalidasi fit |
+| Impact | Endpoint menambahkan `price_axis_calibration` tanpa mengubah keputusan produksi. Hasil OCR tidak menggantikan canonical OHLCV, tidak mengizinkan entry, dan tidak membuka 2024/2025. Missing OCR, axis terpotong, tick kurang, log/persen, arah tidak monoton, atau residual buruk selalu gagal aman. Benchmark OCR/fixture eksternal wajib lulus sebelum integrasi frontend dipertimbangkan |
+
+---

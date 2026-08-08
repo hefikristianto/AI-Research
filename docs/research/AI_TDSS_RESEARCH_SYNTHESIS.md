@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.11
-**Tanggal:** 5 Agustus 2026
-**Status:** E2.2 selesai; E2.3.1 telah mengadjudikasi 55 observasi ambigu tetapi tetap gagal pada gate pra-holdout; High Risk tetap shadow-only, holdout 2024 dan final 2025 tetap terkunci, dan workflow aktif beralih ke kalibrasi sumbu harga screenshot pengguna
+**Versi:** 1.12
+**Tanggal:** 8 Agustus 2026
+**Status:** E2.3.1 tetap gagal pada gate pra-holdout; E2.4 core meregistrasikan kalibrasi sumbu harga screenshot sebagai telemetry opt-in; High Risk tetap shadow-only dan 2024/2025 tetap terkunci
 
 ## 1. Ringkasan Penelitian
 
@@ -147,6 +147,7 @@ Output minimum mencakup:
 | Annotated chart | Implemented | Backend mengembalikan PNG base64 dengan bounding box OB/FVG dan banner keputusan |
 | Decision coverage audit | Implemented | Runner lokal memanggil endpoint produksi dan melaporkan funnel detection→pairing→watchlist/actionable serta blocker tanpa retraining |
 | Plot-aware mapping calibration | Experimental, opt-in | Mengestimasi batas plot secara color-agnostic, fallback ke full-image, dan mencatat indeks legacy/candidate untuk A/B 2020–2024 |
+| Screenshot price-axis calibration | Core implemented, opt-in telemetry | OCR minimal tiga tick, robust linear `price(y)`, locale GBPUSD/XAUUSD, dan fail-closed validation; belum mengubah entry atau keputusan produksi |
 | Persistent journal | Pending | Harus user-scoped dan menyimpan semua keputusan |
 | Verified outcome feedback | Pending | Diperlukan sebelum data dapat eligible untuk incremental learning |
 | Four-sheet Excel export | Pending | Mengikuti kontrak pada Bagian 12 |
