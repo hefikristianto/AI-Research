@@ -133,6 +133,23 @@ def validate_contract(contract: dict[str, Any]) -> list[str]:
     if decision_engine.get("requires_canonical_ohlcv_for_entry") is not True:
         errors.append("Entry wajib menggunakan canonical OHLCV.")
 
+    screenshot_axis = _nested(
+        contract,
+        "analysis_pipeline",
+        "model_roles",
+        "screenshot_price_axis",
+    ) or {}
+    if int(screenshot_axis.get("minimum_ocr_ticks", 0)) < 3:
+        errors.append("Kalibrasi sumbu harga wajib memakai minimal tiga tick OCR.")
+    if screenshot_axis.get("supported_scale") != "linear_price_only":
+        errors.append("Kalibrasi upload hanya boleh menerima sumbu harga linear.")
+    if screenshot_axis.get("fail_closed") is not True:
+        errors.append("Kalibrasi sumbu harga wajib fail closed.")
+    if screenshot_axis.get("may_replace_canonical_ohlcv_for_entry") is not False:
+        errors.append("OCR screenshot tidak boleh menggantikan canonical OHLCV untuk entry.")
+    if screenshot_axis.get("may_change_production_decision") is not False:
+        errors.append("Telemetry E2.4 tidak boleh mengubah keputusan produksi.")
+
     journal = contract.get("journal", {})
     if journal.get("record_every_analysis") is not True:
         errors.append("Setiap hasil analisis wajib dicatat ke jurnal.")

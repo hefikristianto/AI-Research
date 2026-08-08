@@ -4,6 +4,9 @@
 
 ### Added
 
+- Registered E2.4 user-screenshot price-axis calibration with a replaceable OCR adapter, localized GBPUSD/XAUUSD price parsing, robust linear pixel-y mapping, and explicit fail-closed telemetry.
+- Added opt-in `price_axis_calibration` API output without changing canonical OHLCV entry authorization, public decisions, High Risk policy, or locked 2024/2025 data.
+- Added regression coverage for OCR outliers, localized number formats, insufficient/cropped ticks, ascending/log/percentage axes, unavailable OCR, and experiment guardrails.
 - Added a preregistered E2.3 M5 forward-outcome evaluator for the 250 frozen Standard and High Risk daily candidates.
 - Added explicit LIMIT order lineage, conservative same-bar handling, friction sensitivity, uncertainty intervals, and pre-holdout gates.
 - Recorded the failed E2.3 development outcome gate: primary cost-adjusted expectancy was negative and 55 M5 observations remained intrabar-ambiguous; 2024/2025 and production High Risk remain locked.

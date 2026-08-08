@@ -238,14 +238,34 @@ Gate:
 - manifest memakai hanya candle yang telah close pada analysis target, mencatat SHA256 sumber, dan menolak 2025 sampai gate holdout 2024 lulus.
 - cache development 2020–2023 harus lengkap tanpa response-contract error sebelum evaluasi policy; 2024 belum boleh dipanggil sampai policy dibekukan.
 
-### Backlog setelah E2.3
+### E2.4 — User Screenshot Price-Axis Calibration
 
-1. **Kalibrasi harga upload pengguna:** deteksi area plot dan sumbu harga, OCR minimal tiga tick berbeda, lalu estimasi relasi `pixel_y → price` dengan robust linear fit. Validasi harus memeriksa monotonisitas, residu, konsistensi jumlah digit/desimal, jarak tick, dan kecocokan metadata pair/timeframe. Sistem gagal aman ke `WATCHLIST`/`NO_TRADE` bila axis terpotong, tick valid kurang dari tiga, skala log/persen terdeteksi, fit tidak stabil, atau pair/timeframe/waktu chart tidak dapat diverifikasi. CNN menerima crop candle yang dinormalisasi (target awal sekitar 30 candle terakhir), sedangkan YOLO tetap menerima plot yang lebih luas agar struktur zona tidak hilang.
-2. **Robustness screenshot:** evaluasi TradingView/MT5 lintas tema, warna candle, chrome, crop, panel indikator, resolusi, dan aspect ratio. Color augmentation dan grayscale/edge representation diuji pada development set sebelum default upload umum boleh memakai plot-aware mapping.
-3. **Liquidity v1:** bentuk kandidat pool dari swing high/low, EQH/EQL, range boundary, previous-day/session high-low; validasi sweep melalui penetration lalu reclaim/close, displacement, BOS/CHOCH, dan FVG. Wick panjang sendirian bukan liquidity signal.
-4. **Candlestick pattern:** hitung dari OHLCV ternormalisasi ATR dan konteks lokasi/struktur; jangan menambah kelas YOLO hanya untuk nama pola candle.
-5. **XAUUSD:** jalankan sebagai domain/generalization study terpisah setelah baseline GBPUSD dibekukan.
-6. **Journal, outcome, Excel, dan incremental learning:** simpan semua keputusan, verifikasi outcome, lalu gunakan offline batch champion–challenger; prediksi mentah tidak menjadi label.
+**Tujuan:** membaca sumbu harga screenshot TradingView/MT5 secara terukur tanpa mengubah canonical OHLCV gate atau keputusan produksi.
+
+E2.4 mendeteksi kandidat area sumbu kanan, menjalankan OCR melalui adapter yang dapat diganti, memerlukan minimal tiga tick, lalu membentuk robust linear fit `price(y) = slope*y + intercept`. Parsing mendukung format lokal titik/koma untuk GBPUSD dan XAUUSD. Fit wajib turun terhadap pixel Y, memiliki cakupan vertikal memadai, presisi desimal konsisten, R² minimal, serta residual ternormalisasi di bawah batas kontrak.
+
+Implementasi pertama hanya menambahkan telemetry opt-in `price_axis_calibration`. Nilai `entry_price_authorized` dan `production_decision_changed` selalu `false`; full-analysis tetap memakai canonical OHLCV untuk entry/SL/TP. OCR/backend yang hilang, axis terpotong, tick kurang dari tiga, skala log/persen, atau fit tidak stabil selalu `FAIL_CLOSED`.
+
+Kontrak dan panduan lengkap berada di [`E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md`](E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md) serta `config/experiments/e2_4_user_screenshot_price_axis_calibration.json`.
+
+Gate sebelum frontend atau keputusan produksi dapat memakai hasil:
+
+- fixture manifest dibekukan dan lineage lengkap;
+- TradingView/MT5, light/dark/custom, locale, aspect ratio, zoom, chrome, crop, serta panel indikator dilaporkan terpisah;
+- OCR precision/recall, pixel-to-price MAE, false-calibration rate, dan fail-closed recall dilaporkan;
+- parity canonical OHLCV dan keputusan produksi terverifikasi;
+- 2024/2025 outcome E2.3 tidak dibaca atau dipakai memilih threshold;
+- tidak ada training CNN/YOLO pada slice kalibrasi inti.
+
+CNN menerima crop candle yang dinormalisasi pada slice terpisah (target awal sekitar 30 candle terakhir), sedangkan YOLO tetap menerima plot yang lebih luas agar struktur zona tidak hilang.
+
+### Backlog setelah E2.4 core
+
+1. **Robustness screenshot:** evaluasi TradingView/MT5 lintas tema, warna candle, chrome, crop, panel indikator, resolusi, dan aspect ratio. Color augmentation dan grayscale/edge representation diuji pada development set sebelum default upload umum boleh memakai plot-aware mapping.
+2. **Liquidity v1:** bentuk kandidat pool dari swing high/low, EQH/EQL, range boundary, previous-day/session high-low; validasi sweep melalui penetration lalu reclaim/close, displacement, BOS/CHOCH, dan FVG. Wick panjang sendirian bukan liquidity signal.
+3. **Candlestick pattern:** hitung dari OHLCV ternormalisasi ATR dan konteks lokasi/struktur; jangan menambah kelas YOLO hanya untuk nama pola candle.
+4. **XAUUSD:** jalankan sebagai domain/generalization study terpisah setelah baseline GBPUSD dibekukan.
+5. **Journal, outcome, Excel, dan incremental learning:** simpan semua keputusan, verifikasi outcome, lalu gunakan offline batch champion–challenger; prediksi mentah tidak menjadi label.
 
 ### E3 — Ablation Study
 
@@ -394,4 +414,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-E2.3.1 telah selesai dan keputusan `FAIL` telah dicatat. Urutan kerja aktif sekarang adalah kalibrasi sumbu harga screenshot pengguna → robustness lintas tema/platform → liquidity berbasis struktur dan candlestick berbasis OHLCV → journal/feedback/Excel → E3 ablation → E5 product acceptance. High Risk tetap shadow-only dan holdout 2024/final 2025 tetap terkunci; hasil E2.3.1 bukan izin untuk memilih ulang kandidat, menuning policy, atau melonggarkan ambiguity gate. Tick-level follow-up hanya boleh dilakukan sebagai eksperimen baru yang diregistrasikan sebelum data dibaca. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+E2.3.1 telah selesai dan keputusan `FAIL` telah dicatat. E2.4 core kini meregistrasikan kalibrasi sumbu harga screenshot pengguna sebagai telemetry opt-in yang tidak mengubah keputusan produksi. Urutan berikutnya adalah benchmark OCR dan fixture eksternal → robustness lintas tema/platform → liquidity berbasis struktur dan candlestick berbasis OHLCV → journal/feedback/Excel → E3 ablation → E5 product acceptance. High Risk tetap shadow-only dan holdout 2024/final 2025 tetap terkunci; hasil E2.3.1 bukan izin untuk memilih ulang kandidat, menuning policy, atau melonggarkan ambiguity gate. Tick-level follow-up hanya boleh dilakukan sebagai eksperimen baru yang diregistrasikan sebelum data dibaca. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

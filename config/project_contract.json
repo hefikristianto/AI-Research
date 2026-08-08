@@ -72,6 +72,14 @@
         "role": "entry_and_risk_recommendation",
         "requires_canonical_ohlcv_for_entry": true,
         "fallback_without_ohlcv": "NO_TRADE"
+      },
+      "screenshot_price_axis": {
+        "role": "experimental_user_upload_pixel_to_price_telemetry",
+        "minimum_ocr_ticks": 3,
+        "supported_scale": "linear_price_only",
+        "fail_closed": true,
+        "may_replace_canonical_ohlcv_for_entry": false,
+        "may_change_production_decision": false
       }
     }
   },

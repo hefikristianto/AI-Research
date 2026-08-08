@@ -45,6 +45,7 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - Runner cache inferensi E2.3 memproses development 2020–2023 sekali per snapshot, memverifikasi cutoff/session clock serta SHA256 respons, dan menyediakan raw response yang sama untuk policy Standard dan High Risk. Holdout 2024 dan final 2025 ditolak pada tahap ini.
 - Cache development E2.3 selesai pada 8.158/8.158 respons sukses. Kandidat shadow High Risk diregistrasikan pada RR minimum `1,25`; evaluator offline mempertahankan Standard, membatasi satu kandidat per tier/hari, dan fail closed pada konflik BUY/SELL.
 - E2.3.1 memproses seluruh 55 observasi ambigu dengan M1 terverifikasi dan mengubah 15 outcome. Combined expectancy membaik menjadi `+0,0584R/kandidat`, tetapi High Risk selection masih memiliki ambiguity `25%` terhadap batas `10%`; gate tetap **gagal**, High Risk tetap shadow-only, dan 2024/2025 tetap terkunci.
+- E2.4 core menyediakan telemetry opt-in untuk membaca minimal tiga tick sumbu harga, mem-parse format lokal GBPUSD/XAUUSD, dan memvalidasi robust linear `price(y)`. Hasil tidak mengubah keputusan produksi atau menggantikan canonical OHLCV; benchmark OCR lintas TradingView/MT5 masih pending.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -128,6 +129,8 @@ Forward outcome untuk 250 kandidat harian Standard/High Risk 2020–2023 dievalu
 
 Hasil M5 utama gagal pada gate ambiguity dan positive development expectancy. E2.3.1 mempertahankan seluruh kandidat, order, threshold, serta horizon yang sama, lalu membaca M1 hanya untuk 55 observasi yang memiliki ketidakpastian intrabar. Hasilnya memperbaiki point estimate tetapi tetap gagal pada ambiguity High Risk selection; kontrak, hasil, dan keputusan berada di [`docs/experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md`](docs/experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md).
 
+E2.4 menambahkan service kalibrasi sumbu harga screenshot dan field response `price_axis_calibration` melalui flag opt-in. Core service memerlukan pair yang didukung, minimal tiga tick OCR, sumbu linear menurun, serta residual dan cakupan vertikal yang valid. Semua kondisi tidak terverifikasi fail closed dan tidak memengaruhi rekomendasi publik. Protokol: [`docs/experiments/E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md`](docs/experiments/E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md).
+
 ## Dokumen Utama
 
 - [Research synthesis](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md)
@@ -143,6 +146,7 @@ Hasil M5 utama gagal pada gate ambiguity dan positive development expectancy. E2
 - [E2.3 Standard/High Risk shadow-policy evaluator](docs/experiments/E2_3_SHADOW_POLICY_EVALUATION.md)
 - [E2.3 forward outcome evaluation](docs/experiments/E2_3_FORWARD_OUTCOME_EVALUATION.md)
 - [E2.3.1 M1 intrabar adjudication](docs/experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md)
+- [E2.4 user screenshot price-axis calibration](docs/experiments/E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)

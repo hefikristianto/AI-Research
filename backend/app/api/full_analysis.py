@@ -63,6 +63,9 @@ from app.services.ohlcv_context_service import (
 from app.services.public_recommendation_service import (
     PublicRecommendationService,
 )
+from app.services.screenshot_price_axis_calibration_service import (
+    ScreenshotPriceAxisCalibrationService,
+)
 
 
 router = APIRouter(
@@ -117,6 +120,10 @@ execution_gate_service = (
 
 price_conversion_service = (
     CanonicalOHLCVPriceConversionService()
+)
+
+price_axis_calibration_service = (
+    ScreenshotPriceAxisCalibrationService()
 )
 
 recommendation_service = PublicRecommendationService()
@@ -186,6 +193,23 @@ async def run_full_analysis(
         description=(
             "Eksperimen opt-in untuk memetakan koordinat "
             "YOLO terhadap batas plot candle yang terdeteksi."
+        ),
+    ),
+    screenshot_price_axis_calibration: bool = Query(
+        default=False,
+        description=(
+            "E2.4 telemetry opt-in untuk OCR tick harga dan "
+            "robust linear pixel-y ke price fit. Hasil belum "
+            "mengubah keputusan produksi atau menggantikan "
+            "canonical OHLCV."
+        ),
+    ),
+    price_axis_scale_mode: str = Query(
+        default="AUTO",
+        pattern="^(AUTO|LINEAR|LOG|PERCENT)$",
+        description=(
+            "Deklarasi skala sumbu screenshot. LOG dan PERCENT "
+            "selalu fail closed pada E2.4."
         ),
     ),
 ):
@@ -276,6 +300,35 @@ async def run_full_analysis(
             status_code=400,
             detail=str(error),
         ) from error
+
+    if screenshot_price_axis_calibration:
+        try:
+            price_axis_calibration_result = (
+                price_axis_calibration_service.calibrate(
+                    image,
+                    pair=metadata_result.get("pair"),
+                    plot_geometry=chart_geometry_result,
+                    declared_scale_mode=price_axis_scale_mode,
+                )
+            )
+        except Exception as error:
+            price_axis_calibration_result = {
+                "status": "FAIL_CLOSED",
+                "mapping_mode": (
+                    "SCREENSHOT_PRICE_AXIS_LINEAR"
+                ),
+                "mapping_provisional": True,
+                "entry_price_authorized": False,
+                "production_decision_changed": False,
+                "reason_code": (
+                    "PRICE_AXIS_CALIBRATION_SERVICE_ERROR"
+                ),
+                "error": str(error),
+            }
+    else:
+        price_axis_calibration_result = (
+            price_axis_calibration_service.not_requested()
+        )
 
     try:
         regime_result = (
@@ -1361,6 +1414,9 @@ async def run_full_analysis(
         ),
         "price_conversion": (
             price_conversion_result
+        ),
+        "price_axis_calibration": (
+            price_axis_calibration_result
         ),
         "session_risk": (
             session_risk_result

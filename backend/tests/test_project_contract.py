@@ -46,6 +46,19 @@ class ProjectContractTest(unittest.TestCase):
 
         self.assertTrue(any("batch trigger" in error for error in errors))
 
+    def test_screenshot_axis_cannot_bypass_canonical_ohlcv(self) -> None:
+        changed = copy.deepcopy(self.contract)
+        axis = changed["analysis_pipeline"]["model_roles"][
+            "screenshot_price_axis"
+        ]
+        axis["may_replace_canonical_ohlcv_for_entry"] = True
+        axis["may_change_production_decision"] = True
+
+        errors = validate_contract(changed)
+
+        self.assertTrue(any("canonical OHLCV" in error for error in errors))
+        self.assertTrue(any("keputusan produksi" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

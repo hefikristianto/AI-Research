@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.4",
+  "stage": "USER_SCREENSHOT_PRICE_AXIS_CALIBRATION",
+  "status": "REGISTERED_ENGINEERING_SLICE",
+  "registered_on": "2026-08-08",
+  "training_performed": false,
+  "model_inference_required_for_calibration": false,
+  "production_default_changed": false,
+  "production_decision_changed": false,
+  "canonical_ohlcv_requirement_changed": false,
+  "high_risk_policy_changed": false,
+  "holdout_access": {
+    "development_outcome_2020_2023_allowed": false,
+    "frozen_2024_allowed": false,
+    "final_2025_allowed": false
+  },
+  "scope": {
+    "primary_pair": "GBPUSD",
+    "secondary_pair": "XAUUSD",
+    "platform_strata": [
+      "TRADINGVIEW",
+      "MT5",
+      "CANONICAL_SYNTHETIC"
+    ],
+    "theme_strata": [
+      "LIGHT",
+      "DARK",
+      "CUSTOM"
+    ],
+    "timeframes": [
+      "M5",
+      "M15",
+      "H1",
+      "H4"
+    ],
+    "supported_axis_scale": "LINEAR_PRICE_ONLY",
+    "unsupported_axis_scales": [
+      "LOG",
+      "PERCENT"
+    ]
+  },
+  "calibration_contract": {
+    "mapping": "price(y)=slope*y+intercept",
+    "minimum_valid_ocr_ticks": 3,
+    "minimum_ocr_confidence": 0.5,
+    "minimum_vertical_coverage": 0.12,
+    "minimum_linear_r_squared": 0.995,
+    "maximum_normalized_rmse": 0.08,
+    "maximum_normalized_residual": 0.2,
+    "price_must_decrease_as_pixel_y_increases": true,
+    "supported_pair_metadata_required": true,
+    "decimal_locale_variants": [
+      "DOT_DECIMAL",
+      "COMMA_DECIMAL",
+      "DOT_THOUSANDS_COMMA_DECIMAL",
+      "COMMA_THOUSANDS_DOT_DECIMAL"
+    ]
+  },
+  "fail_closed_reasons": [
+    "OCR_BACKEND_UNAVAILABLE",
+    "SUPPORTED_PAIR_METADATA_REQUIRED",
+    "INSUFFICIENT_VALID_PRICE_TICKS",
+    "PRICE_AXIS_CROPPED_OR_TOO_NARROW",
+    "PRICE_AXIS_NOT_MONOTONIC_DESCENDING",
+    "LINEAR_PRICE_FIT_VALIDATION_FAILED",
+    "LOG_PRICE_AXIS_UNSUPPORTED",
+    "LOG_PRICE_AXIS_SUSPECTED",
+    "PERCENT_PRICE_AXIS_UNSUPPORTED",
+    "PERCENT_PRICE_AXIS_DETECTED",
+    "INCONSISTENT_PRICE_DECIMAL_PRECISION"
+  ],
+  "integration_boundary": {
+    "api_mode": "OPT_IN_TELEMETRY_ONLY",
+    "query_flag": "screenshot_price_axis_calibration",
+    "response_field": "price_axis_calibration",
+    "entry_price_authorized": false,
+    "may_replace_canonical_ohlcv": false,
+    "may_change_buy_sell_watchlist_no_trade": false,
+    "cnn_input": "SEPARATE_CANONICAL_RECENT_CANDLE_CROP_FUTURE_SLICE",
+    "yolo_input": "FULL_DETECTED_PLOT_UNCHANGED"
+  },
+  "evaluation_gates_before_production_consideration": [
+    "fixture_lineage_complete",
+    "platform_theme_timeframe_strata_reported",
+    "ocr_tick_detection_metrics_reported",
+    "pixel_to_price_mae_reported_by_pair",
+    "false_calibration_rate_reported",
+    "fail_closed_recall_reported",
+    "canonical_ohlcv_parity_verified",
+    "no_production_decision_change"
+  ],
+  "next_slice_after_core_service": "OCR_BACKEND_BENCHMARK_AND_EXTERNAL_SCREENSHOT_FIXTURES"
+}
