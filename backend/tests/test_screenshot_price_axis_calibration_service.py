@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from PIL import Image
 
 from app.services.screenshot_price_axis_calibration_service import (
+    OptionalTesseractPriceAxisOCRProvider,
     ScreenshotPriceAxisCalibrationService,
 )
 
@@ -104,7 +107,10 @@ class ScreenshotPriceAxisCalibrationServiceTest(unittest.TestCase):
         self.assertEqual(result["valid_tick_count"], 5)
         self.assertEqual(result["inlier_tick_count"], 4)
         self.assertEqual(result["rejected_tick_count"], 1)
-        self.assertEqual(result["axis_region_method"], "PLOT_RIGHT_EDGE")
+        self.assertEqual(
+            result["axis_region_method"],
+            "PLOT_RIGHT_EDGE_CAPPED_TO_RIGHT_STRIP",
+        )
         self.assertFalse(result["entry_price_authorized"])
         self.assertFalse(result["production_decision_changed"])
         self.assertAlmostEqual(
@@ -218,6 +224,76 @@ class ScreenshotPriceAxisCalibrationServiceTest(unittest.TestCase):
             result["reason_code"],
             "OCR_BACKEND_UNAVAILABLE",
         )
+
+    def test_registered_preprocessing_profiles_preserve_contract(self) -> None:
+        image = Image.new("RGB", (120, 60), color=(15, 15, 15))
+
+        raw = OptionalTesseractPriceAxisOCRProvider(
+            preprocessing_profile="RAW_RGB"
+        )
+        enlarged = OptionalTesseractPriceAxisOCRProvider(
+            preprocessing_profile="GRAYSCALE_AUTOCONTRAST_2X"
+        )
+        inverted = OptionalTesseractPriceAxisOCRProvider(
+            preprocessing_profile=(
+                "GRAYSCALE_INVERT_AUTOCONTRAST_2X"
+            )
+        )
+
+        raw_image, raw_scale = raw._prepare_image(image)
+        enlarged_image, enlarged_scale = enlarged._prepare_image(image)
+        inverted_image, inverted_scale = inverted._prepare_image(image)
+
+        self.assertEqual(raw_image.size, image.size)
+        self.assertEqual(raw_scale, 1.0)
+        self.assertEqual(enlarged_image.size, (240, 120))
+        self.assertEqual(inverted_image.size, (240, 120))
+        self.assertEqual(enlarged_scale, 2.0)
+        self.assertEqual(inverted_scale, 2.0)
+
+        with self.assertRaisesRegex(ValueError, "tidak didukung"):
+            OptionalTesseractPriceAxisOCRProvider(
+                preprocessing_profile="UNREGISTERED"
+            )
+
+    def test_tesseract_profile_restores_coordinates_and_global_command(
+        self,
+    ) -> None:
+        tesseract_state = SimpleNamespace(tesseract_cmd="tesseract-default")
+        fake_module = SimpleNamespace(
+            pytesseract=tesseract_state,
+            Output=SimpleNamespace(DICT="DICT"),
+            get_tesseract_version=lambda: "5.5.0",
+            image_to_data=lambda *args, **kwargs: {
+                "text": ["1.27500"],
+                "conf": ["96"],
+                "left": [20],
+                "top": [40],
+                "width": [120],
+                "height": [24],
+            },
+        )
+        provider = OptionalTesseractPriceAxisOCRProvider(
+            preprocessing_profile="GRAYSCALE_AUTOCONTRAST_2X",
+            tesseract_cmd="C:/OCR/tesseract.exe",
+        )
+
+        with patch(
+            "app.services.screenshot_price_axis_calibration_service."
+            "importlib.import_module",
+            return_value=fake_module,
+        ):
+            result = provider.extract(
+                Image.new("RGB", (100, 60), color="white")
+            )
+
+        self.assertEqual(result["status"], "OCR_COMPLETE")
+        self.assertEqual(result["tesseract_version"], "5.5.0")
+        self.assertEqual(result["observations"][0]["left"], 10.0)
+        self.assertEqual(result["observations"][0]["top"], 20.0)
+        self.assertEqual(result["observations"][0]["width"], 60.0)
+        self.assertEqual(result["observations"][0]["height"], 12.0)
+        self.assertEqual(tesseract_state.tesseract_cmd, "tesseract-default")
 
 
 if __name__ == "__main__":

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import importlib
 import math
+import os
 import re
+import threading
 from statistics import median
 from typing import Any
 from typing import Protocol
 
 from PIL import Image
+from PIL import ImageOps
 
 
 class PriceAxisOCRProvider(Protocol):
@@ -23,6 +26,59 @@ class OptionalTesseractPriceAxisOCRProvider:
     """Use pytesseract when locally available, otherwise fail closed."""
 
     ENGINE = "PYTESSERACT"
+    SUPPORTED_PREPROCESSING_PROFILES = {
+        "RAW_RGB",
+        "GRAYSCALE_AUTOCONTRAST_2X",
+        "GRAYSCALE_INVERT_AUTOCONTRAST_2X",
+    }
+    _OCR_LOCK = threading.RLock()
+
+    def __init__(
+        self,
+        *,
+        preprocessing_profile: str = "RAW_RGB",
+        tesseract_cmd: str | None = None,
+    ) -> None:
+        profile = str(preprocessing_profile).upper()
+        if profile not in self.SUPPORTED_PREPROCESSING_PROFILES:
+            raise ValueError(
+                "Profil preprocessing OCR tidak didukung: "
+                f"{preprocessing_profile}"
+            )
+
+        self.preprocessing_profile = profile
+        self.tesseract_cmd = (
+            str(tesseract_cmd).strip()
+            if tesseract_cmd
+            else str(
+                os.getenv("AI_TDSS_TESSERACT_CMD", "")
+            ).strip()
+        ) or None
+
+    def _prepare_image(
+        self,
+        image: Image.Image,
+    ) -> tuple[Image.Image, float]:
+        if self.preprocessing_profile == "RAW_RGB":
+            return image.convert("RGB"), 1.0
+
+        prepared = ImageOps.autocontrast(
+            image.convert("L")
+        )
+        if self.preprocessing_profile == (
+            "GRAYSCALE_INVERT_AUTOCONTRAST_2X"
+        ):
+            prepared = ImageOps.invert(prepared)
+
+        scale = 2.0
+        prepared = prepared.resize(
+            (
+                max(1, round(prepared.width * scale)),
+                max(1, round(prepared.height * scale)),
+            ),
+            Image.Resampling.LANCZOS,
+        )
+        return prepared, scale
 
     def extract(
         self,
@@ -36,24 +92,48 @@ class OptionalTesseractPriceAxisOCRProvider:
             return {
                 "status": "OCR_UNAVAILABLE",
                 "engine": self.ENGINE,
+                "preprocessing_profile": self.preprocessing_profile,
                 "reason_code": "OCR_BACKEND_UNAVAILABLE",
                 "observations": [],
             }
 
+        prepared, coordinate_scale = self._prepare_image(image)
+
+        version: str | None = None
         try:
-            data = pytesseract.image_to_data(
-                image,
-                config=(
-                    "--psm 11 "
-                    "-c tessedit_char_whitelist="
-                    "0123456789.,-%"
-                ),
-                output_type=pytesseract.Output.DICT,
-            )
+            with self._OCR_LOCK:
+                previous_tesseract_cmd = (
+                    pytesseract.pytesseract.tesseract_cmd
+                )
+                if self.tesseract_cmd:
+                    pytesseract.pytesseract.tesseract_cmd = (
+                        self.tesseract_cmd
+                    )
+
+                try:
+                    version = str(
+                        pytesseract.get_tesseract_version()
+                    )
+                    data = pytesseract.image_to_data(
+                        prepared,
+                        config=(
+                            "--oem 1 --psm 11 "
+                            "-c tessedit_char_whitelist="
+                            "0123456789.,-%"
+                        ),
+                        output_type=pytesseract.Output.DICT,
+                    )
+                finally:
+                    pytesseract.pytesseract.tesseract_cmd = (
+                        previous_tesseract_cmd
+                    )
         except Exception as error:
             return {
                 "status": "OCR_ERROR",
                 "engine": self.ENGINE,
+                "preprocessing_profile": self.preprocessing_profile,
+                "tesseract_version": version,
+                "tesseract_cmd": self.tesseract_cmd,
                 "reason_code": "OCR_EXECUTION_FAILED",
                 "error": str(error),
                 "observations": [],
@@ -82,16 +162,19 @@ class OptionalTesseractPriceAxisOCRProvider:
                 {
                     "text": text,
                     "confidence": confidence,
-                    "left": left,
-                    "top": top,
-                    "width": width,
-                    "height": height,
+                    "left": left / coordinate_scale,
+                    "top": top / coordinate_scale,
+                    "width": width / coordinate_scale,
+                    "height": height / coordinate_scale,
                 }
             )
 
         return {
             "status": "OCR_COMPLETE",
             "engine": self.ENGINE,
+            "preprocessing_profile": self.preprocessing_profile,
+            "tesseract_version": version,
+            "tesseract_cmd": self.tesseract_cmd,
             "reason_code": None,
             "observations": observations,
         }
@@ -284,7 +367,8 @@ class ScreenshotPriceAxisCalibrationService:
             else {}
         )
         method = "RIGHT_STRIP_FALLBACK"
-        left = round(width * cls.FALLBACK_AXIS_START_RATIO)
+        fallback_left = round(width * cls.FALLBACK_AXIS_START_RATIO)
+        left = fallback_left
 
         if geometry.get("status") == "DETECTED":
             raw_right = geometry.get("plot_right_pixel")
@@ -309,8 +393,12 @@ class ScreenshotPriceAxisCalibrationService:
                     <= candidate_width_ratio
                     <= 0.35
                 ):
-                    left = candidate
-                    method = "PLOT_RIGHT_EDGE"
+                    left = min(candidate, fallback_left)
+                    method = (
+                        "PLOT_RIGHT_EDGE"
+                        if candidate <= fallback_left
+                        else "PLOT_RIGHT_EDGE_CAPPED_TO_RIGHT_STRIP"
+                    )
 
         left = max(0, min(width - 1, left))
         return (left, 0, width, height), method
@@ -713,6 +801,12 @@ class ScreenshotPriceAxisCalibrationService:
         )
         ocr_status = str(ocr_result.get("status", "OCR_ERROR"))
         ocr_engine = ocr_result.get("engine")
+        preprocessing_profile = ocr_result.get(
+            "preprocessing_profile"
+        )
+        tesseract_version = ocr_result.get(
+            "tesseract_version"
+        )
         if ocr_status != "OCR_COMPLETE":
             return self._fail(
                 str(
@@ -722,6 +816,8 @@ class ScreenshotPriceAxisCalibrationService:
                 pair=pair_key,
                 ocr_status=ocr_status,
                 ocr_engine=ocr_engine,
+                ocr_preprocessing_profile=preprocessing_profile,
+                tesseract_version=tesseract_version,
                 ocr_error=ocr_result.get("error"),
                 axis_region=list(axis_region),
                 axis_region_method=axis_region_method,
@@ -738,6 +834,8 @@ class ScreenshotPriceAxisCalibrationService:
                 pair=pair_key,
                 ocr_status=ocr_status,
                 ocr_engine=ocr_engine,
+                ocr_preprocessing_profile=preprocessing_profile,
+                tesseract_version=tesseract_version,
                 axis_region=list(axis_region),
                 axis_region_method=axis_region_method,
             )
@@ -788,6 +886,8 @@ class ScreenshotPriceAxisCalibrationService:
                 "axis_width_ratio": axis_width_ratio,
                 "declared_scale_mode": scale_mode,
                 "ocr_status": ocr_status,
+                "ocr_preprocessing_profile": preprocessing_profile,
+                "tesseract_version": tesseract_version,
                 "ocr_observation_count": len(raw_observations),
             }
         )
