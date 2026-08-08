@@ -1,6 +1,6 @@
 # E2.4 User Screenshot Price-Axis Calibration
 
-- **Status:** registered engineering slice; core service implemented
+- **Status:** core service implemented; E2.4.1 OCR benchmark registered
 - **API mode:** opt-in telemetry only
 - **Training/inference:** no model training; calibration does not require CNN/YOLO inference
 - **Production decision:** unchanged
@@ -107,7 +107,11 @@ $env:PYTHONPATH = "backend"
 
 Once an OCR backend is deliberately installed and recorded, a local API request may enable the telemetry flag. Backend startup and the normal upload flow remain unchanged. Do not enable the flag as a frontend default in this slice.
 
-## Evaluation plan before any promotion
+## E2.4.1 benchmark before any promotion
+
+E2.4.1 menambahkan Tesseract 5 runner, tiga preprocessing profile, 32 deterministic smoke fixtures, portable external-fixture builder, SHA256 evidence, dan resumable per-task cache. Protocol serta command Windows berada di [`E2_4_1_OCR_BACKEND_BENCHMARK.md`](E2_4_1_OCR_BACKEND_BENCHMARK.md).
+
+Synthetic smoke tidak dapat memilih profile atau meluluskan gate. Acceptance hanya memakai minimal 32 screenshot eksternal TradingView/MT5 yang telah direview.
 
 The next E2.4 slice must build a frozen fixture manifest with known tick text and pixel centers. Report separately by:
 
@@ -134,4 +138,4 @@ No accuracy target may be selected from 2024 or 2025 trading outcomes. Screensho
 
 A readable axis is not proof that the screenshot timestamp, timeframe, broker feed, or displayed candles match canonical OHLCV. E2.4 can reduce vertical price uncertainty, but it does not validate market history by itself. Production entry levels remain blocked until the broader upload identity and canonical-data checks are reviewed.
 
-After the OCR backend and external fixture benchmark pass, the next slices are screenshot theme/platform robustness, structure-based liquidity, and OHLCV candlestick rules. High Risk remains shadow-only and 2024/2025 remain locked throughout E2.4.
+After the OCR backend and external fixture benchmark pass, E2.4.2 freezes screenshot theme/platform robustness before any frontend default is considered. Structure-based liquidity and OHLCV candlestick rules follow as separate slices. High Risk remains shadow-only and 2024/2025 remain locked throughout E2.4.
