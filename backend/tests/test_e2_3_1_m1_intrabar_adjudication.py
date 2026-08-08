@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import unittest
 from datetime import datetime
+from pathlib import Path
 
 from ai.scripts.adjudicate_e2_3_m1_intrabar import (
     DEFAULT_CONFIG,
@@ -15,6 +17,15 @@ from ai.scripts.adjudicate_e2_3_m1_intrabar import (
     verify_m1_m5_ohlc,
 )
 from ai.scripts.evaluate_e2_3_forward_outcomes import Candle
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RESULT_PATH = (
+    PROJECT_ROOT
+    / "config"
+    / "experiments"
+    / "e2_3_1_m1_adjudication_result.json"
+)
 
 
 class E231M1IntrabarAdjudicationTest(unittest.TestCase):
@@ -80,6 +91,35 @@ class E231M1IntrabarAdjudicationTest(unittest.TestCase):
         self.assertFalse(
             self.config["guardrails"]["final_2025_access_allowed"]
         )
+
+    def test_reviewed_result_keeps_failed_gate_and_holdouts_locked(self) -> None:
+        result = json.loads(RESULT_PATH.read_text(encoding="utf-8"))
+        gate = result["registered_gate"]
+        decision = result["decision"]
+        selection = result["high_risk_gate_evidence"]["selection"]
+
+        self.assertEqual(result["decision_status"], "FAILED_PRE_HOLDOUT_GATE")
+        self.assertEqual(result["adjudication"]["required_observations"], 55)
+        self.assertEqual(result["adjudication"]["primary_outcomes_changed"], 15)
+        self.assertEqual(
+            result["adjudication"]["remaining_ambiguity_observations"],
+            25,
+        )
+        self.assertEqual(gate["status"], "FAIL")
+        self.assertEqual(
+            gate["failed_checks"],
+            ["maximum_selection_ambiguous_filled_rate"],
+        )
+        self.assertEqual(selection["filled_count"], 20)
+        self.assertEqual(selection["ambiguous_count"], 5)
+        self.assertEqual(selection["ambiguous_filled_rate_pct"], 25.0)
+        self.assertEqual(
+            selection["maximum_registered_ambiguous_filled_rate_pct"],
+            10.0,
+        )
+        self.assertFalse(decision["high_risk_production_promotion_allowed"])
+        self.assertFalse(decision["holdout_2024_unlocked"])
+        self.assertFalse(decision["final_2025_unlocked"])
 
     def test_filled_trade_target_before_stop_is_resolved_tp(self) -> None:
         row = self._row()

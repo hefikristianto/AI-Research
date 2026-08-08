@@ -162,6 +162,6 @@ If the quality gate fails, the high-risk results remain `WATCHLIST` research tel
 
 ## Current development decision
 
-The frozen M5 forward-outcome run on 250 candidates failed the preregistered pre-holdout gate. Primary net expectancy per candidate was `-0.0587R` for Standard, `-0.1506R` for High Risk, and `-0.1153R` combined. The result also contained 55 intrabar-ambiguous observations, of which 40 were outcome-sensitive.
+The frozen M5 forward-outcome run on 250 candidates failed the preregistered pre-holdout gate. E2.3.1 then adjudicated exactly its 55 intrabar-ambiguous observations using verified M1, changing 15 primary outcomes and improving combined expectancy from `-0.1153R` to `+0.0584R` per candidate.
 
-High Risk therefore remains shadow telemetry. E2.3.1 may adjudicate only those frozen ambiguous observations using verified GBPUSD M1 2020–2023; it may not alter candidate selection, thresholds, or execution assumptions. Holdout 2024 and final 2025 remain locked. See [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).
+The registered gate still failed: High Risk policy-selection retained 5 ambiguous outcomes among 20 fills (`25%`) against the `10%` maximum. Its `+0.0139R` selection expectancy is friction-sensitive and its bootstrap interval crosses zero. High Risk therefore remains shadow telemetry, thresholds remain frozen, and holdout 2024/final 2025 stay locked. See [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).

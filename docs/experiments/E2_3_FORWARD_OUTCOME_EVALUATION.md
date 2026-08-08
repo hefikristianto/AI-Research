@@ -111,7 +111,7 @@ The frozen 2020–2023 run completed all 250 candidates with no data error and n
 
 The pre-holdout gate is **FAIL** because the maximum ambiguity rate and positive development expectancy requirements failed. High Risk therefore remains shadow-only, and 2024/2025 remain locked.
 
-Forty ambiguous observations are outcome-sensitive. E2.3.1 is a preregistered refinement that reads verified M1 data only for the frozen 55 ambiguous observations, preserving every candidate, order, policy threshold, horizon, and friction assumption. See [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).
+Forty ambiguous observations are outcome-sensitive. E2.3.1 read verified M1 data only for the frozen 55 ambiguous observations, preserving every candidate, order, policy threshold, horizon, and friction assumption. It changed 15 primary outcomes and improved the combined point estimate to `+0.0584R` per candidate, but 5 of 20 High Risk policy-selection fills remained ambiguous (`25%`) against the registered `10%` maximum. The reviewed gate therefore remains **FAIL**; High Risk stays shadow-only and 2024/2025 remain locked. See [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](E2_3_1_M1_INTRABAR_ADJUDICATION.md).
 
 ## Interpretation boundaries
 
