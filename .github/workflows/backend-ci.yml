@@ -13,6 +13,9 @@ on:
       - "ai/scripts/evaluate_e2_3_shadow_policy.py"
       - "ai/scripts/evaluate_e2_3_forward_outcomes.py"
       - "ai/scripts/adjudicate_e2_3_m1_intrabar.py"
+      - "ai/scripts/generate_e2_4_synthetic_ocr_fixtures.py"
+      - "ai/scripts/build_e2_4_external_ocr_fixture_pack.py"
+      - "ai/scripts/benchmark_e2_4_price_axis_ocr.py"
       - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/experiments/e2_2_plot_mapping_freeze.json"
@@ -24,6 +27,7 @@ on:
       - "config/experiments/e2_3_forward_outcome_policy.json"
       - "config/experiments/e2_3_1_m1_intrabar_adjudication.json"
       - "config/experiments/e2_4_user_screenshot_price_axis_calibration.json"
+      - "config/experiments/e2_4_1_ocr_benchmark.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   push:
@@ -38,6 +42,9 @@ on:
       - "ai/scripts/evaluate_e2_3_shadow_policy.py"
       - "ai/scripts/evaluate_e2_3_forward_outcomes.py"
       - "ai/scripts/adjudicate_e2_3_m1_intrabar.py"
+      - "ai/scripts/generate_e2_4_synthetic_ocr_fixtures.py"
+      - "ai/scripts/build_e2_4_external_ocr_fixture_pack.py"
+      - "ai/scripts/benchmark_e2_4_price_axis_ocr.py"
       - "ai/scripts/validate_e2_2_final_comparison.py"
       - "ai/scripts/validate_project_contract.py"
       - "config/experiments/e2_2_plot_mapping_freeze.json"
@@ -49,6 +56,7 @@ on:
       - "config/experiments/e2_3_forward_outcome_policy.json"
       - "config/experiments/e2_3_1_m1_intrabar_adjudication.json"
       - "config/experiments/e2_4_user_screenshot_price_axis_calibration.json"
+      - "config/experiments/e2_4_1_ocr_benchmark.json"
       - "config/project_contract.json"
       - ".github/workflows/backend-ci.yml"
   workflow_dispatch:
@@ -109,4 +117,7 @@ jobs:
           ai/scripts/evaluate_e2_3_shadow_policy.py
           ai/scripts/evaluate_e2_3_forward_outcomes.py
           ai/scripts/adjudicate_e2_3_m1_intrabar.py
+          ai/scripts/generate_e2_4_synthetic_ocr_fixtures.py
+          ai/scripts/build_e2_4_external_ocr_fixture_pack.py
+          ai/scripts/benchmark_e2_4_price_axis_ocr.py
           ai/scripts/validate_e2_2_final_comparison.py

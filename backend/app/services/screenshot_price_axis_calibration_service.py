@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import importlib
 import math
+import os
 import re
+import threading
 from statistics import median
 from typing import Any
 from typing import Protocol
 
 from PIL import Image
+from PIL import ImageOps
+from PIL import ImageStat
 
 
 class PriceAxisOCRProvider(Protocol):
@@ -23,6 +27,125 @@ class OptionalTesseractPriceAxisOCRProvider:
     """Use pytesseract when locally available, otherwise fail closed."""
 
     ENGINE = "PYTESSERACT"
+    SUPPORTED_PREPROCESSING_PROFILES = {
+        "RAW_RGB",
+        "GRAYSCALE_AUTOCONTRAST_2X",
+        "GRAYSCALE_INVERT_AUTOCONTRAST_2X",
+        "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X",
+    }
+    LIGHT_BACKGROUND_MINIMUM = 220
+    DARK_FOOTER_MAXIMUM_MEAN = 80.0
+    MINIMUM_FOOTER_HEIGHT_RATIO = 0.025
+    _OCR_LOCK = threading.RLock()
+
+    def __init__(
+        self,
+        *,
+        preprocessing_profile: str = "RAW_RGB",
+        tesseract_cmd: str | None = None,
+    ) -> None:
+        profile = str(preprocessing_profile).upper()
+        if profile not in self.SUPPORTED_PREPROCESSING_PROFILES:
+            raise ValueError(
+                "Profil preprocessing OCR tidak didukung: "
+                f"{preprocessing_profile}"
+            )
+
+        self.preprocessing_profile = profile
+        self.tesseract_cmd = (
+            str(tesseract_cmd).strip()
+            if tesseract_cmd
+            else str(
+                os.getenv("AI_TDSS_TESSERACT_CMD", "")
+            ).strip()
+        ) or None
+
+    @classmethod
+    def _footer_trim_bottom(
+        cls,
+        image: Image.Image,
+    ) -> int:
+        """Return a safe lower OCR boundary for bright charts.
+
+        TradingView can append a dark navigation/status footer below an
+        otherwise bright chart. Including that footer in global
+        autocontrast suppresses the faint gray price ticks. The crop is
+        applied only when the upper image has a bright dominant tone and
+        a sufficiently tall, contiguous dark band reaches the bottom.
+        """
+
+        grayscale = image.convert("L")
+        width, height = grayscale.size
+        if width < 1 or height < 2:
+            return height
+
+        upper_height = max(1, round(height * 0.80))
+        histogram = grayscale.crop(
+            (0, 0, width, upper_height)
+        ).histogram()
+        dominant_tone = max(
+            range(len(histogram)),
+            key=histogram.__getitem__,
+        )
+        if dominant_tone < cls.LIGHT_BACKGROUND_MINIMUM:
+            return height
+
+        footer_start = height
+        for y_pixel in range(height - 1, -1, -1):
+            row_mean = ImageStat.Stat(
+                grayscale.crop((0, y_pixel, width, y_pixel + 1))
+            ).mean[0]
+            if row_mean > cls.DARK_FOOTER_MAXIMUM_MEAN:
+                break
+            footer_start = y_pixel
+
+        minimum_footer_height = max(
+            8,
+            round(height * cls.MINIMUM_FOOTER_HEIGHT_RATIO),
+        )
+        if height - footer_start < minimum_footer_height:
+            return height
+
+        return footer_start
+
+    def _ocr_input_region(
+        self,
+        image: Image.Image,
+    ) -> tuple[Image.Image, tuple[int, int, int, int]]:
+        width, height = image.size
+        bottom = height
+        if self.preprocessing_profile == (
+            "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X"
+        ):
+            bottom = self._footer_trim_bottom(image)
+
+        region = (0, 0, width, bottom)
+        return image.crop(region), region
+
+    def _prepare_image(
+        self,
+        image: Image.Image,
+    ) -> tuple[Image.Image, float]:
+        if self.preprocessing_profile == "RAW_RGB":
+            return image.convert("RGB"), 1.0
+
+        prepared = ImageOps.autocontrast(
+            image.convert("L")
+        )
+        if self.preprocessing_profile == (
+            "GRAYSCALE_INVERT_AUTOCONTRAST_2X"
+        ):
+            prepared = ImageOps.invert(prepared)
+
+        scale = 2.0
+        prepared = prepared.resize(
+            (
+                max(1, round(prepared.width * scale)),
+                max(1, round(prepared.height * scale)),
+            ),
+            Image.Resampling.LANCZOS,
+        )
+        return prepared, scale
 
     def extract(
         self,
@@ -36,24 +159,51 @@ class OptionalTesseractPriceAxisOCRProvider:
             return {
                 "status": "OCR_UNAVAILABLE",
                 "engine": self.ENGINE,
+                "preprocessing_profile": self.preprocessing_profile,
                 "reason_code": "OCR_BACKEND_UNAVAILABLE",
                 "observations": [],
             }
 
+        ocr_input, ocr_input_region = self._ocr_input_region(image)
+        prepared, coordinate_scale = self._prepare_image(ocr_input)
+        coordinate_left = float(ocr_input_region[0])
+        coordinate_top = float(ocr_input_region[1])
+
+        version: str | None = None
         try:
-            data = pytesseract.image_to_data(
-                image,
-                config=(
-                    "--psm 11 "
-                    "-c tessedit_char_whitelist="
-                    "0123456789.,-%"
-                ),
-                output_type=pytesseract.Output.DICT,
-            )
+            with self._OCR_LOCK:
+                previous_tesseract_cmd = (
+                    pytesseract.pytesseract.tesseract_cmd
+                )
+                if self.tesseract_cmd:
+                    pytesseract.pytesseract.tesseract_cmd = (
+                        self.tesseract_cmd
+                    )
+
+                try:
+                    version = str(
+                        pytesseract.get_tesseract_version()
+                    )
+                    data = pytesseract.image_to_data(
+                        prepared,
+                        config=(
+                            "--oem 1 --psm 11 "
+                            "-c tessedit_char_whitelist="
+                            "0123456789.,-%"
+                        ),
+                        output_type=pytesseract.Output.DICT,
+                    )
+                finally:
+                    pytesseract.pytesseract.tesseract_cmd = (
+                        previous_tesseract_cmd
+                    )
         except Exception as error:
             return {
                 "status": "OCR_ERROR",
                 "engine": self.ENGINE,
+                "preprocessing_profile": self.preprocessing_profile,
+                "tesseract_version": version,
+                "tesseract_cmd": self.tesseract_cmd,
                 "reason_code": "OCR_EXECUTION_FAILED",
                 "error": str(error),
                 "observations": [],
@@ -82,17 +232,21 @@ class OptionalTesseractPriceAxisOCRProvider:
                 {
                     "text": text,
                     "confidence": confidence,
-                    "left": left,
-                    "top": top,
-                    "width": width,
-                    "height": height,
+                    "left": coordinate_left + left / coordinate_scale,
+                    "top": coordinate_top + top / coordinate_scale,
+                    "width": width / coordinate_scale,
+                    "height": height / coordinate_scale,
                 }
             )
 
         return {
             "status": "OCR_COMPLETE",
             "engine": self.ENGINE,
+            "preprocessing_profile": self.preprocessing_profile,
+            "tesseract_version": version,
+            "tesseract_cmd": self.tesseract_cmd,
             "reason_code": None,
+            "ocr_input_region": list(ocr_input_region),
             "observations": observations,
         }
 
@@ -103,6 +257,7 @@ class ScreenshotPriceAxisCalibrationService:
     MAPPING_MODE = "SCREENSHOT_PRICE_AXIS_LINEAR"
     MINIMUM_VALID_TICKS = 3
     MINIMUM_OCR_CONFIDENCE = 0.50
+    MINIMUM_PERCENT_LABEL_CONFIDENCE = 0.10
     MINIMUM_VERTICAL_COVERAGE = 0.12
     MINIMUM_AXIS_WIDTH_RATIO = 0.035
     FALLBACK_AXIS_START_RATIO = 0.72
@@ -111,6 +266,9 @@ class ScreenshotPriceAxisCalibrationService:
     PRELIMINARY_INLIER_RESIDUAL_RATIO = 0.30
     MINIMUM_R_SQUARED = 0.995
     MINIMUM_Y_SEPARATION_PIXELS = 3.0
+    PERCENT_LABEL_PATTERN = re.compile(
+        r"^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)%$"
+    )
 
     PAIR_PRICE_RANGES = {
         "GBPUSD": (0.50, 3.00),
@@ -164,6 +322,30 @@ class ScreenshotPriceAxisCalibrationService:
             confidence /= 100.0
 
         return max(0.0, min(1.0, confidence))
+
+    @classmethod
+    def _valid_percent_label_count(
+        cls,
+        observations: list[Any],
+    ) -> int:
+        count = 0
+        for observation in observations:
+            if not isinstance(observation, dict):
+                continue
+            confidence = cls._normalize_confidence(
+                observation.get("confidence")
+            )
+            if confidence < cls.MINIMUM_PERCENT_LABEL_CONFIDENCE:
+                continue
+            compact = (
+                str(observation.get("text", ""))
+                .strip()
+                .replace("\u00a0", "")
+                .replace(" ", "")
+            )
+            if cls.PERCENT_LABEL_PATTERN.fullmatch(compact):
+                count += 1
+        return count
 
     @classmethod
     def _price_candidates(
@@ -284,7 +466,8 @@ class ScreenshotPriceAxisCalibrationService:
             else {}
         )
         method = "RIGHT_STRIP_FALLBACK"
-        left = round(width * cls.FALLBACK_AXIS_START_RATIO)
+        fallback_left = round(width * cls.FALLBACK_AXIS_START_RATIO)
+        left = fallback_left
 
         if geometry.get("status") == "DETECTED":
             raw_right = geometry.get("plot_right_pixel")
@@ -309,8 +492,12 @@ class ScreenshotPriceAxisCalibrationService:
                     <= candidate_width_ratio
                     <= 0.35
                 ):
-                    left = candidate
-                    method = "PLOT_RIGHT_EDGE"
+                    left = min(candidate, fallback_left)
+                    method = (
+                        "PLOT_RIGHT_EDGE"
+                        if candidate <= fallback_left
+                        else "PLOT_RIGHT_EDGE_CAPPED_TO_RIGHT_STRIP"
+                    )
 
         left = max(0, min(width - 1, left))
         return (left, 0, width, height), method
@@ -713,6 +900,12 @@ class ScreenshotPriceAxisCalibrationService:
         )
         ocr_status = str(ocr_result.get("status", "OCR_ERROR"))
         ocr_engine = ocr_result.get("engine")
+        preprocessing_profile = ocr_result.get(
+            "preprocessing_profile"
+        )
+        tesseract_version = ocr_result.get(
+            "tesseract_version"
+        )
         if ocr_status != "OCR_COMPLETE":
             return self._fail(
                 str(
@@ -722,22 +915,31 @@ class ScreenshotPriceAxisCalibrationService:
                 pair=pair_key,
                 ocr_status=ocr_status,
                 ocr_engine=ocr_engine,
+                ocr_preprocessing_profile=preprocessing_profile,
+                tesseract_version=tesseract_version,
                 ocr_error=ocr_result.get("error"),
                 axis_region=list(axis_region),
                 axis_region_method=axis_region_method,
             )
 
         raw_observations = ocr_result.get("observations") or []
-        if any(
-            "%" in str(observation.get("text", ""))
-            for observation in raw_observations
-            if isinstance(observation, dict)
+        percent_label_observation_count = (
+            self._valid_percent_label_count(raw_observations)
+        )
+        if (
+            percent_label_observation_count
+            >= self.MINIMUM_VALID_TICKS
         ):
             return self._fail(
                 "PERCENT_PRICE_AXIS_DETECTED",
                 pair=pair_key,
                 ocr_status=ocr_status,
                 ocr_engine=ocr_engine,
+                ocr_preprocessing_profile=preprocessing_profile,
+                tesseract_version=tesseract_version,
+                percent_label_observation_count=(
+                    percent_label_observation_count
+                ),
                 axis_region=list(axis_region),
                 axis_region_method=axis_region_method,
             )
@@ -788,7 +990,12 @@ class ScreenshotPriceAxisCalibrationService:
                 "axis_width_ratio": axis_width_ratio,
                 "declared_scale_mode": scale_mode,
                 "ocr_status": ocr_status,
+                "ocr_preprocessing_profile": preprocessing_profile,
+                "tesseract_version": tesseract_version,
                 "ocr_observation_count": len(raw_observations),
+                "percent_label_observation_count": (
+                    percent_label_observation_count
+                ),
             }
         )
         return result

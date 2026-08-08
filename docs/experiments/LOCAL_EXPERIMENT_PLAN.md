@@ -259,6 +259,25 @@ Gate sebelum frontend atau keputusan produksi dapat memakai hasil:
 
 CNN menerima crop candle yang dinormalisasi pada slice terpisah (target awal sekitar 30 candle terakhir), sedangkan YOLO tetap menerima plot yang lebih luas agar struktur zona tidak hilang.
 
+#### E2.4.1 — OCR backend dan fixture benchmark
+
+E2.4.1 membekukan tiga preprocessing profile Tesseract 5 dan mengevaluasi OCR tick, exact text, fail-closed behavior, serta pixel-to-price MAE. Runner menyimpan raw OCR response dan CSV per fixture, memverifikasi image/response SHA256 saat resume, dan menolak field outcome trading. Synthetic fixture hanya smoke test; acceptance memakai minimal 32 screenshot eksternal TradingView/MT5 yang direview dan mencakup GBPUSD/XAUUSD, tema light/dark/custom, M5/M15/H1/H4, serta locale titik/koma.
+
+```powershell
+$PY = ".\backend\.venv\Scripts\python.exe"
+$env:PYTHONPATH = "backend"
+& $PY -m pip install -r ".\backend\requirements-ocr.txt"
+
+$RUN = ".\local_artifacts\experiments\$(Get-Date -Format yyyyMMdd_HHmmss)_E2_4_1_ocr"
+& $PY ai\scripts\generate_e2_4_synthetic_ocr_fixtures.py `
+  --output-dir "$RUN\fixtures_synthetic"
+& $PY ai\scripts\benchmark_e2_4_price_axis_ocr.py `
+  --fixture-manifest "$RUN\fixtures_synthetic\e2_4_1_fixture_manifest.json" `
+  --output-dir "$RUN\benchmark_synthetic"
+```
+
+Synthetic-only overall result wajib dibaca sebagai `FAIL / INCOMPLETE`, bukan kegagalan pipeline. Panduan instalasi, external-fixture builder, gate, dan review pack berada di [`E2_4_1_OCR_BACKEND_BENCHMARK.md`](E2_4_1_OCR_BACKEND_BENCHMARK.md).
+
 ### Backlog setelah E2.4 core
 
 1. **Robustness screenshot:** evaluasi TradingView/MT5 lintas tema, warna candle, chrome, crop, panel indikator, resolusi, dan aspect ratio. Color augmentation dan grayscale/edge representation diuji pada development set sebelum default upload umum boleh memakai plot-aware mapping.
@@ -414,4 +433,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-E2.3.1 telah selesai dan keputusan `FAIL` telah dicatat. E2.4 core kini meregistrasikan kalibrasi sumbu harga screenshot pengguna sebagai telemetry opt-in yang tidak mengubah keputusan produksi. Urutan berikutnya adalah benchmark OCR dan fixture eksternal → robustness lintas tema/platform → liquidity berbasis struktur dan candlestick berbasis OHLCV → journal/feedback/Excel → E3 ablation → E5 product acceptance. High Risk tetap shadow-only dan holdout 2024/final 2025 tetap terkunci; hasil E2.3.1 bukan izin untuk memilih ulang kandidat, menuning policy, atau melonggarkan ambiguity gate. Tick-level follow-up hanya boleh dilakukan sebagai eksperimen baru yang diregistrasikan sebelum data dibaca. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+E2.3.1 telah selesai dan keputusan `FAIL` telah dicatat. E2.4 core serta runner E2.4.1 kini tersedia tanpa mengubah keputusan produksi. Urutan berikutnya adalah synthetic smoke → fixture eksternal dan OCR gate → E2.4.2 robustness lintas tema/platform → liquidity berbasis struktur dan candlestick berbasis OHLCV → journal/feedback/Excel → E3 ablation → E5 product acceptance. High Risk tetap shadow-only dan holdout 2024/final 2025 tetap terkunci; hasil E2.3.1 bukan izin untuk memilih ulang kandidat, menuning policy, atau melonggarkan ambiguity gate. Tick-level follow-up hanya boleh dilakukan sebagai eksperimen baru yang diregistrasikan sebelum data dibaca. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

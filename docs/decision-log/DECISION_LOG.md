@@ -208,3 +208,14 @@
 | Impact | Endpoint menambahkan `price_axis_calibration` tanpa mengubah keputusan produksi. Hasil OCR tidak menggantikan canonical OHLCV, tidak mengizinkan entry, dan tidak membuka 2024/2025. Missing OCR, axis terpotong, tick kurang, log/persen, arah tidak monoton, atau residual buruk selalu gagal aman. Benchmark OCR/fixture eksternal wajib lulus sebelum integrasi frontend dipertimbangkan |
 
 ---
+
+## Decision #021
+
+| Item | Description |
+|------|-------------|
+| Date | 08-08-2026 |
+| Decision | E2.4.1 membekukan Tesseract 5 dan tiga preprocessing profile untuk benchmark OCR; synthetic fixture hanya smoke test dan pemilihan profile hanya boleh memakai minimal 32 screenshot eksternal yang direview |
+| Reason | Smoke test nyata menunjukkan geometry foreground dapat ikut menghitung teks sumbu dan memotong label harga. OCR raw RGB juga tidak cukup robust pada fixture beragam, sehingga crop sumbu, preprocessing, exact-text matching, fail-closed behavior, dan mapping MAE perlu dibandingkan secara terdaftar |
+| Impact | OCR strip dibatasi agar tidak dimulai di kanan fallback 72% lebar gambar. Runner memverifikasi SHA256 image/raw response dan tidak membaca outcome trading, menjalankan training/model inference, mengizinkan entry, atau mengubah keputusan produksi. Synthetic-only selalu `FAIL / INCOMPLETE`; profile yang lulus external gate masih memerlukan freeze E2.4.2 sebelum dipertimbangkan sebagai default frontend |
+
+---

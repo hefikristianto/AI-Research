@@ -1,8 +1,8 @@
 # Research Synthesis AI-TDSS
 
-**Versi:** 1.12
+**Versi:** 1.13
 **Tanggal:** 8 Agustus 2026
-**Status:** E2.3.1 tetap gagal pada gate pra-holdout; E2.4 core meregistrasikan kalibrasi sumbu harga screenshot sebagai telemetry opt-in; High Risk tetap shadow-only dan 2024/2025 tetap terkunci
+**Status:** E2.3.1 tetap gagal pada gate pra-holdout; E2.4.1 meregistrasikan benchmark OCR screenshot tanpa outcome/training; High Risk tetap shadow-only dan 2024/2025 tetap terkunci
 
 ## 1. Ringkasan Penelitian
 
@@ -228,6 +228,8 @@ Evaluasi M5 development menyelesaikan seluruh 250 kandidat tanpa data error atau
 
 E2.3.1 kemudian mengadjudikasi tepat 55 observasi tersebut menggunakan M1 2020–2023. Semua tujuh hash artefak, 56 window sumber M1/M5, candidate lineage, dan guardrail 2024/2025 lolos; tidak ada data error. Lima belas outcome utama berubah, TP/SL bergeser dari 53/117 menjadi 66/104, ambiguity turun dari 55 menjadi 25, expectancy Combined menjadi `+0,0584R`, profit factor menjadi `1,1097`, dan maximum event drawdown turun dari `39,3268R` menjadi `21,5338R`. Meski demikian, High Risk policy-selection masih menyisakan 5 ambiguity dari 20 fill (`25%`) terhadap maksimum terdaftar `10%`, sehingga keputusan resmi tetap **FAIL**. Expectancy High Risk selection hanya `+0,0139R/kandidat`, interval bootstrap 95% `[-0,3351R, +0,3885R]`, dan menjadi `-0,0447R` pada friction 2 pip. Karena itu High Risk tetap shadow-only, threshold tidak dituning, dan subgroup BUY/SELL atau rule tidak boleh dijadikan filter post-hoc. Protokol serta hasil berada di [`E2_3_1_M1_INTRABAR_ADJUDICATION.md`](../experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md); keputusan machine-readable berada di `config/experiments/e2_3_1_m1_adjudication_result.json`. Holdout 2024 dan final 2025 tetap terkunci.
 
+E2.4 memisahkan pembacaan harga screenshot pengguna dari mapping OHLCV kanonis. Core service membaca minimal tiga tick OCR, mem-parse format lokal GBPUSD/XAUUSD, membentuk robust linear `price(y)`, lalu fail closed pada crop, persen, log, arah harga salah, atau residual buruk. E2.4.1 meregistrasikan benchmark Tesseract 5 dengan tiga preprocessing profile, fixture image dan raw-response SHA256, one-to-one tick matching, resumable cache, serta gate precision/recall/exact text/calibration/fail-closed/MAE. Synthetic fixtures hanya smoke test; pemilihan profile memerlukan minimal 32 screenshot eksternal TradingView/MT5 yang direview. Slice ini tidak membaca outcome trading, tidak menjalankan CNN/YOLO atau training, tidak mengizinkan entry, dan tidak mengubah keputusan produksi. Protokol berada di [`E2_4_1_OCR_BACKEND_BENCHMARK.md`](../experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md).
+
 ## 9. Incremental Learning yang Aman
 
 ### 9.1 Unit pembelajaran
@@ -281,6 +283,8 @@ Rollback dilakukan dengan mengaktifkan kembali manifest champion sebelumnya.
 | E2.2 | Plot-aware mapping A/B | Selesai; dipilih untuk chart kanonis/E2.3, default upload umum tetap full-image | Scoped mapping policy |
 | E2.3 | High-risk daily coverage | Cache 8.158/8.158 dan 250 outcome M5 selesai; gate pra-holdout gagal sehingga High Risk tetap shadow | Risk-tier rejection/continuation decision |
 | E2.3.1 | M1 intrabar adjudication | Selesai; 15 outcome berubah tetapi ambiguity High Risk selection 25% melewati batas 10% | High Risk tetap shadow; holdout tetap terkunci |
+| E2.4 | Screenshot price-axis calibration | Robust multi-tick `price(y)` dengan fail-closed telemetry | Core boundary implemented |
+| E2.4.1 | OCR backend benchmark | Bandingkan profile Tesseract pada synthetic smoke dan fixture eksternal yang direview | OCR profile evidence; no production promotion |
 | E3 | Ablation | Mengukur kontribusi tiap komponen | Bukti RQ3 |
 | E4 | Incremental comparison | Membandingkan frozen, naive, replay, dan cumulative | Bukti RQ4 |
 | E5 | Product acceptance | Menguji React upload, annotated image, journal, dan Excel | Release readiness |
@@ -324,8 +328,8 @@ Export harus mempertahankan timestamp UTC, analysis ID, model version, blockers,
 | Timezone broker dataset masih bersifat asumsi provisional | Penyelarasan screenshot lintas platform perlu divalidasi | P1 |
 | Endpoint full analysis belum memiliki fixture integration test dengan model stub | Risiko regresi orkestrasi masih lebih tinggi daripada service-level unit test | P1 |
 | E2.3.1 gagal pada gate ambiguity High Risk selection | High Risk belum layak dipromosikan dan 2024/2025 tetap terkunci | CLOSED — reject promotion |
-| Robustness tema warna/platform belum dievaluasi | Recall dapat turun pada TradingView/MT5 yang berbeda dari renderer dataset | P1 |
-| Harga pada screenshot pengguna belum memiliki kalibrasi sumbu multi-tick yang tervalidasi | Entry/SL/TP tidak dapat dipetakan secara auditable tanpa OCR minimal tiga tick, robust fit, dan quality gate | P0 |
+| E2.4.1 belum memiliki minimal 32 fixture eksternal yang direview | Profile OCR belum dapat dipilih dan kalibrasi belum boleh menjadi default upload | P0 |
+| Robustness tema warna/platform belum dibekukan melalui E2.4.2 | Recall dapat turun pada TradingView/MT5 yang berbeda dari fixture development | P1 |
 | Liquidity masih memerlukan validasi rule-level terhadap swing/EQH-EQL dan sweep-reclaim | Wick panjang dapat salah dianggap liquidity bila konteks struktur tidak diwajibkan | P1 |
 
 ## 14. Batas Klaim Akademik

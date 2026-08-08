@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.4.1",
+  "stage": "OCR_BACKEND_AND_FIXTURE_BENCHMARK",
+  "status": "PREREGISTERED_ENGINEERING_EVALUATION",
+  "registered_on": "2026-08-08",
+  "parent_contract": "config/experiments/e2_4_user_screenshot_price_axis_calibration.json",
+  "training_performed": false,
+  "model_inference_performed": false,
+  "trading_outcome_data_allowed": false,
+  "production_default_changed": false,
+  "production_decision_changed": false,
+  "canonical_ohlcv_requirement_changed": false,
+  "high_risk_policy_changed": false,
+  "holdout_access": {
+    "development_outcomes_2020_2023_allowed": false,
+    "frozen_2024_outcomes_allowed": false,
+    "final_2025_outcomes_allowed": false
+  },
+  "fixture_contract": {
+    "manifest_schema_version": 1,
+    "image_sha256_required": true,
+    "ground_truth_tick_text_required": true,
+    "ground_truth_tick_price_required": true,
+    "ground_truth_tick_y_center_required": true,
+    "trade_outcome_fields_forbidden": true,
+    "minimum_total_fixtures": 32,
+    "minimum_external_fixtures": 32,
+    "required_pairs": [
+      "GBPUSD",
+      "XAUUSD"
+    ],
+    "required_platforms": [
+      "TRADINGVIEW",
+      "MT5"
+    ],
+    "required_themes": [
+      "LIGHT",
+      "DARK",
+      "CUSTOM"
+    ],
+    "required_timeframes": [
+      "M5",
+      "M15",
+      "H1",
+      "H4"
+    ],
+    "required_locales": [
+      "DOT_DECIMAL",
+      "COMMA_DECIMAL"
+    ],
+    "minimum_count_per_required_stratum_value": 4,
+    "allowed_fixture_sources": [
+      "DETERMINISTIC_SYNTHETIC",
+      "EXTERNAL_REVIEWED"
+    ],
+    "allowed_expected_statuses": [
+      "CALIBRATED",
+      "FAIL_CLOSED"
+    ]
+  },
+  "ocr_engine": {
+    "engine": "TESSERACT_5",
+    "python_wrapper": "pytesseract==0.3.13",
+    "minimum_tesseract_major_version": 5,
+    "language": "eng",
+    "page_segmentation_mode": 11,
+    "character_whitelist": "0123456789.,-%",
+    "profiles": [
+      {
+        "profile_id": "RAW_RGB_PSM11",
+        "preprocessing_profile": "RAW_RGB"
+      },
+      {
+        "profile_id": "GRAY_AUTOCONTRAST_2X_PSM11",
+        "preprocessing_profile": "GRAYSCALE_AUTOCONTRAST_2X"
+      },
+      {
+        "profile_id": "GRAY_INVERT_AUTOCONTRAST_2X_PSM11",
+        "preprocessing_profile": "GRAYSCALE_INVERT_AUTOCONTRAST_2X"
+      },
+      {
+        "profile_id": "GRAY_FOOTER_TRIM_AUTOCONTRAST_2X_PSM11",
+        "preprocessing_profile": "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X",
+        "candidate_added_after_partial_review": true,
+        "candidate_rationale": "Bright chart screenshots can include a contiguous dark platform footer that suppresses faint static price ticks during global autocontrast."
+      }
+    ]
+  },
+  "matching_contract": {
+    "minimum_ocr_confidence": 0.5,
+    "percent_axis_detection": {
+      "minimum_well_formed_labels": 3,
+      "minimum_label_confidence": 0.1,
+      "malformed_percent_tokens_are_not_axis_evidence": true
+    },
+    "maximum_tick_y_error_pixels": 12.0,
+    "maximum_tick_price_error": {
+      "GBPUSD": 0.00001,
+      "XAUUSD": 0.01
+    },
+    "exact_text_comparison": "TRIMMED_CASE_SENSITIVE",
+    "one_to_one_matching": true
+  },
+  "acceptance_gates": {
+    "minimum_tick_precision": 0.99,
+    "minimum_tick_recall": 0.95,
+    "minimum_exact_text_accuracy": 0.95,
+    "minimum_axis_region_containment_recall": 1.0,
+    "minimum_expected_calibration_recall": 0.95,
+    "minimum_fail_closed_recall": 1.0,
+    "maximum_false_calibration_rate": 0.0,
+    "maximum_normalized_mapping_mae": 0.1,
+    "maximum_mapping_mae": {
+      "GBPUSD": 0.00005,
+      "XAUUSD": 0.05
+    },
+    "minimum_tesseract_major_version": 5,
+    "canonical_ohlcv_parity_required": true,
+    "no_production_decision_change_required": true
+  },
+  "profile_selection": {
+    "selection_scope": "EXTERNAL_REVIEWED_FIXTURES_ONLY",
+    "ranking_order": [
+      "FEWEST_FALSE_CALIBRATIONS",
+      "HIGHEST_TICK_PRECISION",
+      "HIGHEST_EXACT_TEXT_ACCURACY",
+      "HIGHEST_TICK_RECALL",
+      "LOWEST_NORMALIZED_MAPPING_MAE",
+      "LOWEST_MEAN_LATENCY_MS"
+    ],
+    "selection_does_not_promote_production": true
+  },
+  "output_contract": {
+    "resumable": true,
+    "raw_ocr_response_saved": true,
+    "fixture_level_rows_saved": true,
+    "summary_json_saved": true,
+    "summary_markdown_saved": true,
+    "production_promotion_possible": false
+  },
+  "next_review_after_pass": "E2_4_2_EXTERNAL_THEME_PLATFORM_ROBUSTNESS_FREEZE"
+}

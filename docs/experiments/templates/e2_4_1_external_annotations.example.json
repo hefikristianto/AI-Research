@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.4.1",
+  "fixture_set_id": "E2_4_1_EXTERNAL_REVIEWED_V1",
+  "trading_outcome_data_used": false,
+  "fixtures": [
+    {
+      "fixture_id": "EXT_GBPUSD_TRADINGVIEW_DARK_M5_001",
+      "source_image_path": "C:\\path\\to\\reviewed_screenshot.png",
+      "pair": "GBPUSD",
+      "timeframe": "M5",
+      "platform": "TRADINGVIEW",
+      "theme": "DARK",
+      "locale": "DOT_DECIMAL",
+      "scale_mode": "LINEAR",
+      "variant": "VALID",
+      "expected_status": "CALIBRATED",
+      "expected_reason_codes": [],
+      "expected_axis_region": [
+        1680,
+        0,
+        1780,
+        776
+      ],
+      "expected_plot_right_pixel": 1678,
+      "ground_truth_ticks": [
+        {
+          "text": "1.28000",
+          "price": 1.28,
+          "y_center": 140.0
+        },
+        {
+          "text": "1.27500",
+          "price": 1.275,
+          "y_center": 300.0
+        },
+        {
+          "text": "1.27000",
+          "price": 1.27,
+          "y_center": 460.0
+        }
+      ],
+      "tick_metric_eligible": true
+    }
+  ]
+}

@@ -4,6 +4,10 @@
 
 ### Added
 
+- Added an explicit E2.4.1 light-chart OCR candidate that removes only a contiguous dark platform footer before autocontrast, preserving the three original profiles unchanged.
+- Registered E2.4.1 with three Tesseract 5 preprocessing profiles, frozen OCR/mapping gates, deterministic synthetic fixtures, and a portable reviewed-external-fixture builder.
+- Added resumable fixture-level OCR benchmarking with image/raw-response SHA256 verification, one-to-one tick matching, external-only profile acceptance, and explicit prohibition of training, outcome reads, entry authorization, or production promotion.
+- Added Windows OCR dependency/setup documentation and regression tests for coordinate restoration, Tesseract command isolation, fixture lineage, raw-cache integrity, and forbidden outcome fields.
 - Registered E2.4 user-screenshot price-axis calibration with a replaceable OCR adapter, localized GBPUSD/XAUUSD price parsing, robust linear pixel-y mapping, and explicit fail-closed telemetry.
 - Added opt-in `price_axis_calibration` API output without changing canonical OHLCV entry authorization, public decisions, High Risk policy, or locked 2024/2025 data.
 - Added regression coverage for OCR outliers, localized number formats, insufficient/cropped ticks, ascending/log/percentage axes, unavailable OCR, and experiment guardrails.
@@ -50,6 +54,8 @@
 
 ### Changed
 
+- Hardened percentage-axis detection to require three well-formed repeated labels with sufficient OCR confidence, preventing a single malformed `%` token from forcing a false fail-closed result.
+- Capped the screenshot price-axis OCR crop to the registered right-side fallback strip so foreground geometry that includes axis labels cannot crop those labels away.
 - Connected the upload workflow to `/api/analysis/full` with required pair, timeframe, chart time, and UTC-offset metadata.
 - Redacted entry, stop-loss, take-profit, risk-reward, and order type from non-actionable public decisions.
 - Locked GBPUSD as the primary research/product pair.
