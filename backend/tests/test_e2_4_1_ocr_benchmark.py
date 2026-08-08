@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import codecs
 import hashlib
 import json
 import tempfile
@@ -204,6 +205,18 @@ class E241OCRBenchmarkTest(unittest.TestCase):
             rows_text = rows_path.read_text(encoding="utf-8")
             self.assertIn("CALIBRATED", rows_text)
             self.assertIn("FAKE_TEST_OCR", rows_text)
+            report_path = (
+                output_dir / "e2_4_1_ocr_benchmark_summary.md"
+            )
+            self.assertTrue(
+                report_path.read_bytes().startswith(codecs.BOM_UTF8)
+            )
+            report_text = report_path.read_text(encoding="utf-8-sig")
+            self.assertIn("## Synthetic smoke results", report_text)
+            self.assertIn(
+                "## External reviewed gate results",
+                report_text,
+            )
             raw_files = list((output_dir / "raw").glob("*.json"))
             self.assertEqual(len(raw_files), 1)
 

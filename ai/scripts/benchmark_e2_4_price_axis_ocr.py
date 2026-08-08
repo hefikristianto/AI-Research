@@ -1525,12 +1525,12 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
         "- Production decision changed: `false`",
         "- Production promotion allowed: `false`",
         "",
-        "## Profile results",
+        "## Synthetic smoke results",
         "",
-        "| Profile | External N | Precision | Recall | Exact text | "
+        "| Profile | Tasks | Success | Precision | Recall | Exact text | "
         "Calibration recall | Fail-closed recall | False calibration | "
-        "Normalized MAE | Gate |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+        "Normalized MAE |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
     def percent(value: Any) -> str:
@@ -1538,6 +1538,42 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
 
     def decimal(value: Any) -> str:
         return "—" if value is None else f"{float(value):.6f}"
+
+    for profile_id, result in summary["profiles"].items():
+        synthetic = result["synthetic_fixtures"]
+        lines.append(
+            "| "
+            + " | ".join(
+                (
+                    f"`{profile_id}`",
+                    str(synthetic["task_count"]),
+                    str(synthetic["successful_tasks"]),
+                    percent(synthetic["tick_precision"]),
+                    percent(synthetic["tick_recall"]),
+                    percent(synthetic["exact_text_accuracy"]),
+                    percent(synthetic["expected_calibration_recall"]),
+                    percent(synthetic["fail_closed_recall"]),
+                    percent(synthetic["false_calibration_rate"]),
+                    decimal(synthetic["normalized_mapping_mae"]),
+                )
+            )
+            + " |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "Synthetic results verify OCR execution and fail-closed behavior; "
+            "they never select a production profile.",
+            "",
+            "## External reviewed gate results",
+            "",
+            "| Profile | External N | Precision | Recall | Exact text | "
+            "Calibration recall | Fail-closed recall | False calibration | "
+            "Normalized MAE | Gate |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+        ]
+    )
 
     for profile_id, result in summary["profiles"].items():
         external = result["external_fixtures"]
@@ -1738,7 +1774,7 @@ def run(
     )
     summary_md_path.write_text(
         render_summary_markdown(summary),
-        encoding="utf-8",
+        encoding="utf-8-sig",
     )
 
     print(f"Rows: {rows_path}")
