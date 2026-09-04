@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.4.2",
+  "stage": "EXTERNAL_THEME_PLATFORM_ROBUSTNESS_REMEDIATION",
+  "status": "PREREGISTERED_DEVELOPMENT_REMEDIATION",
+  "registered_on": "2026-09-04",
+  "parent_contract": "config/experiments/e2_4_1_ocr_benchmark.json",
+  "training_performed": false,
+  "model_inference_performed": false,
+  "trading_outcome_data_allowed": false,
+  "production_default_changed": false,
+  "production_decision_changed": false,
+  "canonical_ohlcv_requirement_changed": false,
+  "high_risk_policy_changed": false,
+  "holdout_access": {
+    "development_outcomes_2020_2023_allowed": false,
+    "frozen_2024_outcomes_allowed": false,
+    "final_2025_outcomes_allowed": false
+  },
+  "predecessor_evidence": {
+    "e2_4_1_result": "FAIL",
+    "windows_result_zip_sha256": "a9ca2ad2576171c9a5898afd59f2d716158bc47fbdfba7821d039d78fb3d1241",
+    "fixture_manifest_sha256": "888c3627713798f87d58e1b76fe92eac5c4ca8e192419c75a6fe8f5087517852",
+    "tesseract_version": "5.5.3.20260724",
+    "all_registered_profiles_failed": true,
+    "selected_profile": null
+  },
+  "evidence_roles": {
+    "reused_e2_4_1_fixtures": "DEVELOPMENT_REGRESSION_ONLY",
+    "development_fixture_count": 32,
+    "development_metrics_may_select_implementation": true,
+    "development_metrics_may_pass_freeze": false,
+    "fresh_external_holdout_required": true,
+    "minimum_fresh_external_holdout_fixtures": 32,
+    "holdout_must_be_captured_after_implementation_freeze": true,
+    "production_promotion_possible": false
+  },
+  "fixture_contract": {
+    "manifest_schema_version": 1,
+    "accepted_source_experiment_ids": [
+      "E2.4.1",
+      "E2.4.2"
+    ],
+    "image_sha256_required": true,
+    "ground_truth_tick_text_required": true,
+    "ground_truth_tick_price_required": true,
+    "ground_truth_tick_y_center_required": true,
+    "trade_outcome_fields_forbidden": true,
+    "minimum_total_fixtures": 32,
+    "minimum_external_fixtures": 32,
+    "required_pairs": [
+      "GBPUSD",
+      "XAUUSD"
+    ],
+    "required_platforms": [
+      "TRADINGVIEW",
+      "MT5"
+    ],
+    "required_themes": [
+      "LIGHT",
+      "DARK",
+      "CUSTOM"
+    ],
+    "required_timeframes": [
+      "M5",
+      "M15",
+      "H1",
+      "H4"
+    ],
+    "required_locales": [
+      "DOT_DECIMAL",
+      "COMMA_DECIMAL"
+    ],
+    "minimum_count_per_required_stratum_value": 4,
+    "allowed_fixture_sources": [
+      "DETERMINISTIC_SYNTHETIC",
+      "EXTERNAL_REVIEWED"
+    ],
+    "allowed_expected_statuses": [
+      "CALIBRATED",
+      "FAIL_CLOSED"
+    ]
+  },
+  "ocr_engine": {
+    "engine": "TESSERACT_5",
+    "python_wrapper": "pytesseract==0.3.13",
+    "minimum_tesseract_major_version": 5,
+    "language": "eng",
+    "character_whitelist": "0123456789.,-%",
+    "profiles": [
+      {
+        "profile_id": "ADAPTIVE_WIDE_FOOTER2_TIGHT_GRAY3_PSM11",
+        "preprocessing_profile": "ADAPTIVE_WIDE_FOOTER2_TIGHT_GRAY3",
+        "page_segmentation_mode": 11,
+        "wide_pass": {
+          "axis_start_ratio": 0.72,
+          "footer_trim": true,
+          "grayscale_autocontrast": true,
+          "scale": 2
+        },
+        "tight_pass": {
+          "axis_start_ratio": 0.94,
+          "footer_trim": false,
+          "grayscale_autocontrast": true,
+          "scale": 3
+        },
+        "filled_background_rejection": {
+          "enabled": true,
+          "rgb_mode_distance": "EUCLIDEAN",
+          "minimum_rgb_mode_distance": 100.0,
+          "minimum_local_mode_coverage": 0.6,
+          "observation_padding_pixels": 3
+        },
+        "pass_selection": [
+          "PERCENT_AXIS_EVIDENCE_PREEMPTS_CALIBRATION",
+          "CALIBRATED_BEFORE_FAIL_CLOSED",
+          "HIGHEST_INLIER_TICK_COUNT",
+          "HIGHEST_VERTICAL_COVERAGE",
+          "LOWEST_NORMALIZED_RMSE",
+          "WIDE_PASS_TIE_BREAK"
+        ]
+      }
+    ]
+  },
+  "matching_contract": {
+    "minimum_ocr_confidence": 0.5,
+    "percent_axis_detection": {
+      "minimum_well_formed_labels": 3,
+      "minimum_label_confidence": 0.1,
+      "malformed_percent_tokens_are_not_axis_evidence": true
+    },
+    "maximum_tick_y_error_pixels": 12.0,
+    "maximum_tick_price_error": {
+      "GBPUSD": 0.00001,
+      "XAUUSD": 0.01
+    },
+    "exact_text_comparison": "TRIMMED_CASE_SENSITIVE",
+    "one_to_one_matching": true
+  },
+  "acceptance_gates": {
+    "minimum_tick_precision": 0.99,
+    "minimum_tick_recall": 0.95,
+    "minimum_exact_text_accuracy": 0.95,
+    "minimum_axis_region_containment_recall": 1.0,
+    "minimum_expected_calibration_recall": 0.95,
+    "minimum_fail_closed_recall": 1.0,
+    "maximum_false_calibration_rate": 0.0,
+    "maximum_normalized_mapping_mae": 0.1,
+    "maximum_mapping_mae_pixels": 0.75,
+    "reported_non_gating_absolute_mapping_mae": {
+      "GBPUSD": 0.00005,
+      "XAUUSD": 0.05
+    },
+    "minimum_tesseract_major_version": 5,
+    "canonical_ohlcv_parity_required": true,
+    "no_production_decision_change_required": true
+  },
+  "output_contract": {
+    "resumable": true,
+    "raw_ocr_passes_saved": true,
+    "fixture_level_rows_saved": true,
+    "summary_json_saved": true,
+    "summary_markdown_saved": true,
+    "development_and_holdout_roles_reported_separately": true,
+    "production_promotion_possible": false
+  },
+  "freeze_rule": {
+    "development_result_label": "DEVELOPMENT_ONLY",
+    "holdout_profile_changes_allowed_after_first_holdout_run": false,
+    "holdout_threshold_changes_allowed_after_first_holdout_run": false,
+    "holdout_pass_required_before_any_further_integration_review": true
+  }
+}
