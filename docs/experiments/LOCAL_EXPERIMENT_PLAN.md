@@ -261,7 +261,7 @@ CNN menerima crop candle yang dinormalisasi pada slice terpisah (target awal sek
 
 #### E2.4.1 — OCR backend dan fixture benchmark
 
-E2.4.1 membekukan tiga preprocessing profile Tesseract 5 dan mengevaluasi OCR tick, exact text, fail-closed behavior, serta pixel-to-price MAE. Runner menyimpan raw OCR response dan CSV per fixture, memverifikasi image/response SHA256 saat resume, dan menolak field outcome trading. Synthetic fixture hanya smoke test; acceptance memakai minimal 32 screenshot eksternal TradingView/MT5 yang direview dan mencakup GBPUSD/XAUUSD, tema light/dark/custom, M5/M15/H1/H4, serta locale titik/koma.
+E2.4.1 membekukan empat preprocessing profile Tesseract 5 dan mengevaluasi OCR tick, exact text, fail-closed behavior, serta pixel-to-price MAE. Runner menyimpan raw OCR response dan CSV per fixture, memverifikasi image/response SHA256 saat resume, dan menolak field outcome trading. Synthetic fixture hanya smoke test; acceptance memakai minimal 32 screenshot eksternal TradingView/MT5 yang direview dan mencakup GBPUSD/XAUUSD, tema light/dark/custom, M5/M15/H1/H4, serta locale titik/koma.
 
 ```powershell
 $PY = ".\backend\.venv\Scripts\python.exe"
@@ -277,6 +277,8 @@ $RUN = ".\local_artifacts\experiments\$(Get-Date -Format yyyyMMdd_HHmmss)_E2_4_1
 ```
 
 Synthetic-only overall result wajib dibaca sebagai `FAIL / INCOMPLETE`, bukan kegagalan pipeline. Panduan instalasi, external-fixture builder, gate, dan review pack berada di [`E2_4_1_OCR_BACKEND_BENCHMARK.md`](E2_4_1_OCR_BACKEND_BENCHMARK.md).
+
+Reviewed external run Windows E2.4.1 telah selesai dan keempat profile gagal gate; tidak ada profile yang dipilih. E2.4.2 kemudian diregistrasikan sebelum remediation implementation. Kandidat adaptive wide/tight lulus seluruh target teknis pada reuse 32 fixture di Linux, tetapi bukti tersebut berstatus `DEVELOPMENT_REGRESSION_ONLY` dan tidak dapat meluluskan freeze. Windows development rerun dan minimal 32 screenshot baru setelah implementation freeze tetap wajib; lihat [`E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md`](E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md).
 
 ### Backlog setelah E2.4 core
 
@@ -433,4 +435,4 @@ Setiap `manifest.json` minimal berisi:
 
 ## 5. Keputusan Tahap Berikutnya
 
-E2.3.1 telah selesai dan keputusan `FAIL` telah dicatat. E2.4 core serta runner E2.4.1 kini tersedia tanpa mengubah keputusan produksi. Urutan berikutnya adalah synthetic smoke → fixture eksternal dan OCR gate → E2.4.2 robustness lintas tema/platform → liquidity berbasis struktur dan candlestick berbasis OHLCV → journal/feedback/Excel → E3 ablation → E5 product acceptance. High Risk tetap shadow-only dan holdout 2024/final 2025 tetap terkunci; hasil E2.3.1 bukan izin untuk memilih ulang kandidat, menuning policy, atau melonggarkan ambiguity gate. Tick-level follow-up hanya boleh dilakukan sebagai eksperimen baru yang diregistrasikan sebelum data dibaca. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.
+E2.3.1 dan E2.4.1 telah selesai dengan keputusan `FAIL`. Kandidat remediation E2.4.2 lulus target development Linux tetapi belum freeze. Urutan berikutnya adalah Windows development verification → implementation freeze → fresh external E2.4.2 holdout → liquidity berbasis struktur dan candlestick berbasis OHLCV → journal/feedback/Excel → E3 ablation → E5 product acceptance. High Risk tetap shadow-only dan holdout 2024/final 2025 tetap terkunci; hasil E2.3.1 bukan izin untuk memilih ulang kandidat, menuning policy, atau melonggarkan ambiguity gate. Tick-level follow-up hanya boleh dilakukan sebagai eksperimen baru yang diregistrasikan sebelum data dibaca. E4 tidak dijalankan hanya karena satu bulan berlalu; training tetap memerlukan minimum eligible batch dan evaluation gate. Dengan urutan ini, incremental learning memperbaiki sistem yang sudah dapat diukur, bukan menambah kompleksitas sebelum baseline end-to-end tersedia.

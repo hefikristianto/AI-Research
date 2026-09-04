@@ -79,7 +79,13 @@
     "allowed_expected_statuses": [
       "CALIBRATED",
       "FAIL_CLOSED"
-    ]
+    ],
+    "fresh_holdout_manifest_requirements": {
+      "evidence_role": "FRESH_EXTERNAL_HOLDOUT",
+      "captured_after_implementation_freeze": true,
+      "capture_started_at_utc_required": true,
+      "implementation_freeze_id_required": true
+    }
   },
   "ocr_engine": {
     "engine": "TESSERACT_5",
@@ -100,6 +106,8 @@
         },
         "tight_pass": {
           "axis_start_ratio": 0.94,
+          "outer_axis_region_relative_start_ratio": 0.7857142857142857,
+          "axis_start_ratio_is_maximum_effective_canvas_ratio": true,
           "footer_trim": false,
           "grayscale_autocontrast": true,
           "scale": 3

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.4.2",
+  "fixture_set_id": "E2_4_2_FRESH_EXTERNAL_HOLDOUT_V1",
+  "evidence_role": "FRESH_EXTERNAL_HOLDOUT",
+  "captured_after_implementation_freeze": true,
+  "capture_started_at_utc": "<ISO-8601 UTC after frozen_at_utc>",
+  "implementation_freeze_id": "<copy from frozen E2.4.2 contract>",
+  "trading_outcome_data_used": false,
+  "fixtures": [
+    {
+      "fixture_id": "E242_GBPUSD_TRADINGVIEW_DARK_M5_001",
+      "source_image_path": "C:\\path\\to\\new_reviewed_screenshot.png",
+      "pair": "GBPUSD",
+      "timeframe": "M5",
+      "platform": "TRADINGVIEW",
+      "theme": "DARK",
+      "locale": "DOT_DECIMAL",
+      "scale_mode": "LINEAR",
+      "variant": "VALID",
+      "expected_status": "CALIBRATED",
+      "expected_reason_codes": [],
+      "expected_axis_region": [
+        1680,
+        0,
+        1780,
+        776
+      ],
+      "expected_plot_right_pixel": 1678,
+      "ground_truth_ticks": [
+        {
+          "text": "1.28000",
+          "price": 1.28,
+          "y_center": 140.0
+        },
+        {
+          "text": "1.27500",
+          "price": 1.275,
+          "y_center": 300.0
+        },
+        {
+          "text": "1.27000",
+          "price": 1.27,
+          "y_center": 460.0
+        }
+      ],
+      "tick_metric_eligible": true
+    }
+  ]
+}

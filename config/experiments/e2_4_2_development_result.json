@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.4.2",
+  "status": "DEVELOPMENT_TARGETS_PASS_FREEZE_NOT_EVALUATED",
+  "evidence_role": "DEVELOPMENT_REGRESSION_ONLY",
+  "generated_at_utc": "2026-09-04T11:27:44.194704+00:00",
+  "environment": {
+    "operating_system": "LINUX",
+    "tesseract_version": "5.3.4",
+    "runner_version": "1.1.0"
+  },
+  "lineage": {
+    "source_fixture_experiment_id": "E2.4.1",
+    "source_fixture_manifest_sha256": "888c3627713798f87d58e1b76fe92eac5c4ca8e192419c75a6fe8f5087517852",
+    "predecessor_windows_result_zip_sha256": "a9ca2ad2576171c9a5898afd59f2d716158bc47fbdfba7821d039d78fb3d1241",
+    "calibration_service_source_sha256": "de22fef5b4da4e3811e4930e3ade3652300cea9f18b04eb8a2c632ffa9cff42e",
+    "benchmark_runner_source_sha256": "5046ccd45af77145c6c24adf782a07545e61a4f335c889c8720097c4db401439",
+    "run_contract_sha256": "d879420d40f8dc67c765f1d3e21f6e16da6343dbb40773162f6e28f703532358",
+    "rows_csv_sha256": "a99e4f0c0d3ae364c984e376790f0552b9d5308dd3bd87ce88fa6c6bd17cbad2",
+    "summary_json_sha256": "d9aa76c8519711e996a8a83d21ba382c949eca6f111c82c914641fde211132f7"
+  },
+  "profile_id": "ADAPTIVE_WIDE_FOOTER2_TIGHT_GRAY3_PSM11",
+  "metrics": {
+    "fixture_count": 32,
+    "successful_tasks": 32,
+    "tick_true_positive": 359,
+    "tick_false_positive": 1,
+    "tick_false_negative": 5,
+    "tick_precision": 0.9972222222222222,
+    "tick_recall": 0.9862637362637363,
+    "exact_text_accuracy": 0.9916434540389972,
+    "expected_calibration_recall": 1.0,
+    "fail_closed_recall": 1.0,
+    "false_calibration_rate": 0.0,
+    "normalized_mapping_mae": 0.007794180549288851,
+    "mapping_mae_pixels": 0.3018630617037126,
+    "reported_non_gating_absolute_mapping_mae": 0.04646418587398687,
+    "telemetry_boundary_violations": 0
+  },
+  "development_technical_gates_passed": true,
+  "freeze_evaluated": false,
+  "benchmark_pass": false,
+  "fresh_external_holdout_required": true,
+  "minimum_fresh_external_holdout_fixtures": 32,
+  "windows_development_verification_pending": true,
+  "selected_production_profile": null,
+  "training_performed": false,
+  "model_inference_performed": false,
+  "trading_outcome_data_used": false,
+  "production_promotion_allowed": false,
+  "production_decision_changed": false,
+  "entry_price_authorized": false
+}

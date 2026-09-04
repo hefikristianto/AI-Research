@@ -32,10 +32,15 @@ class OptionalTesseractPriceAxisOCRProvider:
         "GRAYSCALE_AUTOCONTRAST_2X",
         "GRAYSCALE_INVERT_AUTOCONTRAST_2X",
         "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X",
+        "ADAPTIVE_WIDE_FOOTER2_TIGHT_GRAY3",
     }
     LIGHT_BACKGROUND_MINIMUM = 220
     DARK_FOOTER_MAXIMUM_MEAN = 80.0
     MINIMUM_FOOTER_HEIGHT_RATIO = 0.025
+    ADAPTIVE_TIGHT_INPUT_START_RATIO = 11.0 / 14.0
+    FILLED_BACKGROUND_MINIMUM_RGB_DISTANCE = 100.0
+    FILLED_BACKGROUND_MINIMUM_MODE_COVERAGE = 0.60
+    FILLED_BACKGROUND_OBSERVATION_PADDING = 3
     _OCR_LOCK = threading.RLock()
 
     def __init__(
@@ -112,12 +117,23 @@ class OptionalTesseractPriceAxisOCRProvider:
         self,
         image: Image.Image,
     ) -> tuple[Image.Image, tuple[int, int, int, int]]:
+        return self._ocr_input_region_for_profile(
+            image,
+            self.preprocessing_profile,
+        )
+
+    @classmethod
+    def _ocr_input_region_for_profile(
+        cls,
+        image: Image.Image,
+        preprocessing_profile: str,
+    ) -> tuple[Image.Image, tuple[int, int, int, int]]:
         width, height = image.size
         bottom = height
-        if self.preprocessing_profile == (
+        if preprocessing_profile == (
             "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X"
         ):
-            bottom = self._footer_trim_bottom(image)
+            bottom = cls._footer_trim_bottom(image)
 
         region = (0, 0, width, bottom)
         return image.crop(region), region
@@ -126,18 +142,33 @@ class OptionalTesseractPriceAxisOCRProvider:
         self,
         image: Image.Image,
     ) -> tuple[Image.Image, float]:
-        if self.preprocessing_profile == "RAW_RGB":
+        return self._prepare_image_for_profile(
+            image,
+            self.preprocessing_profile,
+        )
+
+    @staticmethod
+    def _prepare_image_for_profile(
+        image: Image.Image,
+        preprocessing_profile: str,
+    ) -> tuple[Image.Image, float]:
+        if preprocessing_profile == "RAW_RGB":
             return image.convert("RGB"), 1.0
 
         prepared = ImageOps.autocontrast(
             image.convert("L")
         )
-        if self.preprocessing_profile == (
+        if preprocessing_profile == (
             "GRAYSCALE_INVERT_AUTOCONTRAST_2X"
         ):
             prepared = ImageOps.invert(prepared)
 
-        scale = 2.0
+        scale = (
+            3.0
+            if preprocessing_profile
+            == "GRAYSCALE_AUTOCONTRAST_3X"
+            else 2.0
+        )
         prepared = prepared.resize(
             (
                 max(1, round(prepared.width * scale)),
@@ -147,68 +178,14 @@ class OptionalTesseractPriceAxisOCRProvider:
         )
         return prepared, scale
 
-    def extract(
-        self,
-        image: Image.Image,
-    ) -> dict[str, Any]:
-        try:
-            pytesseract = importlib.import_module(
-                "pytesseract"
-            )
-        except (ImportError, ModuleNotFoundError):
-            return {
-                "status": "OCR_UNAVAILABLE",
-                "engine": self.ENGINE,
-                "preprocessing_profile": self.preprocessing_profile,
-                "reason_code": "OCR_BACKEND_UNAVAILABLE",
-                "observations": [],
-            }
-
-        ocr_input, ocr_input_region = self._ocr_input_region(image)
-        prepared, coordinate_scale = self._prepare_image(ocr_input)
-        coordinate_left = float(ocr_input_region[0])
-        coordinate_top = float(ocr_input_region[1])
-
-        version: str | None = None
-        try:
-            with self._OCR_LOCK:
-                previous_tesseract_cmd = (
-                    pytesseract.pytesseract.tesseract_cmd
-                )
-                if self.tesseract_cmd:
-                    pytesseract.pytesseract.tesseract_cmd = (
-                        self.tesseract_cmd
-                    )
-
-                try:
-                    version = str(
-                        pytesseract.get_tesseract_version()
-                    )
-                    data = pytesseract.image_to_data(
-                        prepared,
-                        config=(
-                            "--oem 1 --psm 11 "
-                            "-c tessedit_char_whitelist="
-                            "0123456789.,-%"
-                        ),
-                        output_type=pytesseract.Output.DICT,
-                    )
-                finally:
-                    pytesseract.pytesseract.tesseract_cmd = (
-                        previous_tesseract_cmd
-                    )
-        except Exception as error:
-            return {
-                "status": "OCR_ERROR",
-                "engine": self.ENGINE,
-                "preprocessing_profile": self.preprocessing_profile,
-                "tesseract_version": version,
-                "tesseract_cmd": self.tesseract_cmd,
-                "reason_code": "OCR_EXECUTION_FAILED",
-                "error": str(error),
-                "observations": [],
-            }
-
+    @staticmethod
+    def _observations_from_data(
+        data: dict[str, Any],
+        *,
+        coordinate_scale: float,
+        coordinate_left: float,
+        coordinate_top: float,
+    ) -> list[dict[str, Any]]:
         observations: list[dict[str, Any]] = []
         texts = data.get("text", [])
 
@@ -218,9 +195,7 @@ class OptionalTesseractPriceAxisOCRProvider:
                 continue
 
             try:
-                confidence = float(
-                    data.get("conf", [])[index]
-                )
+                confidence = float(data.get("conf", [])[index])
                 left = int(data.get("left", [])[index])
                 top = int(data.get("top", [])[index])
                 width = int(data.get("width", [])[index])
@@ -239,16 +214,243 @@ class OptionalTesseractPriceAxisOCRProvider:
                 }
             )
 
-        return {
+        return observations
+
+    @staticmethod
+    def _dominant_rgb(image: Image.Image) -> tuple[tuple[int, int, int], int]:
+        rgb = image.convert("RGB")
+        colors = rgb.getcolors(maxcolors=max(1, rgb.width * rgb.height))
+        if not colors:
+            return (0, 0, 0), 0
+        count, color = max(colors, key=lambda item: item[0])
+        return tuple(int(value) for value in color), int(count)
+
+    @classmethod
+    def _reject_filled_background_observations(
+        cls,
+        source: Image.Image,
+        observations: list[dict[str, Any]],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Remove live-price badges while retaining static axis labels.
+
+        TradingView and MT5 render the current-price label on a filled
+        badge, whereas static price ticks use the axis background. The
+        rule compares dominant source RGB colors and is deliberately
+        independent of OCR text, pair, platform, and ground truth.
+        """
+
+        background, _ = cls._dominant_rgb(source)
+        accepted: list[dict[str, Any]] = []
+        rejected: list[dict[str, Any]] = []
+        padding = cls.FILLED_BACKGROUND_OBSERVATION_PADDING
+
+        for observation in observations:
+            try:
+                left = math.floor(float(observation["left"])) - padding
+                top = math.floor(float(observation["top"])) - padding
+                right = math.ceil(
+                    float(observation["left"])
+                    + float(observation.get("width", 0.0))
+                ) + padding
+                bottom = math.ceil(
+                    float(observation["top"])
+                    + float(observation.get("height", 0.0))
+                ) + padding
+            except (KeyError, TypeError, ValueError):
+                accepted.append(observation)
+                continue
+
+            box = (
+                max(0, min(source.width, left)),
+                max(0, min(source.height, top)),
+                max(0, min(source.width, right)),
+                max(0, min(source.height, bottom)),
+            )
+            if box[2] <= box[0] or box[3] <= box[1]:
+                accepted.append(observation)
+                continue
+
+            patch = source.crop(box)
+            local_mode, local_count = cls._dominant_rgb(patch)
+            coverage = local_count / max(1, patch.width * patch.height)
+            distance = math.sqrt(
+                sum(
+                    (float(local) - float(axis)) ** 2
+                    for local, axis in zip(local_mode, background)
+                )
+            )
+            enriched = {
+                **observation,
+                "source_background_mode_rgb": list(background),
+                "local_background_mode_rgb": list(local_mode),
+                "local_background_mode_coverage": coverage,
+                "background_mode_rgb_distance": distance,
+            }
+            if (
+                coverage >= cls.FILLED_BACKGROUND_MINIMUM_MODE_COVERAGE
+                and distance
+                >= cls.FILLED_BACKGROUND_MINIMUM_RGB_DISTANCE
+            ):
+                rejected.append(
+                    {**enriched, "rejection_reason": "FILLED_BACKGROUND"}
+                )
+            else:
+                accepted.append(enriched)
+
+        return accepted, rejected
+
+    def extract(
+        self,
+        image: Image.Image,
+    ) -> dict[str, Any]:
+        try:
+            pytesseract = importlib.import_module(
+                "pytesseract"
+            )
+        except (ImportError, ModuleNotFoundError):
+            return {
+                "status": "OCR_UNAVAILABLE",
+                "engine": self.ENGINE,
+                "preprocessing_profile": self.preprocessing_profile,
+                "reason_code": "OCR_BACKEND_UNAVAILABLE",
+                "observations": [],
+            }
+
+        is_adaptive = self.preprocessing_profile == (
+            "ADAPTIVE_WIDE_FOOTER2_TIGHT_GRAY3"
+        )
+        if is_adaptive:
+            wide_input, wide_region = self._ocr_input_region_for_profile(
+                image,
+                "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X",
+            )
+            tight_left = round(
+                image.width * self.ADAPTIVE_TIGHT_INPUT_START_RATIO
+            )
+            tight_region = (tight_left, 0, image.width, image.height)
+            pass_specs = [
+                (
+                    "WIDE_FOOTER_TRIM_GRAY2",
+                    wide_input,
+                    wide_region,
+                    "GRAYSCALE_FOOTER_TRIM_AUTOCONTRAST_2X",
+                ),
+                (
+                    "TIGHT_GRAY3",
+                    image.crop(tight_region),
+                    tight_region,
+                    "GRAYSCALE_AUTOCONTRAST_3X",
+                ),
+            ]
+        else:
+            ocr_input, ocr_input_region = self._ocr_input_region(image)
+            pass_specs = [
+                (
+                    "PRIMARY",
+                    ocr_input,
+                    ocr_input_region,
+                    self.preprocessing_profile,
+                )
+            ]
+
+        version: str | None = None
+        pass_results: list[dict[str, Any]] = []
+        try:
+            with self._OCR_LOCK:
+                previous_tesseract_cmd = (
+                    pytesseract.pytesseract.tesseract_cmd
+                )
+                if self.tesseract_cmd:
+                    pytesseract.pytesseract.tesseract_cmd = (
+                        self.tesseract_cmd
+                    )
+
+                try:
+                    version = str(
+                        pytesseract.get_tesseract_version()
+                    )
+                    for (
+                        pass_id,
+                        ocr_input,
+                        ocr_input_region,
+                        pass_profile,
+                    ) in pass_specs:
+                        prepared, coordinate_scale = (
+                            self._prepare_image_for_profile(
+                                ocr_input,
+                                pass_profile,
+                            )
+                        )
+                        data = pytesseract.image_to_data(
+                            prepared,
+                            config=(
+                                "--oem 1 --psm 11 "
+                                "-c tessedit_char_whitelist="
+                                "0123456789.,-%"
+                            ),
+                            output_type=pytesseract.Output.DICT,
+                        )
+                        observations = self._observations_from_data(
+                            data,
+                            coordinate_scale=coordinate_scale,
+                            coordinate_left=float(ocr_input_region[0]),
+                            coordinate_top=float(ocr_input_region[1]),
+                        )
+                        rejected_observations: list[dict[str, Any]] = []
+                        if is_adaptive:
+                            observations, rejected_observations = (
+                                self._reject_filled_background_observations(
+                                    image,
+                                    observations,
+                                )
+                            )
+                        pass_results.append(
+                            {
+                                "pass_id": pass_id,
+                                "status": "OCR_COMPLETE",
+                                "preprocessing_profile": pass_profile,
+                                "ocr_input_region": list(ocr_input_region),
+                                "observations": observations,
+                                "rejected_observations": (
+                                    rejected_observations
+                                ),
+                                "filled_background_rejection_count": len(
+                                    rejected_observations
+                                ),
+                            }
+                        )
+                finally:
+                    pytesseract.pytesseract.tesseract_cmd = (
+                        previous_tesseract_cmd
+                    )
+        except Exception as error:
+            return {
+                "status": "OCR_ERROR",
+                "engine": self.ENGINE,
+                "preprocessing_profile": self.preprocessing_profile,
+                "tesseract_version": version,
+                "tesseract_cmd": self.tesseract_cmd,
+                "reason_code": "OCR_EXECUTION_FAILED",
+                "error": str(error),
+                "observations": [],
+            }
+
+        primary = pass_results[0]
+
+        result = {
             "status": "OCR_COMPLETE",
             "engine": self.ENGINE,
             "preprocessing_profile": self.preprocessing_profile,
             "tesseract_version": version,
             "tesseract_cmd": self.tesseract_cmd,
             "reason_code": None,
-            "ocr_input_region": list(ocr_input_region),
-            "observations": observations,
+            "ocr_input_region": primary["ocr_input_region"],
+            "observations": primary["observations"],
         }
+        if is_adaptive:
+            result["passes"] = pass_results
+            result["adaptive_pass_count"] = len(pass_results)
+        return result
 
 
 class ScreenshotPriceAxisCalibrationService:
@@ -835,6 +1037,94 @@ class ScreenshotPriceAxisCalibrationService:
             "ticks": public_ticks,
         }
 
+    @classmethod
+    def _ticks_from_observations(
+        cls,
+        observations: list[Any],
+        *,
+        pair: str,
+        outer_top: int,
+    ) -> list[dict[str, Any]]:
+        ticks: list[dict[str, Any]] = []
+        for observation in observations:
+            if not isinstance(observation, dict):
+                continue
+
+            confidence = cls._normalize_confidence(
+                observation.get("confidence")
+            )
+            if confidence < cls.MINIMUM_OCR_CONFIDENCE:
+                continue
+
+            text = str(observation.get("text", "")).strip()
+            price = cls.parse_price_label(text, pair)
+            if price is None:
+                continue
+
+            try:
+                local_top = float(observation["top"])
+                token_height = float(observation.get("height", 0.0))
+            except (KeyError, TypeError, ValueError):
+                continue
+
+            ticks.append(
+                {
+                    "text": text,
+                    "price": price,
+                    "confidence": confidence,
+                    "y": outer_top + local_top + token_height / 2.0,
+                }
+            )
+        return ticks
+
+    @staticmethod
+    def _absolute_pass_region(
+        outer_region: tuple[int, int, int, int],
+        pass_payload: dict[str, Any],
+    ) -> tuple[int, int, int, int]:
+        outer_left, outer_top, outer_right, outer_bottom = outer_region
+        outer_width = outer_right - outer_left
+        outer_height = outer_bottom - outer_top
+        raw_region = pass_payload.get("ocr_input_region")
+        if not isinstance(raw_region, list) or len(raw_region) != 4:
+            return outer_region
+        try:
+            left, top, right, bottom = (
+                int(round(float(value))) for value in raw_region
+            )
+        except (TypeError, ValueError):
+            return outer_region
+        left = max(0, min(outer_width, left))
+        right = max(left, min(outer_width, right))
+        top = max(0, min(outer_height, top))
+        bottom = max(top, min(outer_height, bottom))
+        return (
+            outer_left + left,
+            outer_top + top,
+            outer_left + right,
+            outer_top + bottom,
+        )
+
+    @staticmethod
+    def _ocr_pass_selection_key(
+        candidate: dict[str, Any],
+    ) -> tuple[float, float, float, float, float]:
+        result = candidate["calibration"]
+        normalized_rmse = result.get("normalized_rmse")
+        try:
+            rmse_score = -float(normalized_rmse)
+        except (TypeError, ValueError):
+            rmse_score = float("-inf")
+        return (
+            1.0 if result.get("status") == "CALIBRATED" else 0.0,
+            float(result.get("inlier_tick_count") or 0.0),
+            float(result.get("vertical_coverage") or 0.0),
+            rmse_score,
+            1.0
+            if candidate.get("pass_id") == "WIDE_FOOTER_TRIM_GRAY2"
+            else 0.0,
+        )
+
     def calibrate(
         self,
         image: Image.Image,
@@ -922,14 +1212,58 @@ class ScreenshotPriceAxisCalibrationService:
                 axis_region_method=axis_region_method,
             )
 
-        raw_observations = ocr_result.get("observations") or []
-        percent_label_observation_count = (
-            self._valid_percent_label_count(raw_observations)
+        raw_passes = ocr_result.get("passes")
+        if isinstance(raw_passes, list) and raw_passes:
+            ocr_passes = [
+                pass_payload
+                for pass_payload in raw_passes
+                if isinstance(pass_payload, dict)
+            ]
+        else:
+            ocr_passes = [
+                {
+                    "pass_id": "PRIMARY",
+                    "preprocessing_profile": preprocessing_profile,
+                    "ocr_input_region": [
+                        0,
+                        0,
+                        right - left,
+                        bottom - top,
+                    ],
+                    "observations": ocr_result.get("observations") or [],
+                    "rejected_observations": [],
+                    "filled_background_rejection_count": 0,
+                }
+            ]
+        if not ocr_passes:
+            return self._fail(
+                "PRICE_AXIS_OCR_FAILED",
+                pair=pair_key,
+                ocr_status=ocr_status,
+                ocr_engine=ocr_engine,
+                ocr_preprocessing_profile=preprocessing_profile,
+                tesseract_version=tesseract_version,
+                ocr_error="OCR provider returned no valid pass payload.",
+                axis_region=list(axis_region),
+                axis_region_method=axis_region_method,
+            )
+
+        percent_counts = {
+            str(pass_payload.get("pass_id") or "PRIMARY"):
+            self._valid_percent_label_count(
+                pass_payload.get("observations") or []
+            )
+            for pass_payload in ocr_passes
+        }
+        percent_label_observation_count = max(
+            percent_counts.values(),
+            default=0,
         )
-        if (
-            percent_label_observation_count
-            >= self.MINIMUM_VALID_TICKS
-        ):
+        if percent_label_observation_count >= self.MINIMUM_VALID_TICKS:
+            selected_percent_pass = max(
+                percent_counts,
+                key=percent_counts.__getitem__,
+            )
             return self._fail(
                 "PERCENT_PRICE_AXIS_DETECTED",
                 pair=pair_key,
@@ -940,49 +1274,80 @@ class ScreenshotPriceAxisCalibrationService:
                 percent_label_observation_count=(
                     percent_label_observation_count
                 ),
+                percent_label_observation_count_by_pass=percent_counts,
+                ocr_pass_count=len(ocr_passes),
+                ocr_selected_pass_id=selected_percent_pass,
                 axis_region=list(axis_region),
                 axis_region_method=axis_region_method,
             )
 
-        ticks: list[dict[str, Any]] = []
-        for observation in raw_observations:
-            if not isinstance(observation, dict):
-                continue
-
-            confidence = self._normalize_confidence(
-                observation.get("confidence")
+        pass_candidates: list[dict[str, Any]] = []
+        for pass_payload in ocr_passes:
+            pass_id = str(pass_payload.get("pass_id") or "PRIMARY")
+            observations = pass_payload.get("observations") or []
+            pass_axis_region = self._absolute_pass_region(
+                axis_region,
+                pass_payload,
             )
-            if confidence < self.MINIMUM_OCR_CONFIDENCE:
-                continue
-
-            text = str(observation.get("text", "")).strip()
-            price = self.parse_price_label(text, pair_key)
-            if price is None:
-                continue
-
-            try:
-                local_top = float(observation["top"])
-                token_height = float(observation.get("height", 0.0))
-            except (KeyError, TypeError, ValueError):
-                continue
-
-            ticks.append(
+            pass_axis_region_method = (
+                axis_region_method
+                if len(ocr_passes) == 1 and pass_id == "PRIMARY"
+                else f"{axis_region_method}:{pass_id}"
+            )
+            ticks = self._ticks_from_observations(
+                observations,
+                pair=pair_key,
+                outer_top=top,
+            )
+            calibration = self.fit_ticks(
+                ticks,
+                image_height=height,
+                pair=pair_key,
+                axis_region=pass_axis_region,
+                axis_region_method=pass_axis_region_method,
+                ocr_engine=str(ocr_engine) if ocr_engine else None,
+            )
+            pass_candidates.append(
                 {
-                    "text": text,
-                    "price": price,
-                    "confidence": confidence,
-                    "y": top + local_top + token_height / 2.0,
+                    "pass_id": pass_id,
+                    "payload": pass_payload,
+                    "calibration": calibration,
                 }
             )
 
-        result = self.fit_ticks(
-            ticks,
-            image_height=height,
-            pair=pair_key,
-            axis_region=axis_region,
-            axis_region_method=axis_region_method,
-            ocr_engine=str(ocr_engine) if ocr_engine else None,
+        selected = max(
+            pass_candidates,
+            key=self._ocr_pass_selection_key,
         )
+        selected_payload = selected["payload"]
+        selected_observations = selected_payload.get("observations") or []
+        result = selected["calibration"]
+        pass_summaries = [
+            {
+                "pass_id": candidate["pass_id"],
+                "status": candidate["calibration"].get("status"),
+                "reason_code": candidate["calibration"].get("reason_code"),
+                "valid_tick_count": candidate["calibration"].get(
+                    "valid_tick_count"
+                ),
+                "inlier_tick_count": candidate["calibration"].get(
+                    "inlier_tick_count"
+                ),
+                "vertical_coverage": candidate["calibration"].get(
+                    "vertical_coverage"
+                ),
+                "normalized_rmse": candidate["calibration"].get(
+                    "normalized_rmse"
+                ),
+                "observation_count": len(
+                    candidate["payload"].get("observations") or []
+                ),
+                "filled_background_rejection_count": candidate[
+                    "payload"
+                ].get("filled_background_rejection_count", 0),
+            }
+            for candidate in pass_candidates
+        ]
         result.update(
             {
                 "image_width": width,
@@ -992,10 +1357,24 @@ class ScreenshotPriceAxisCalibrationService:
                 "ocr_status": ocr_status,
                 "ocr_preprocessing_profile": preprocessing_profile,
                 "tesseract_version": tesseract_version,
-                "ocr_observation_count": len(raw_observations),
+                "ocr_observation_count": len(selected_observations),
+                "ocr_total_observation_count": sum(
+                    len(pass_payload.get("observations") or [])
+                    for pass_payload in ocr_passes
+                ),
+                "ocr_pass_count": len(ocr_passes),
+                "ocr_selected_pass_id": selected["pass_id"],
+                "ocr_pass_summaries": pass_summaries,
+                "ocr_filled_background_rejection_count": (
+                    selected_payload.get(
+                        "filled_background_rejection_count",
+                        0,
+                    )
+                ),
                 "percent_label_observation_count": (
                     percent_label_observation_count
                 ),
+                "percent_label_observation_count_by_pass": percent_counts,
             }
         )
         return result

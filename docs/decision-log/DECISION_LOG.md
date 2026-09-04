@@ -219,3 +219,14 @@
 | Impact | OCR strip dibatasi agar tidak dimulai di kanan fallback 72% lebar gambar. Runner memverifikasi SHA256 image/raw response dan tidak membaca outcome trading, menjalankan training/model inference, mengizinkan entry, atau mengubah keputusan produksi. Synthetic-only selalu `FAIL / INCOMPLETE`; profile yang lulus external gate masih memerlukan freeze E2.4.2 sebelum dipertimbangkan sebagai default frontend |
 
 ---
+
+## Decision #022
+
+| Item | Description |
+|------|-------------|
+| Date | 04-09-2026 |
+| Decision | E2.4.1 dinyatakan `FAIL` tanpa profile terpilih; E2.4.2 meregistrasikan satu kandidat OCR dua-pass untuk remediation development, sedangkan 32 fixture E2.4.1 hanya boleh dipakai sebagai regression data dan tidak dapat meluluskan freeze |
+| Reason | Run Windows Tesseract 5.5.3 pada 32 fixture eksternal menyelesaikan semua task, tetapi empat profile gagal gate: profile grayscale memiliki recall 47,80–53,02%, sedangkan RAW hanya mencapai precision 93,50% dan recall 71,15%. Audit raw OCR menunjukkan kontaminasi plot/grid pada crop lebar, badge live-price yang terbaca sebagai tick statis, serta perlunya metric mapping yang comparable lintas pair/zoom |
+| Impact | E2.4.2 memakai wide footer-trim 2× dan tight grayscale 3×, menolak observasi pada filled background, memilih pass melalui urutan struktural yang dibekukan, serta menggate normalized/pixel MAE. Development regression Linux mencapai precision 99,72%, recall 98,63%, calibration/fail-closed recall 100%, dan false calibration 0%, tetapi freeze tetap `NOT EVALUATED`; minimal 32 screenshot eksternal baru yang diambil setelah implementation freeze tetap wajib. Produksi, entry authorization, High Risk, canonical OHLCV, serta outcome 2024/2025 tidak berubah |
+
+---
