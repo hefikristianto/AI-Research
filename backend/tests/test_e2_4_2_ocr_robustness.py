@@ -324,13 +324,24 @@ class E242OCRRobustnessTest(unittest.TestCase):
                 validate_manifest(manifest, contract, manifest_path),
                 [],
             )
+            mismatched_contract = json.loads(
+                E242_CONTRACT.read_text(encoding="utf-8")
+            )
+            mismatched_contract["implementation_freeze"][
+                "calibration_service_source_sha256"
+            ] = "0" * 64
+            mismatched_contract_path = root / "mismatched_contract.json"
+            mismatched_contract_path.write_text(
+                json.dumps(mismatched_contract),
+                encoding="utf-8",
+            )
             with self.assertRaisesRegex(
                 ValueError,
                 "Frozen source SHA berubah",
             ):
                 run(
                     SimpleNamespace(
-                        contract=E242_CONTRACT,
+                        contract=mismatched_contract_path,
                         fixture_manifest=manifest_path,
                         output_dir=root / "benchmark",
                         profile_ids=None,
