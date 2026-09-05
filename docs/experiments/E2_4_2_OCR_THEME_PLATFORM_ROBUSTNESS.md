@@ -1,7 +1,9 @@
 # E2.4.2 OCR Theme and Platform Robustness
 
-- **Status:** implementation candidate complete; development targets pass; freeze not evaluated
+- **Status:** implementation frozen; fresh holdout not evaluated
 - **Evidence role:** the 32 E2.4.1 fixtures are development regression data only
+- **Freeze ID:** `E2_4_2_FREEZE_20260905_01`
+- **Frozen implementation commit:** `32cd3015f694ae9fc36bd545d160f6b6c5c1a1fd`
 - **Next gate:** one fresh, post-freeze set of at least 32 reviewed external screenshots
 - **Training/model inference:** not performed
 - **Trading outcomes:** not read
@@ -67,7 +69,7 @@ selection is fixed in this order: calibrated status, inlier count, vertical
 coverage, normalized RMSE, then the wide-pass tie-break. Each raw pass,
 rejected observation, source hash, and selected pass is persisted for audit.
 
-## Development regression result
+## Linux development regression result
 
 The candidate was run on Linux with Tesseract `5.3.4` against the already
 reviewed E2.4.1 set. Because those same fixtures informed the remediation,
@@ -93,49 +95,58 @@ and five false negatives. This is a technical development-target pass only:
 `benchmark_pass=false`, `freeze_evaluated=false`, and
 `production_promotion_allowed=false`.
 
-## Windows development rerun
+## Windows development verification
 
-First apply the E2.4.2 implementation commit and keep the existing 32-image
-fixture pack unchanged. Then run from the repository root:
+The same candidate and unchanged 32-image fixture pack were rerun on Windows
+with Tesseract `5.5.3.20260724` and pytesseract `0.3.13`. The submitted ZIP
+has SHA256
+`07d99c4d83d1a36ec12cb1c92c44caa5f1f17896a42a20f3c03964efd27e9713`.
+Its ZIP entries, raw-response hashes, aggregate metrics, boundary fields, and
+all 15 technical gates were independently checked. The complete Windows test
+suite also passed: 114 tests, zero failures.
 
-```powershell
-Set-Location "C:\Users\ASUS\Documents\Project\AI-TDSS"
-Set-ExecutionPolicy -Scope Process Bypass
+| Metric | Windows result | Registered target |
+|---|---:|---:|
+| External fixtures | 32 | >= 32 |
+| Tick precision | 100.00% | >= 99.00% |
+| Tick recall | 98.90% | >= 95.00% |
+| Exact text | 99.17% | >= 95.00% |
+| Expected calibration recall | 100.00% | >= 95.00% |
+| Fail-closed recall | 100.00% | 100.00% |
+| False calibration | 0.00% | 0.00% |
+| Normalized mapping MAE | 0.007793 tick step | <= 0.10 |
+| Mapping MAE | 0.301831 px | <= 0.75 px |
 
-$FIXTURE_MANIFEST = "C:\path\to\e2_4_1_fixture_manifest.json"
-$OUTPUT = "$HOME\Downloads\e2_4_2_windows_development"
-
-& ".\ai\scripts\rerun_e2_4_2_windows.ps1" `
-    -FixtureManifest $FIXTURE_MANIFEST `
-    -OutputDirectory $OUTPUT
-```
-
-The script discovers the active Python and common Tesseract installation
-paths, runs the registered contract, prints the Markdown summary, and creates
-`e2_4_2_windows_development_windows_results.zip` beside the output directory.
-If an interrupted compatible run must continue, repeat the command with
-`-Resume`.
-
-The expected interpretation is:
+All 24 valid fixtures calibrated and all eight negative fixtures failed
+closed. Aggregate matching produced 360 true positives, zero false positives,
+and four false negatives. The evidence remains development-only:
 
 ```text
 Evidence role: DEVELOPMENT_REGRESSION_ONLY
 Development targets: PASS; E2.4.2 freeze: NOT EVALUATED
 ```
 
-A different technical result on Windows is a portability failure to diagnose
-before freezing; it is not permission to tune from a fresh holdout.
+The audited artifact lineage is recorded in
+[`config/experiments/e2_4_2_development_result.json`](../../config/experiments/e2_4_2_development_result.json).
 
-## Fresh holdout and freeze rule
+## Implementation freeze and fresh holdout rule
 
-After the implementation hashes and Windows development result are reviewed,
-freeze the provider, runner, preprocessing values, badge rule, selection
-order, matching rules, and gates. Only then capture and annotate a new set of
-at least 32 external TradingView/MT5 screenshots with the same required
-pair/platform/theme/timeframe/locale marginal coverage.
+Implementation freeze `E2_4_2_FREEZE_20260905_01` was recorded at
+`2026-09-05T13:00:43+00:00`. It locks the provider, runner, preprocessing
+values, badge rule, selection order, matching rules, and gates at implementation
+commit `32cd3015f694ae9fc36bd545d160f6b6c5c1a1fd`.
 
-The builder deliberately refuses an E2.4.2 manifest while the contract is
-still in development status. After the freeze record exists, copy
+The runtime source hashes are the exact CRLF bytes reviewed on Windows; the
+contract also records canonical LF hashes for repository lineage. Run the
+fresh holdout from the same Windows checkout so the frozen runtime hashes are
+verified before OCR starts.
+
+Only screenshots captured after the freeze timestamp are eligible. Capture
+and annotate at least 32 new external TradingView/MT5 screenshots with the
+same required pair/platform/theme/timeframe/locale marginal coverage.
+
+The builder deliberately refuses an E2.4.2 manifest unless the contract has
+this freeze record. Copy
 [`templates/e2_4_2_external_annotations.example.json`](templates/e2_4_2_external_annotations.example.json),
 fill the frozen ID and post-freeze capture timestamp, then use the same
 external-fixture builder with `--contract` pointing to the E2.4.2 contract.

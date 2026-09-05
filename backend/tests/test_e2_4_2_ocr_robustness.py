@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
 import unittest
@@ -29,6 +30,22 @@ E242_CONTRACT = (
     / "config"
     / "experiments"
     / "e2_4_2_ocr_robustness.json"
+)
+E242_DEVELOPMENT_RESULT = (
+    PROJECT_ROOT
+    / "config"
+    / "experiments"
+    / "e2_4_2_development_result.json"
+)
+E242_BENCHMARK_RUNNER = (
+    PROJECT_ROOT / "ai" / "scripts" / "benchmark_e2_4_price_axis_ocr.py"
+)
+E242_CALIBRATION_SERVICE = (
+    PROJECT_ROOT
+    / "backend"
+    / "app"
+    / "services"
+    / "screenshot_price_axis_calibration_service.py"
 )
 
 
@@ -86,12 +103,62 @@ class E242OCRRobustnessTest(unittest.TestCase):
             "filled_background_rejection_count": 0,
         }
 
-    def test_repository_contract_marks_reused_fixtures_as_development(
+    def test_repository_contract_is_frozen_after_windows_verification(
         self,
     ) -> None:
         contract = json.loads(E242_CONTRACT.read_text(encoding="utf-8"))
 
         self.assertEqual(validate_contract(contract), [])
+        self.assertEqual(
+            contract["status"],
+            "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT",
+        )
+        implementation_freeze = contract["implementation_freeze"]
+        self.assertEqual(
+            implementation_freeze["freeze_id"],
+            "E2_4_2_FREEZE_20260905_01",
+        )
+        self.assertEqual(
+            implementation_freeze["source_commit"],
+            "32cd3015f694ae9fc36bd545d160f6b6c5c1a1fd",
+        )
+        self.assertEqual(
+            implementation_freeze[
+                "windows_development_result_zip_sha256"
+            ],
+            (
+                "07d99c4d83d1a36ec12cb1c92c44caa"
+                "5f1f17896a42a20f3c03964efd27e9713"
+            ),
+        )
+        source_paths = {
+            "calibration_service": (
+                E242_CALIBRATION_SERVICE,
+                "calibration_service_source_sha256",
+            ),
+            "benchmark_runner": (
+                E242_BENCHMARK_RUNNER,
+                "benchmark_runner_source_sha256",
+            ),
+        }
+        for source_id, (source_path, runtime_hash_key) in (
+            source_paths.items()
+        ):
+            canonical_bytes = source_path.read_bytes().replace(
+                b"\r\n",
+                b"\n",
+            )
+            self.assertEqual(
+                hashlib.sha256(canonical_bytes).hexdigest(),
+                implementation_freeze["canonical_lf_source_sha256"][
+                    source_id
+                ],
+            )
+            windows_bytes = canonical_bytes.replace(b"\n", b"\r\n")
+            self.assertEqual(
+                hashlib.sha256(windows_bytes).hexdigest(),
+                implementation_freeze[runtime_hash_key],
+            )
         self.assertEqual(
             contract["evidence_roles"]["reused_e2_4_1_fixtures"],
             "DEVELOPMENT_REGRESSION_ONLY",
@@ -107,6 +174,16 @@ class E242OCRRobustnessTest(unittest.TestCase):
         self.assertFalse(
             contract["output_contract"]["production_promotion_possible"]
         )
+        development_result = json.loads(
+            E242_DEVELOPMENT_RESULT.read_text(encoding="utf-8")
+        )
+        self.assertTrue(development_result["implementation_frozen"])
+        self.assertFalse(
+            development_result["windows_development_verification_pending"]
+        )
+        self.assertFalse(development_result["freeze_evaluated"])
+        self.assertFalse(development_result["benchmark_pass"])
+        self.assertIsNone(development_result["selected_production_profile"])
         profile = contract["ocr_engine"]["profiles"][0]
         self.assertAlmostEqual(
             profile["tight_pass"][
@@ -186,6 +263,17 @@ class E242OCRRobustnessTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
+            contract = json.loads(E242_CONTRACT.read_text(encoding="utf-8"))
+            development_contract = dict(contract)
+            development_contract[
+                "status"
+            ] = "PREREGISTERED_DEVELOPMENT_REMEDIATION"
+            development_contract.pop("implementation_freeze")
+            development_contract_path = root / "development_contract.json"
+            development_contract_path.write_text(
+                json.dumps(development_contract),
+                encoding="utf-8",
+            )
             with self.assertRaisesRegex(
                 ValueError,
                 "sebelum implementation freeze",
@@ -193,31 +281,18 @@ class E242OCRRobustnessTest(unittest.TestCase):
                 build_pack(
                     annotations_path=annotations_path,
                     output_dir=root / "pack",
-                    contract_path=E242_CONTRACT,
+                    contract_path=development_contract_path,
                 )
 
-            contract = json.loads(E242_CONTRACT.read_text(encoding="utf-8"))
-            contract["status"] = "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT"
-            contract["implementation_freeze"] = {
-                "freeze_id": "UNIT_TEST_FREEZE_001",
-                "frozen_at_utc": "2026-09-04T12:00:00+00:00",
-                "calibration_service_source_sha256": "a" * 64,
-                "benchmark_runner_source_sha256": "b" * 64,
-                "windows_development_result_zip_sha256": "c" * 64,
-            }
-            contract_path = root / "frozen_contract.json"
-            contract_path.write_text(
-                json.dumps(contract),
-                encoding="utf-8",
-            )
+            freeze_id = contract["implementation_freeze"]["freeze_id"]
             annotations.update(
                 {
                     "evidence_role": "FRESH_EXTERNAL_HOLDOUT",
                     "captured_after_implementation_freeze": True,
                     "capture_started_at_utc": (
-                        "2026-09-05T00:00:00+00:00"
+                        "2026-09-06T00:00:00+00:00"
                     ),
-                    "implementation_freeze_id": "UNIT_TEST_FREEZE_001",
+                    "implementation_freeze_id": freeze_id,
                 }
             )
             annotations_path.write_text(
@@ -228,7 +303,7 @@ class E242OCRRobustnessTest(unittest.TestCase):
             manifest_path = build_pack(
                 annotations_path=annotations_path,
                 output_dir=root / "pack",
-                contract_path=contract_path,
+                contract_path=E242_CONTRACT,
             )
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
@@ -243,7 +318,7 @@ class E242OCRRobustnessTest(unittest.TestCase):
             )
             self.assertEqual(
                 manifest["implementation_freeze_id"],
-                "UNIT_TEST_FREEZE_001",
+                freeze_id,
             )
             self.assertEqual(
                 validate_manifest(manifest, contract, manifest_path),
@@ -255,7 +330,7 @@ class E242OCRRobustnessTest(unittest.TestCase):
             ):
                 run(
                     SimpleNamespace(
-                        contract=contract_path,
+                        contract=E242_CONTRACT,
                         fixture_manifest=manifest_path,
                         output_dir=root / "benchmark",
                         profile_ids=None,

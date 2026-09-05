@@ -45,7 +45,7 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - Runner cache inferensi E2.3 memproses development 2020–2023 sekali per snapshot, memverifikasi cutoff/session clock serta SHA256 respons, dan menyediakan raw response yang sama untuk policy Standard dan High Risk. Holdout 2024 dan final 2025 ditolak pada tahap ini.
 - Cache development E2.3 selesai pada 8.158/8.158 respons sukses. Kandidat shadow High Risk diregistrasikan pada RR minimum `1,25`; evaluator offline mempertahankan Standard, membatasi satu kandidat per tier/hari, dan fail closed pada konflik BUY/SELL.
 - E2.3.1 memproses seluruh 55 observasi ambigu dengan M1 terverifikasi dan mengubah 15 outcome. Combined expectancy membaik menjadi `+0,0584R/kandidat`, tetapi High Risk selection masih memiliki ambiguity `25%` terhadap batas `10%`; gate tetap **gagal**, High Risk tetap shadow-only, dan 2024/2025 tetap terkunci.
-- E2.4 core menyediakan telemetry opt-in untuk membaca minimal tiga tick sumbu harga, mem-parse format lokal GBPUSD/XAUUSD, dan memvalidasi robust linear `price(y)`. E2.4.1 selesai `FAIL` pada 32 fixture eksternal Windows tanpa profile terpilih. Kandidat dua-pass E2.4.2 lulus target development pada fixture reuse, tetapi freeze belum dievaluasi dan tetap membutuhkan minimal 32 screenshot baru setelah implementation freeze.
+- E2.4 core menyediakan telemetry opt-in untuk membaca minimal tiga tick sumbu harga, mem-parse format lokal GBPUSD/XAUUSD, dan memvalidasi robust linear `price(y)`. E2.4.1 selesai `FAIL` pada 32 fixture eksternal Windows tanpa profile terpilih. Kandidat dua-pass E2.4.2 lulus target development Linux/Windows dan implementation freeze `E2_4_2_FREEZE_20260905_01` sudah dicatat; freeze tetap belum dievaluasi sampai minimal 32 screenshot baru menjalani fresh holdout.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -133,7 +133,7 @@ E2.4 menambahkan service kalibrasi sumbu harga screenshot dan field response `pr
 
 E2.4.1 menjalankan benchmark OCR secara lokal tanpa backend server, CNN/YOLO inference, training, atau outcome trading. Keempat profile gagal reviewed external gate, sehingga tidak ada profile yang dipilih. Hasil dan evidence lineage dijelaskan di [`docs/experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md`](docs/experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md).
 
-E2.4.2 meregistrasikan satu kandidat adaptive wide/tight dengan filled-background rejection. Fixture E2.4.1 hanya development regression; target teknis development lulus, tetapi fresh post-freeze holdout tetap wajib. Protokol, metrik, dan Windows rerun berada di [`docs/experiments/E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md`](docs/experiments/E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md).
+E2.4.2 membekukan satu kandidat adaptive wide/tight dengan filled-background rejection setelah target teknis development Linux/Windows lulus. Fixture E2.4.1 tetap development regression saja; fresh post-freeze holdout tetap wajib. Protokol, metrik, dan freeze lineage berada di [`docs/experiments/E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md`](docs/experiments/E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md).
 
 ## Dokumen Utama
 
@@ -162,11 +162,10 @@ E2.4.2 meregistrasikan satu kandidat adaptive wide/tight dengan filled-backgroun
 
 ## Urutan Pengembangan Berikutnya
 
-1. Verifikasi kandidat E2.4.2 pada Windows memakai 32 fixture development E2.4.1, lalu bekukan seluruh source/config jika hasil lintas OS konsisten.
-2. Ambil minimal 32 fixture eksternal baru setelah freeze dan jalankan E2.4.2 tepat sekali sebagai fresh holdout sebelum review integrasi frontend; lanjutkan liquidity berbasis struktur dan candlestick berbasis OHLCV sebagai slice terpisah.
-3. Simpan setiap hasil analisis, termasuk tier High Risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.
-4. Implementasikan feedback outcome terverifikasi dan unduhan workbook Excel empat sheet.
-5. Jalankan product acceptance, outcome baseline, ablation, dan incremental experiment sesuai evaluation gate.
+1. Ambil minimal 32 fixture eksternal baru setelah freeze `E2_4_2_FREEZE_20260905_01` dan jalankan E2.4.2 tepat sekali sebagai fresh holdout sebelum review integrasi frontend; lanjutkan liquidity berbasis struktur dan candlestick berbasis OHLCV sebagai slice terpisah.
+2. Simpan setiap hasil analisis, termasuk tier High Risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.
+3. Implementasikan feedback outcome terverifikasi dan unduhan workbook Excel empat sheet.
+4. Jalankan product acceptance, outcome baseline, ablation, dan incremental experiment sesuai evaluation gate.
 
 E2.3.1 sudah selesai dengan keputusan `FAIL`; High Risk tetap shadow-only dan 2024/2025 tidak dibuka. Tick-level follow-up memerlukan eksperimen baru yang diregistrasikan terlebih dahulu, bukan perubahan threshold setelah melihat hasil.
 

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "experiment_id": "E2.4.2",
   "stage": "EXTERNAL_THEME_PLATFORM_ROBUSTNESS_REMEDIATION",
-  "status": "PREREGISTERED_DEVELOPMENT_REMEDIATION",
+  "status": "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT",
   "registered_on": "2026-09-04",
   "parent_contract": "config/experiments/e2_4_1_ocr_benchmark.json",
   "training_performed": false,
@@ -24,6 +24,32 @@
     "tesseract_version": "5.5.3.20260724",
     "all_registered_profiles_failed": true,
     "selected_profile": null
+  },
+  "implementation_freeze": {
+    "freeze_id": "E2_4_2_FREEZE_20260905_01",
+    "frozen_at_utc": "2026-09-05T13:00:43+00:00",
+    "source_commit": "32cd3015f694ae9fc36bd545d160f6b6c5c1a1fd",
+    "profile_id": "ADAPTIVE_WIDE_FOOTER2_TIGHT_GRAY3_PSM11",
+    "source_hash_byte_format": "WINDOWS_CHECKOUT_CRLF",
+    "calibration_service_source_sha256": "3c026ac67a87b4d5014e17f4e176fa0f00561e8fd6ede767fce7d6cf1ac5c1ee",
+    "benchmark_runner_source_sha256": "56eb76dde4e2a378f815abc83d221c26f381997915ac3bbab195532b0ee74bcc",
+    "canonical_lf_source_sha256": {
+      "calibration_service": "de22fef5b4da4e3811e4930e3ade3652300cea9f18b04eb8a2c632ffa9cff42e",
+      "benchmark_runner": "5046ccd45af77145c6c24adf782a07545e61a4f335c889c8720097c4db401439"
+    },
+    "windows_development_result_zip_sha256": "07d99c4d83d1a36ec12cb1c92c44caa5f1f17896a42a20f3c03964efd27e9713",
+    "windows_development_artifact_sha256": {
+      "run_contract": "41957bcd85f6924d90eda90f3dd0bdf9b016fa5bffed66697e3c5083e824fbfa",
+      "rows_csv": "8f8a33089a70b893a2eca625ec4ce870296c45c370aae15d6e48132be1b60384",
+      "summary_json": "031f1ca010f432bb41629d27740108577143bdafa73f4e3cd221123bb11245c2",
+      "summary_markdown": "b836219d39da0c1350ae28a7f050d39c46ec92cd6142f1b0a783b427abeebc83"
+    },
+    "windows_environment": {
+      "tesseract_version": "5.5.3.20260724",
+      "pytesseract_version": "0.3.13",
+      "unittest_tests_run": 114,
+      "unittest_result": "PASS"
+    }
   },
   "evidence_roles": {
     "reused_e2_4_1_fixtures": "DEVELOPMENT_REGRESSION_ONLY",

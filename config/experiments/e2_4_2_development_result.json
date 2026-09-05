@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "experiment_id": "E2.4.2",
-  "status": "DEVELOPMENT_TARGETS_PASS_FREEZE_NOT_EVALUATED",
+  "status": "DEVELOPMENT_TARGETS_PASS_IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT",
   "evidence_role": "DEVELOPMENT_REGRESSION_ONLY",
   "generated_at_utc": "2026-09-04T11:27:44.194704+00:00",
   "environment": {
@@ -37,12 +37,52 @@
     "reported_non_gating_absolute_mapping_mae": 0.04646418587398687,
     "telemetry_boundary_violations": 0
   },
+  "windows_development_verification": {
+    "generated_at_utc": "2026-09-05T12:40:37.939721+00:00",
+    "environment": {
+      "operating_system": "WINDOWS",
+      "tesseract_version": "5.5.3.20260724",
+      "pytesseract_version": "0.3.13",
+      "runner_version": "1.1.0"
+    },
+    "lineage": {
+      "source_commit": "32cd3015f694ae9fc36bd545d160f6b6c5c1a1fd",
+      "source_fixture_manifest_sha256": "888c3627713798f87d58e1b76fe92eac5c4ca8e192419c75a6fe8f5087517852",
+      "result_zip_sha256": "07d99c4d83d1a36ec12cb1c92c44caa5f1f17896a42a20f3c03964efd27e9713",
+      "run_contract_sha256": "41957bcd85f6924d90eda90f3dd0bdf9b016fa5bffed66697e3c5083e824fbfa",
+      "rows_csv_sha256": "8f8a33089a70b893a2eca625ec4ce870296c45c370aae15d6e48132be1b60384",
+      "summary_json_sha256": "031f1ca010f432bb41629d27740108577143bdafa73f4e3cd221123bb11245c2",
+      "summary_markdown_sha256": "b836219d39da0c1350ae28a7f050d39c46ec92cd6142f1b0a783b427abeebc83"
+    },
+    "metrics": {
+      "fixture_count": 32,
+      "successful_tasks": 32,
+      "tick_true_positive": 360,
+      "tick_false_positive": 0,
+      "tick_false_negative": 4,
+      "tick_precision": 1.0,
+      "tick_recall": 0.989010989010989,
+      "exact_text_accuracy": 0.9916666666666667,
+      "expected_calibration_recall": 1.0,
+      "fail_closed_recall": 1.0,
+      "false_calibration_rate": 0.0,
+      "normalized_mapping_mae": 0.007793174969675793,
+      "mapping_mae_pixels": 0.3018305229953568,
+      "reported_non_gating_absolute_mapping_mae": 0.046461118856167036,
+      "telemetry_boundary_violations": 0
+    },
+    "all_technical_gates_passed": true,
+    "unittest_tests_run": 114,
+    "unittest_result": "PASS"
+  },
   "development_technical_gates_passed": true,
+  "implementation_frozen": true,
+  "implementation_freeze_id": "E2_4_2_FREEZE_20260905_01",
   "freeze_evaluated": false,
   "benchmark_pass": false,
   "fresh_external_holdout_required": true,
   "minimum_fresh_external_holdout_fixtures": 32,
-  "windows_development_verification_pending": true,
+  "windows_development_verification_pending": false,
   "selected_production_profile": null,
   "training_performed": false,
   "model_inference_performed": false,

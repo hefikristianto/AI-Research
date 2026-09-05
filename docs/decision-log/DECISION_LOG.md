@@ -230,3 +230,14 @@
 | Impact | E2.4.2 memakai wide footer-trim 2× dan tight grayscale 3×, menolak observasi pada filled background, memilih pass melalui urutan struktural yang dibekukan, serta menggate normalized/pixel MAE. Development regression Linux mencapai precision 99,72%, recall 98,63%, calibration/fail-closed recall 100%, dan false calibration 0%, tetapi freeze tetap `NOT EVALUATED`; minimal 32 screenshot eksternal baru yang diambil setelah implementation freeze tetap wajib. Produksi, entry authorization, High Risk, canonical OHLCV, serta outcome 2024/2025 tidak berubah |
 
 ---
+
+## Decision #023
+
+| Item | Description |
+|------|-------------|
+| Date | 05-09-2026 |
+| Decision | Implementasi E2.4.2 pada commit `32cd3015f694ae9fc36bd545d160f6b6c5c1a1fd` dibekukan sebagai `E2_4_2_FREEZE_20260905_01`; fresh external holdout belum dievaluasi |
+| Reason | Development regression Windows pada 32 fixture reuse menyelesaikan 32/32 task, mencapai precision 100%, recall 98,90%, calibration/fail-closed recall 100%, false calibration 0%, normalized MAE 0,007793, dan pixel MAE 0,301831. Seluruh 15 technical gate serta 114 unit test lulus, dan ZIP/result lineage lolos verifikasi hash serta audit boundary |
+| Impact | Provider, runner, profile adaptive, preprocessing, badge rejection, pass selection, matching, dan gate tidak boleh diubah selama fresh holdout. Hanya screenshot baru yang diambil setelah `2026-09-05T13:00:43+00:00` dan mengacu pada freeze ID ini yang eligible. `benchmark_pass` tetap false sampai holdout selesai; produksi, entry authorization, High Risk, canonical OHLCV, serta outcome 2024/2025 tetap tidak berubah |
+
+---

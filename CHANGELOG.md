@@ -4,6 +4,7 @@
 
 ### Added
 
+- Recorded E2.4.2 implementation freeze `E2_4_2_FREEZE_20260905_01` after the audited 32-fixture Windows development run passed all 15 technical gates and the 114-test suite passed; fresh post-freeze holdout evaluation remains pending and production promotion remains prohibited.
 - Registered E2.4.2 after all four E2.4.1 profiles failed the reviewed 32-fixture Windows gate; no E2.4.1 profile was selected.
 - Added a deterministic adaptive OCR candidate with wide footer-trim 2× and tight grayscale 3× passes, filled live-price-badge rejection, audited pass selection, and pixel-space mapping telemetry.
 - Added explicit development-versus-fresh-holdout reporting so reused E2.4.1 fixtures can verify remediation targets but can never pass the E2.4.2 freeze.

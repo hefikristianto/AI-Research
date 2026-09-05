@@ -5,7 +5,7 @@
   "evidence_role": "FRESH_EXTERNAL_HOLDOUT",
   "captured_after_implementation_freeze": true,
   "capture_started_at_utc": "<ISO-8601 UTC after frozen_at_utc>",
-  "implementation_freeze_id": "<copy from frozen E2.4.2 contract>",
+  "implementation_freeze_id": "E2_4_2_FREEZE_20260905_01",
   "trading_outcome_data_used": false,
   "fixtures": [
     {
