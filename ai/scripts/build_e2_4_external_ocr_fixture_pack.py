@@ -20,7 +20,7 @@ from ai.scripts.benchmark_e2_4_price_axis_ocr import validate_contract
 from ai.scripts.benchmark_e2_4_price_axis_ocr import validate_manifest
 
 
-BUILDER_VERSION = "1.0.0"
+BUILDER_VERSION = "1.1.0"
 ALLOWED_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 
 
@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Copy reviewed TradingView/MT5 screenshots into a portable "
-            "E2.4.1 fixture pack and freeze each image by SHA256."
+            "E2.4 OCR fixture pack and freeze each image by SHA256."
         )
     )
     parser.add_argument(
@@ -47,7 +47,7 @@ def parse_args() -> argparse.Namespace:
         "--contract",
         type=Path,
         default=DEFAULT_CONTRACT,
-        help="Registered E2.4.1 benchmark contract.",
+        help="Registered E2.4.1 or E2.4.2 benchmark contract.",
     )
     return parser.parse_args()
 
@@ -96,8 +96,10 @@ def build_pack(
     contract_errors = validate_contract(contract)
     if contract_errors:
         raise ValueError(
-            "Contract E2.4.1 INVALID: " + "; ".join(contract_errors)
+            f"Contract {contract.get('experiment_id', 'OCR')} INVALID: "
+            + "; ".join(contract_errors)
         )
+    experiment_id = str(contract["experiment_id"])
 
     annotations_path = annotations_path.resolve()
     annotations = read_json(annotations_path)
@@ -109,10 +111,72 @@ def build_pack(
         )
     if annotations.get("schema_version") != 1:
         raise ValueError("Annotation schema_version harus 1.")
-    if annotations.get("experiment_id") != "E2.4.1":
-        raise ValueError("Annotation experiment_id harus E2.4.1.")
+    if annotations.get("experiment_id") != experiment_id:
+        raise ValueError(
+            f"Annotation experiment_id harus {experiment_id}."
+        )
     if annotations.get("trading_outcome_data_used") is not False:
         raise ValueError("Annotation tidak boleh memakai outcome trading.")
+
+    holdout_metadata: dict[str, Any] = {}
+    if experiment_id == "E2.4.2":
+        if contract.get("status") != "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT":
+            raise ValueError(
+                "Fresh holdout E2.4.2 tidak boleh dibuat sebelum "
+                "implementation freeze dan verifikasi development Windows."
+            )
+        implementation_freeze = contract["implementation_freeze"]
+        holdout_requirements = contract["fixture_contract"][
+            "fresh_holdout_manifest_requirements"
+        ]
+        expected_evidence_role = holdout_requirements["evidence_role"]
+        freeze_id = str(implementation_freeze["freeze_id"])
+        if annotations.get("evidence_role") != expected_evidence_role:
+            raise ValueError(
+                "Annotation E2.4.2 wajib evidence_role "
+                "FRESH_EXTERNAL_HOLDOUT."
+            )
+        if annotations.get("captured_after_implementation_freeze") is not (
+            holdout_requirements[
+                "captured_after_implementation_freeze"
+            ]
+        ):
+            raise ValueError(
+                "Annotation E2.4.2 wajib menyatakan capture setelah freeze."
+            )
+        if str(annotations.get("implementation_freeze_id") or "") != freeze_id:
+            raise ValueError("Annotation E2.4.2 memakai freeze_id berbeda.")
+        capture_started_at_utc = str(
+            annotations.get("capture_started_at_utc") or ""
+        )
+        try:
+            captured_at = datetime.fromisoformat(
+                capture_started_at_utc.replace("Z", "+00:00")
+            )
+            frozen_at = datetime.fromisoformat(
+                str(implementation_freeze["frozen_at_utc"]).replace(
+                    "Z", "+00:00"
+                )
+            )
+            if (
+                captured_at.utcoffset() is None
+                or frozen_at.utcoffset() is None
+                or captured_at < frozen_at
+            ):
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            raise ValueError(
+                "capture_started_at_utc wajib ISO UTC dan tidak boleh "
+                "mendahului implementation freeze."
+            ) from None
+        holdout_metadata = {
+            "evidence_role": expected_evidence_role,
+            "captured_after_implementation_freeze": holdout_requirements[
+                "captured_after_implementation_freeze"
+            ],
+            "capture_started_at_utc": capture_started_at_utc,
+            "implementation_freeze_id": freeze_id,
+        }
 
     fixture_set_id = str(annotations.get("fixture_set_id", "")).strip()
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", fixture_set_id):
@@ -122,7 +186,8 @@ def build_pack(
         raise ValueError("Annotation fixtures harus list non-empty.")
 
     output_dir = output_dir.resolve()
-    manifest_path = output_dir / "e2_4_1_fixture_manifest.json"
+    output_prefix = experiment_id.lower().replace(".", "_")
+    manifest_path = output_dir / f"{output_prefix}_fixture_manifest.json"
     if manifest_path.exists():
         raise FileExistsError(
             "Fixture pack sudah ada; pilih output directory baru: "
@@ -169,7 +234,7 @@ def build_pack(
 
     manifest = {
         "schema_version": 1,
-        "experiment_id": "E2.4.1",
+        "experiment_id": experiment_id,
         "fixture_set_id": fixture_set_id,
         "builder_version": BUILDER_VERSION,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -178,6 +243,7 @@ def build_pack(
         "trading_outcome_data_used": False,
         "production_decision_changed": False,
         "fixtures": fixtures,
+        **holdout_metadata,
     }
     errors = validate_manifest(manifest, contract, manifest_path)
     if errors:

@@ -1,6 +1,6 @@
 # E2.4.1 OCR Backend and Fixture Benchmark
 
-- **Status:** preregistered; runner and deterministic smoke fixtures implemented
+- **Status:** completed external benchmark — FAIL; no profile selected
 - **Execution:** laptop lokal, tanpa FastAPI/React server
 - **Training/model inference:** tidak dilakukan
 - **Trading outcome:** tidak dibaca
@@ -24,6 +24,27 @@ Semua profil memakai Tesseract 5, English language data, OEM 1, PSM 11, dan whit
 Profil footer-trim ditambahkan sebagai kandidat eksplisit setelah partial review 8 fixture menemukan footer hitam TradingView menekan kontras label sumbu abu-abu pada chart terang. Profil lama tidak diubah. Deteksi sumbu persen juga diperketat: sekurangnya tiga label persen berformat valid dengan confidence ≥ 0,10 harus ditemukan. Ambang khusus ini memakai pengulangan struktur label sebagai bukti sumbu; token `%` tunggal, malformed, atau confidence nol tetap dicatat sebagai telemetry tetapi tidak lagi menjadi bukti sumbu persen.
 
 Kontrak machine-readable berada di [`config/experiments/e2_4_1_ocr_benchmark.json`](../../config/experiments/e2_4_1_ocr_benchmark.json).
+
+## Hasil eksternal final
+
+Run Windows yang direview memproses seluruh 32 fixture eksternal dengan
+Tesseract `5.5.3.20260724`. SHA256 result ZIP adalah
+`a9ca2ad2576171c9a5898afd59f2d716158bc47fbdfba7821d039d78fb3d1241`
+dan SHA256 fixture manifest adalah
+`888c3627713798f87d58e1b76fe92eac5c4ca8e192419c75a6fe8f5087517852`.
+Ringkasan machine-readable dan hash artefak disimpan di
+[`config/experiments/e2_4_1_external_result.json`](../../config/experiments/e2_4_1_external_result.json).
+
+| Profile | Precision | Recall | Exact text | Calibration recall | Fail-closed recall | False calibration | Normalized MAE | Gate |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| `GRAY_AUTOCONTRAST_2X_PSM11` | 97.77% | 48.08% | 98.86% | 45.83% | 100.00% | 0.00% | 0.010097 | FAIL |
+| `GRAY_FOOTER_TRIM_AUTOCONTRAST_2X_PSM11` | 98.47% | 53.02% | 98.45% | 50.00% | 100.00% | 0.00% | 0.010131 | FAIL |
+| `GRAY_INVERT_AUTOCONTRAST_2X_PSM11` | 97.75% | 47.80% | 99.43% | 45.83% | 100.00% | 0.00% | 0.010107 | FAIL |
+| `RAW_RGB_PSM11` | 93.50% | 71.15% | 99.61% | 95.83% | 100.00% | 0.00% | 0.006775 | FAIL |
+
+Kesimpulan E2.4.1 adalah **FAIL**. Tidak ada profile yang dipilih atau
+dipromosikan. Remediasi hanya boleh dilakukan melalui eksperimen baru yang
+diregistrasikan; tindak lanjut tersebut dicatat sebagai E2.4.2.
 
 ## Batas metodologis
 

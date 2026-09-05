@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "experiment_id": "E2.4.1",
+  "status": "FAIL_NO_PROFILE_SELECTED",
+  "generated_at_utc": "2026-09-04T06:37:26.796345+00:00",
+  "fixture_set_id": "E2_4_1_EXTERNAL_REVIEWED_20260904_V2",
+  "environment": {
+    "operating_system": "WINDOWS",
+    "tesseract_version": "5.5.3.20260724",
+    "runner_version": "1.0.0"
+  },
+  "lineage": {
+    "result_zip_sha256": "a9ca2ad2576171c9a5898afd59f2d716158bc47fbdfba7821d039d78fb3d1241",
+    "fixture_manifest_sha256": "888c3627713798f87d58e1b76fe92eac5c4ca8e192419c75a6fe8f5087517852",
+    "contract_sha256": "6db18d0f72a6952be6a032868c7fcfb8351434b4f5e51d59ce8fb2a864a1b2ee",
+    "run_contract_sha256": "eea85c07a32f62ca5d5f23238ec374855883880b1887c2dd6ed240e8ef93879c",
+    "rows_csv_sha256": "59c9c3a3592c4a3ed21a48515c9695329bdd3b2a8d754d13211b1ec0b7f4e12f",
+    "summary_json_sha256": "57d4ba77d0b804066176f1b4cb96f35e7247d414d360cf0c774685d0ff0c9b53"
+  },
+  "task_count": 128,
+  "fixture_count": 32,
+  "profiles": {
+    "GRAY_AUTOCONTRAST_2X_PSM11": {
+      "tick_precision": 0.9776536312849162,
+      "tick_recall": 0.4807692307692308,
+      "exact_text_accuracy": 0.9885714285714285,
+      "expected_calibration_recall": 0.4583333333333333,
+      "fail_closed_recall": 1.0,
+      "false_calibration_rate": 0.0,
+      "normalized_mapping_mae": 0.01009692452075877,
+      "gate_pass": false
+    },
+    "GRAY_FOOTER_TRIM_AUTOCONTRAST_2X_PSM11": {
+      "tick_precision": 0.9846938775510204,
+      "tick_recall": 0.5302197802197802,
+      "exact_text_accuracy": 0.9844559585492227,
+      "expected_calibration_recall": 0.5,
+      "fail_closed_recall": 1.0,
+      "false_calibration_rate": 0.0,
+      "normalized_mapping_mae": 0.010131279634624879,
+      "gate_pass": false
+    },
+    "GRAY_INVERT_AUTOCONTRAST_2X_PSM11": {
+      "tick_precision": 0.9775280898876404,
+      "tick_recall": 0.47802197802197804,
+      "exact_text_accuracy": 0.9942528735632183,
+      "expected_calibration_recall": 0.4583333333333333,
+      "fail_closed_recall": 1.0,
+      "false_calibration_rate": 0.0,
+      "normalized_mapping_mae": 0.010107470660818497,
+      "gate_pass": false
+    },
+    "RAW_RGB_PSM11": {
+      "tick_precision": 0.9350180505415162,
+      "tick_recall": 0.7115384615384616,
+      "exact_text_accuracy": 0.9961389961389961,
+      "expected_calibration_recall": 0.9583333333333334,
+      "fail_closed_recall": 1.0,
+      "false_calibration_rate": 0.0,
+      "normalized_mapping_mae": 0.006774973065927255,
+      "gate_pass": false
+    }
+  },
+  "passing_profiles": [],
+  "benchmark_pass": false,
+  "selected_profile": null,
+  "training_performed": false,
+  "model_inference_performed": false,
+  "trading_outcome_data_used": false,
+  "production_promotion_allowed": false,
+  "production_decision_changed": false,
+  "entry_price_authorized": false
+}

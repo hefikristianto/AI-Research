@@ -4,6 +4,11 @@
 
 ### Added
 
+- Recorded E2.4.2 implementation freeze `E2_4_2_FREEZE_20260905_01` after the audited 32-fixture Windows development run passed all 15 technical gates and the 114-test suite passed; fresh post-freeze holdout evaluation remains pending and production promotion remains prohibited.
+- Registered E2.4.2 after all four E2.4.1 profiles failed the reviewed 32-fixture Windows gate; no E2.4.1 profile was selected.
+- Added a deterministic adaptive OCR candidate with wide footer-trim 2× and tight grayscale 3× passes, filled live-price-badge rejection, audited pass selection, and pixel-space mapping telemetry.
+- Added explicit development-versus-fresh-holdout reporting so reused E2.4.1 fixtures can verify remediation targets but can never pass the E2.4.2 freeze.
+- Added an E2.4.2 Windows rerun helper, generic E2.4.1/E2.4.2 external fixture builder support, and regression tests for badge rejection, pass selection, percent-axis preemption, and freeze boundaries.
 - Added an explicit E2.4.1 light-chart OCR candidate that removes only a contiguous dark platform footer before autocontrast, preserving the three original profiles unchanged.
 - Registered E2.4.1 with three Tesseract 5 preprocessing profiles, frozen OCR/mapping gates, deterministic synthetic fixtures, and a portable reviewed-external-fixture builder.
 - Added resumable fixture-level OCR benchmarking with image/raw-response SHA256 verification, one-to-one tick matching, external-only profile acceptance, and explicit prohibition of training, outcome reads, entry authorization, or production promotion.

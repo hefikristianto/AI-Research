@@ -45,7 +45,7 @@ Kontrak kanonis yang dapat divalidasi mesin berada di [`config/project_contract.
 - Runner cache inferensi E2.3 memproses development 2020–2023 sekali per snapshot, memverifikasi cutoff/session clock serta SHA256 respons, dan menyediakan raw response yang sama untuk policy Standard dan High Risk. Holdout 2024 dan final 2025 ditolak pada tahap ini.
 - Cache development E2.3 selesai pada 8.158/8.158 respons sukses. Kandidat shadow High Risk diregistrasikan pada RR minimum `1,25`; evaluator offline mempertahankan Standard, membatasi satu kandidat per tier/hari, dan fail closed pada konflik BUY/SELL.
 - E2.3.1 memproses seluruh 55 observasi ambigu dengan M1 terverifikasi dan mengubah 15 outcome. Combined expectancy membaik menjadi `+0,0584R/kandidat`, tetapi High Risk selection masih memiliki ambiguity `25%` terhadap batas `10%`; gate tetap **gagal**, High Risk tetap shadow-only, dan 2024/2025 tetap terkunci.
-- E2.4 core menyediakan telemetry opt-in untuk membaca minimal tiga tick sumbu harga, mem-parse format lokal GBPUSD/XAUUSD, dan memvalidasi robust linear `price(y)`. E2.4.1 kini menyediakan empat profil Tesseract 5—termasuk kandidat footer-trim untuk chart terang—32 deterministic smoke fixtures, external-fixture builder, SHA256 evidence, serta resumable OCR benchmark; evidence eksternal TradingView/MT5 masih harus dikumpulkan sebelum profile dapat dibekukan.
+- E2.4 core menyediakan telemetry opt-in untuk membaca minimal tiga tick sumbu harga, mem-parse format lokal GBPUSD/XAUUSD, dan memvalidasi robust linear `price(y)`. E2.4.1 selesai `FAIL` pada 32 fixture eksternal Windows tanpa profile terpilih. Kandidat dua-pass E2.4.2 lulus target development Linux/Windows dan implementation freeze `E2_4_2_FREEZE_20260905_01` sudah dicatat; freeze tetap belum dievaluasi sampai minimal 32 screenshot baru menjalani fresh holdout.
 - Journal persisten, feedback outcome, dan ekspor Excel masih menjadi pekerjaan berikutnya.
 
 Lihat [`docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md`](docs/research/AI_TDSS_RESEARCH_SYNTHESIS.md) untuk metodologi dan batas klaim penelitian.
@@ -131,7 +131,9 @@ Hasil M5 utama gagal pada gate ambiguity dan positive development expectancy. E2
 
 E2.4 menambahkan service kalibrasi sumbu harga screenshot dan field response `price_axis_calibration` melalui flag opt-in. Core service memerlukan pair yang didukung, minimal tiga tick OCR, sumbu linear menurun, serta residual dan cakupan vertikal yang valid. Semua kondisi tidak terverifikasi fail closed dan tidak memengaruhi rekomendasi publik. Protokol: [`docs/experiments/E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md`](docs/experiments/E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md).
 
-E2.4.1 menjalankan benchmark OCR secara lokal tanpa backend server, CNN/YOLO inference, training, atau outcome trading. Synthetic smoke hanya memverifikasi wiring; gate dan pemilihan profile memakai minimal 32 screenshot eksternal yang direview. Setup Tesseract Windows, fixture annotation, runner resumable, serta review pack dijelaskan di [`docs/experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md`](docs/experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md).
+E2.4.1 menjalankan benchmark OCR secara lokal tanpa backend server, CNN/YOLO inference, training, atau outcome trading. Keempat profile gagal reviewed external gate, sehingga tidak ada profile yang dipilih. Hasil dan evidence lineage dijelaskan di [`docs/experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md`](docs/experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md).
+
+E2.4.2 membekukan satu kandidat adaptive wide/tight dengan filled-background rejection setelah target teknis development Linux/Windows lulus. Fixture E2.4.1 tetap development regression saja; fresh post-freeze holdout tetap wajib. Protokol, metrik, dan freeze lineage berada di [`docs/experiments/E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md`](docs/experiments/E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md).
 
 ## Dokumen Utama
 
@@ -150,6 +152,7 @@ E2.4.1 menjalankan benchmark OCR secara lokal tanpa backend server, CNN/YOLO inf
 - [E2.3.1 M1 intrabar adjudication](docs/experiments/E2_3_1_M1_INTRABAR_ADJUDICATION.md)
 - [E2.4 user screenshot price-axis calibration](docs/experiments/E2_4_USER_SCREENSHOT_PRICE_AXIS_CALIBRATION.md)
 - [E2.4.1 OCR backend and fixture benchmark](docs/experiments/E2_4_1_OCR_BACKEND_BENCHMARK.md)
+- [E2.4.2 OCR theme/platform robustness](docs/experiments/E2_4_2_OCR_THEME_PLATFORM_ROBUSTNESS.md)
 - [System overview](docs/sdd/chapters/CH01_System_Overview.md)
 - [AI architecture](docs/sdd/chapters/CH06_AI_Architecture.md)
 - [Trading journal](docs/sdd/chapters/CH11_Trading_Journal.md)
@@ -159,11 +162,10 @@ E2.4.1 menjalankan benchmark OCR secara lokal tanpa backend server, CNN/YOLO inf
 
 ## Urutan Pengembangan Berikutnya
 
-1. Jalankan E2.4.1 synthetic smoke, kumpulkan minimal 32 fixture eksternal yang direview, lalu bekukan profile OCR hanya bila seluruh gate lulus.
-2. Validasi E2.4.2 robustness warna/platform sebelum default frontend; lanjutkan liquidity berbasis struktur dan candlestick berbasis OHLCV sebagai slice terpisah.
-3. Simpan setiap hasil analisis, termasuk tier High Risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.
-4. Implementasikan feedback outcome terverifikasi dan unduhan workbook Excel empat sheet.
-5. Jalankan product acceptance, outcome baseline, ablation, dan incremental experiment sesuai evaluation gate.
+1. Ambil minimal 32 fixture eksternal baru setelah freeze `E2_4_2_FREEZE_20260905_01` dan jalankan E2.4.2 tepat sekali sebagai fresh holdout sebelum review integrasi frontend; lanjutkan liquidity berbasis struktur dan candlestick berbasis OHLCV sebagai slice terpisah.
+2. Simpan setiap hasil analisis, termasuk tier High Risk, `WATCHLIST`, dan `NO_TRADE`, ke journal milik pengguna.
+3. Implementasikan feedback outcome terverifikasi dan unduhan workbook Excel empat sheet.
+4. Jalankan product acceptance, outcome baseline, ablation, dan incremental experiment sesuai evaluation gate.
 
 E2.3.1 sudah selesai dengan keputusan `FAIL`; High Risk tetap shadow-only dan 2024/2025 tidak dibuka. Tick-level follow-up memerlukan eksperimen baru yang diregistrasikan terlebih dahulu, bukan perubahan threshold setelah melihat hasil.
 

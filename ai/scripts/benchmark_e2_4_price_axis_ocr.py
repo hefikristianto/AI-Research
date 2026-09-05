@@ -36,7 +36,14 @@ DEFAULT_CONTRACT = (
     / "experiments"
     / "e2_4_1_ocr_benchmark.json"
 )
-RUNNER_VERSION = "1.0.0"
+CALIBRATION_SERVICE_SOURCE = (
+    PROJECT_ROOT
+    / "backend"
+    / "app"
+    / "services"
+    / "screenshot_price_axis_calibration_service.py"
+)
+RUNNER_VERSION = "1.1.0"
 
 FORBIDDEN_OUTCOME_KEYS = {
     "trade_outcome",
@@ -82,6 +89,9 @@ ROW_FIELDS = [
     "ocr_engine",
     "tesseract_version",
     "ocr_observation_count",
+    "ocr_pass_count",
+    "ocr_selected_pass_id",
+    "ocr_filled_background_rejection_count",
     "ground_truth_tick_count",
     "recognized_tick_count",
     "tick_true_positive",
@@ -102,9 +112,12 @@ ROW_FIELDS = [
     "mapping_point_count",
     "mapping_absolute_error_sum",
     "mapping_normalized_absolute_error_sum",
+    "mapping_pixel_absolute_error_sum",
     "mapping_mae",
     "mapping_maximum_error",
     "normalized_mapping_mae",
+    "mapping_mae_pixels",
+    "mapping_maximum_error_pixels",
     "entry_price_authorized",
     "production_decision_changed",
     "telemetry_boundary_valid",
@@ -131,7 +144,7 @@ ProviderFactory = Callable[
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Benchmark E2.4.1 price-axis OCR profiles against a frozen "
+            "Benchmark E2.4 price-axis OCR profiles against a frozen "
             "SHA256 fixture manifest. This runner performs no training, "
             "model inference, trading outcome evaluation, or production "
             "decision change."
@@ -141,7 +154,7 @@ def parse_args() -> argparse.Namespace:
         "--contract",
         type=Path,
         default=DEFAULT_CONTRACT,
-        help="Registered E2.4.1 benchmark contract.",
+        help="Registered E2.4.1 or E2.4.2 benchmark contract.",
     )
     parser.add_argument(
         "--fixture-manifest",
@@ -239,14 +252,30 @@ def _forbidden_keys(payload: Any) -> set[str]:
 
 def validate_contract(contract: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    experiment_id = str(contract.get("experiment_id") or "")
+    expected_contracts = {
+        "E2.4.1": (
+            "OCR_BACKEND_AND_FIXTURE_BENCHMARK",
+            {"PREREGISTERED_ENGINEERING_EVALUATION"},
+        ),
+        "E2.4.2": (
+            "EXTERNAL_THEME_PLATFORM_ROBUSTNESS_REMEDIATION",
+            {
+                "PREREGISTERED_DEVELOPMENT_REMEDIATION",
+                "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT",
+            },
+        ),
+    }
     if contract.get("schema_version") != 1:
-        errors.append("E2.4.1 schema_version harus 1.")
-    if contract.get("experiment_id") != "E2.4.1":
-        errors.append("experiment_id harus E2.4.1.")
-    if contract.get("stage") != "OCR_BACKEND_AND_FIXTURE_BENCHMARK":
-        errors.append("Stage E2.4.1 berubah.")
-    if contract.get("status") != "PREREGISTERED_ENGINEERING_EVALUATION":
-        errors.append("E2.4.1 harus preregistered sebelum benchmark.")
+        errors.append("Schema contract OCR harus 1.")
+    if experiment_id not in expected_contracts:
+        errors.append("experiment_id harus E2.4.1 atau E2.4.2.")
+    else:
+        expected_stage, expected_statuses = expected_contracts[experiment_id]
+        if contract.get("stage") != expected_stage:
+            errors.append(f"Stage {experiment_id} berubah.")
+        if contract.get("status") not in expected_statuses:
+            errors.append(f"Status {experiment_id} tidak terdaftar.")
     for key in (
         "training_performed",
         "model_inference_performed",
@@ -260,7 +289,59 @@ def validate_contract(contract: dict[str, Any]) -> list[str]:
             errors.append(f"Contract {key} harus false.")
 
     if any(bool(value) for value in contract.get("holdout_access", {}).values()):
-        errors.append("Semua akses outcome dan holdout E2.4.1 harus false.")
+        errors.append("Semua akses outcome dan holdout OCR harus false.")
+
+    if experiment_id == "E2.4.2":
+        evidence_roles = contract.get("evidence_roles", {})
+        if evidence_roles.get("development_metrics_may_pass_freeze") is not False:
+            errors.append("Development E2.4.2 tidak boleh meluluskan freeze.")
+        if evidence_roles.get("fresh_external_holdout_required") is not True:
+            errors.append("E2.4.2 wajib memerlukan fresh external holdout.")
+        holdout_requirements = contract.get("fixture_contract", {}).get(
+            "fresh_holdout_manifest_requirements",
+            {},
+        )
+        expected_holdout_requirements = {
+            "evidence_role": "FRESH_EXTERNAL_HOLDOUT",
+            "captured_after_implementation_freeze": True,
+            "capture_started_at_utc_required": True,
+            "implementation_freeze_id_required": True,
+        }
+        if holdout_requirements != expected_holdout_requirements:
+            errors.append("Requirement manifest fresh holdout E2.4.2 berubah.")
+        if contract.get("status") == "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT":
+            implementation_freeze = contract.get("implementation_freeze")
+            if not isinstance(implementation_freeze, dict):
+                errors.append("E2.4.2 frozen wajib memiliki implementation_freeze.")
+            else:
+                freeze_id = str(
+                    implementation_freeze.get("freeze_id") or ""
+                )
+                if not re.fullmatch(r"[A-Za-z0-9_.-]+", freeze_id):
+                    errors.append("implementation_freeze.freeze_id tidak valid.")
+                try:
+                    frozen_at = datetime.fromisoformat(
+                        str(implementation_freeze["frozen_at_utc"])
+                        .replace("Z", "+00:00")
+                    )
+                    if frozen_at.utcoffset() is None:
+                        raise ValueError
+                except (KeyError, TypeError, ValueError):
+                    errors.append(
+                        "implementation_freeze.frozen_at_utc wajib ISO UTC."
+                    )
+                for key in (
+                    "calibration_service_source_sha256",
+                    "benchmark_runner_source_sha256",
+                    "windows_development_result_zip_sha256",
+                ):
+                    if not re.fullmatch(
+                        r"[0-9a-fA-F]{64}",
+                        str(implementation_freeze.get(key) or ""),
+                    ):
+                        errors.append(
+                            f"implementation_freeze.{key} wajib SHA256."
+                        )
 
     profiles = contract.get("ocr_engine", {}).get("profiles", [])
     profile_ids = [str(profile.get("profile_id")) for profile in profiles]
@@ -271,7 +352,7 @@ def validate_contract(contract: dict[str, Any]) -> list[str]:
     if output.get("production_promotion_possible") is not False:
         errors.append("Runner benchmark tidak boleh mempromosikan produksi.")
     if output.get("resumable") is not True:
-        errors.append("Runner E2.4.1 wajib resumable.")
+        errors.append("Runner OCR wajib resumable.")
     return errors
 
 
@@ -328,8 +409,16 @@ def validate_manifest(
         "manifest_schema_version"
     ]:
         errors.append("Fixture manifest schema_version berubah.")
-    if manifest.get("experiment_id") != "E2.4.1":
-        errors.append("Fixture manifest bukan E2.4.1.")
+    accepted_experiment_ids = set(
+        fixture_contract.get(
+            "accepted_source_experiment_ids",
+            [contract.get("experiment_id")],
+        )
+    )
+    if manifest.get("experiment_id") not in accepted_experiment_ids:
+        errors.append(
+            "Fixture manifest tidak terdaftar untuk contract ini."
+        )
     if manifest.get("trading_outcome_data_used") is not False:
         errors.append("Fixture manifest tidak boleh memakai outcome trading.")
     if manifest.get("production_decision_changed") is not False:
@@ -337,6 +426,61 @@ def validate_manifest(
     fixture_set_id = str(manifest.get("fixture_set_id", "")).strip()
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", fixture_set_id):
         errors.append("fixture_set_id manifest tidak valid.")
+
+    if (
+        contract.get("experiment_id") == "E2.4.2"
+        and manifest.get("experiment_id") == "E2.4.2"
+    ):
+        holdout_requirements = fixture_contract[
+            "fresh_holdout_manifest_requirements"
+        ]
+        expected_evidence_role = holdout_requirements["evidence_role"]
+        if contract.get("status") != "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT":
+            errors.append(
+                "Fresh holdout E2.4.2 ditolak sebelum implementation freeze."
+            )
+        implementation_freeze = contract.get("implementation_freeze", {})
+        expected_freeze_id = str(
+            implementation_freeze.get("freeze_id") or ""
+        )
+        if manifest.get("evidence_role") != expected_evidence_role:
+            errors.append(
+                "Manifest E2.4.2 wajib evidence_role FRESH_EXTERNAL_HOLDOUT."
+            )
+        if manifest.get("captured_after_implementation_freeze") is not (
+            holdout_requirements[
+                "captured_after_implementation_freeze"
+            ]
+        ):
+            errors.append(
+                "Manifest E2.4.2 wajib menyatakan capture setelah freeze."
+            )
+        if str(manifest.get("implementation_freeze_id") or "") != (
+            expected_freeze_id
+        ):
+            errors.append("Manifest E2.4.2 memakai freeze_id yang berbeda.")
+        try:
+            captured_at = datetime.fromisoformat(
+                str(manifest["capture_started_at_utc"]).replace(
+                    "Z", "+00:00"
+                )
+            )
+            frozen_at = datetime.fromisoformat(
+                str(implementation_freeze["frozen_at_utc"]).replace(
+                    "Z", "+00:00"
+                )
+            )
+            if (
+                captured_at.utcoffset() is None
+                or frozen_at.utcoffset() is None
+                or captured_at < frozen_at
+            ):
+                raise ValueError
+        except (KeyError, TypeError, ValueError):
+            errors.append(
+                "capture_started_at_utc wajib ISO UTC dan tidak boleh "
+                "mendahului implementation freeze."
+            )
 
     forbidden = _forbidden_keys(manifest)
     if forbidden:
@@ -541,6 +685,37 @@ def recognized_ticks(
     return recognized
 
 
+def selected_ocr_pass(
+    ocr_result: dict[str, Any],
+    calibration: dict[str, Any],
+) -> dict[str, Any]:
+    passes = ocr_result.get("passes")
+    selected_id = calibration.get("ocr_selected_pass_id")
+    if not isinstance(passes, list) or not selected_id:
+        return ocr_result
+
+    for pass_payload in passes:
+        if (
+            isinstance(pass_payload, dict)
+            and str(pass_payload.get("pass_id")) == str(selected_id)
+        ):
+            return {
+                "status": ocr_result.get("status"),
+                "engine": ocr_result.get("engine"),
+                "tesseract_version": ocr_result.get(
+                    "tesseract_version"
+                ),
+                "tesseract_cmd": ocr_result.get("tesseract_cmd"),
+                "pass_id": selected_id,
+                "preprocessing_profile": pass_payload.get(
+                    "preprocessing_profile"
+                ),
+                "ocr_input_region": pass_payload.get("ocr_input_region"),
+                "observations": pass_payload.get("observations") or [],
+            }
+    return ocr_result
+
+
 def match_ticks(
     ground_truth: list[dict[str, Any]],
     recognized: list[dict[str, Any]],
@@ -729,13 +904,14 @@ def benchmark_fixture(
         plot_geometry=geometry,
         declared_scale_mode=str(fixture.get("scale_mode", "AUTO")),
     )
+    metric_ocr_result = selected_ocr_pass(ocr_result, calibration)
 
     matching_contract = contract["matching_contract"]
     ground_truth = [
         dict(tick) for tick in fixture.get("ground_truth_ticks", [])
     ]
     detected = recognized_ticks(
-        ocr_result,
+        metric_ocr_result,
         pair=str(fixture["pair"]),
         axis_region=axis_region,
         minimum_confidence=float(
@@ -789,6 +965,16 @@ def benchmark_fixture(
         if price_step and price_step > 0
         else []
     )
+    slope = calibration.get("slope_price_per_pixel")
+    try:
+        absolute_slope = abs(float(slope))
+    except (TypeError, ValueError):
+        absolute_slope = 0.0
+    pixel_errors = (
+        [error / absolute_slope for error in mapping_errors]
+        if absolute_slope > 0.0
+        else []
+    )
 
     expected_status = str(fixture["expected_status"])
     calibration_status = str(calibration.get("status"))
@@ -824,7 +1010,7 @@ def benchmark_fixture(
 
     raw_payload = {
         "schema_version": 1,
-        "experiment_id": "E2.4.1",
+        "experiment_id": str(contract["experiment_id"]),
         "fixture_id": fixture_id,
         "profile_id": profile_id,
         "image_sha256": actual_digest,
@@ -832,6 +1018,8 @@ def benchmark_fixture(
         "axis_region": list(axis_region),
         "axis_region_method": axis_region_method,
         "ocr": ocr_result,
+        "metric_ocr_pass_id": calibration.get("ocr_selected_pass_id"),
+        "metric_ocr": metric_ocr_result,
         "recognized_ticks": detected,
         "ground_truth_ticks": ground_truth,
         "matching": matching,
@@ -851,7 +1039,7 @@ def benchmark_fixture(
 
     return {
         "schema_version": 1,
-        "experiment_id": "E2.4.1",
+        "experiment_id": str(contract["experiment_id"]),
         "fixture_set_id": None,
         "fixture_id": fixture_id,
         "profile_id": profile_id,
@@ -890,7 +1078,16 @@ def benchmark_fixture(
         "ocr_engine": ocr_result.get("engine"),
         "tesseract_version": ocr_result.get("tesseract_version"),
         "ocr_observation_count": len(
-            ocr_result.get("observations") or []
+            metric_ocr_result.get("observations") or []
+        ),
+        "ocr_pass_count": int(calibration.get("ocr_pass_count") or 1),
+        "ocr_selected_pass_id": calibration.get("ocr_selected_pass_id"),
+        "ocr_filled_background_rejection_count": int(
+            calibration.get(
+                "ocr_filled_background_rejection_count",
+                0,
+            )
+            or 0
         ),
         "ground_truth_tick_count": len(ground_truth),
         "recognized_tick_count": len(detected),
@@ -914,10 +1111,15 @@ def benchmark_fixture(
         "mapping_point_count": len(mapping_errors),
         "mapping_absolute_error_sum": sum(mapping_errors),
         "mapping_normalized_absolute_error_sum": sum(normalized_errors),
+        "mapping_pixel_absolute_error_sum": sum(pixel_errors),
         "mapping_mae": mean(mapping_errors) if mapping_errors else None,
         "mapping_maximum_error": max(mapping_errors) if mapping_errors else None,
         "normalized_mapping_mae": (
             mean(normalized_errors) if normalized_errors else None
+        ),
+        "mapping_mae_pixels": mean(pixel_errors) if pixel_errors else None,
+        "mapping_maximum_error_pixels": (
+            max(pixel_errors) if pixel_errors else None
         ),
         "entry_price_authorized": int(entry_authorized),
         "production_decision_changed": int(production_changed),
@@ -932,12 +1134,14 @@ def error_row(
     fixture: dict[str, Any],
     profile: dict[str, Any],
     error: Exception,
+    *,
+    experiment_id: str = "E2.4.1",
 ) -> dict[str, Any]:
     row = {field: None for field in ROW_FIELDS}
     row.update(
         {
             "schema_version": 1,
-            "experiment_id": "E2.4.1",
+            "experiment_id": experiment_id,
             "fixture_id": fixture.get("fixture_id"),
             "profile_id": profile.get("profile_id"),
             "fixture_source": fixture.get("fixture_source"),
@@ -976,6 +1180,8 @@ def _coerce_csv_value(field: str, value: str) -> Any:
         "image_sha256_verified",
         "axis_region_contains_expected",
         "ocr_observation_count",
+        "ocr_pass_count",
+        "ocr_filled_background_rejection_count",
         "ground_truth_tick_count",
         "recognized_tick_count",
         "tick_true_positive",
@@ -1000,9 +1206,12 @@ def _coerce_csv_value(field: str, value: str) -> Any:
         "mean_tick_y_error_pixels",
         "mapping_absolute_error_sum",
         "mapping_normalized_absolute_error_sum",
+        "mapping_pixel_absolute_error_sum",
         "mapping_mae",
         "mapping_maximum_error",
         "normalized_mapping_mae",
+        "mapping_mae_pixels",
+        "mapping_maximum_error_pixels",
         "latency_ms",
     }
     if field in integer_fields:
@@ -1042,6 +1251,8 @@ def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def _run_contract(
     *,
+    experiment_id: str,
+    fixture_manifest_experiment_id: str,
     contract_path: Path,
     fixture_manifest_path: Path,
     profiles: list[dict[str, Any]],
@@ -1049,8 +1260,13 @@ def _run_contract(
 ) -> dict[str, Any]:
     return {
         "schema_version": 1,
-        "experiment_id": "E2.4.1",
+        "experiment_id": experiment_id,
+        "fixture_manifest_experiment_id": fixture_manifest_experiment_id,
         "runner_version": RUNNER_VERSION,
+        "runner_source_sha256": file_sha256(Path(__file__)),
+        "calibration_service_source_sha256": file_sha256(
+            CALIBRATION_SERVICE_SOURCE
+        ),
         "contract_sha256": file_sha256(contract_path),
         "fixture_manifest_sha256": file_sha256(fixture_manifest_path),
         "profile_ids": [profile["profile_id"] for profile in profiles],
@@ -1072,7 +1288,10 @@ def ensure_resume_compatible(
     for key in (
         "schema_version",
         "experiment_id",
+        "fixture_manifest_experiment_id",
         "runner_version",
+        "runner_source_sha256",
+        "calibration_service_source_sha256",
         "contract_sha256",
         "fixture_manifest_sha256",
         "profile_ids",
@@ -1192,6 +1411,10 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         float(row.get("mapping_normalized_absolute_error_sum") or 0.0)
         for row in successful
     )
+    pixel_error_sum = sum(
+        float(row.get("mapping_pixel_absolute_error_sum") or 0.0)
+        for row in successful
+    )
     latencies = [
         float(row["latency_ms"])
         for row in successful
@@ -1275,6 +1498,10 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "mapping_mae": _safe_rate(mapping_error_sum, mapping_points),
         "normalized_mapping_mae": _safe_rate(
             normalized_error_sum,
+            mapping_points,
+        ),
+        "mapping_mae_pixels": _safe_rate(
+            pixel_error_sum,
             mapping_points,
         ),
         "telemetry_boundary_violations": sum(
@@ -1374,7 +1601,7 @@ def evaluate_gates(
         return value is not None and float(value) <= threshold
 
     pair_mapping_gates: dict[str, bool] = {}
-    for pair, threshold in acceptance["maximum_mapping_mae"].items():
+    for pair, threshold in acceptance.get("maximum_mapping_mae", {}).items():
         pair_rows = [row for row in external_rows if row.get("pair") == pair]
         pair_aggregate = _aggregate(pair_rows)
         pair_mapping_gates[pair] = at_most(
@@ -1435,8 +1662,17 @@ def evaluate_gates(
         "no_production_decision_change": (
             aggregate["telemetry_boundary_violations"] == 0
         ),
-        "maximum_mapping_mae_by_pair": all(pair_mapping_gates.values()),
     }
+    if pair_mapping_gates:
+        gates["maximum_mapping_mae_by_pair"] = all(
+            pair_mapping_gates.values()
+        )
+    maximum_pixel_mae = acceptance.get("maximum_mapping_mae_pixels")
+    if maximum_pixel_mae is not None:
+        gates["maximum_mapping_mae_pixels"] = at_most(
+            external_aggregate["mapping_mae_pixels"],
+            float(maximum_pixel_mae),
+        )
     return {
         "overall_pass": all(gates.values()),
         "gates": gates,
@@ -1454,6 +1690,8 @@ def build_summary(
     contract: dict[str, Any],
     fixture_set_id: str,
     run_contract: dict[str, Any],
+    *,
+    evidence_role: str = "EXTERNAL_GATE",
 ) -> dict[str, Any]:
     profile_rows: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
@@ -1487,10 +1725,12 @@ def build_summary(
         for profile_id, result in profiles.items()
         if result["acceptance"]["overall_pass"]
     ]
+    technical_gate_pass = bool(passing_profiles)
+    freeze_evaluated = evidence_role != "DEVELOPMENT_REGRESSION_ONLY"
     return {
         "schema_version": 1,
-        "experiment_id": "E2.4.1",
-        "stage": "OCR_BACKEND_AND_FIXTURE_BENCHMARK",
+        "experiment_id": str(contract["experiment_id"]),
+        "stage": str(contract["stage"]),
         "runner_version": RUNNER_VERSION,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "fixture_set_id": fixture_set_id,
@@ -1499,24 +1739,30 @@ def build_summary(
         "profile_count": len(profiles),
         "profiles": profiles,
         "passing_profiles": passing_profiles,
-        "benchmark_pass": bool(passing_profiles),
+        "technical_gate_pass": technical_gate_pass,
+        "evidence_role": evidence_role,
+        "freeze_evaluated": freeze_evaluated,
+        "benchmark_pass": technical_gate_pass and freeze_evaluated,
         "production_promotion_allowed": False,
         "training_performed": False,
         "model_inference_performed": False,
         "trading_outcome_data_used": False,
         "canonical_production_decision_changed": False,
         "interpretation": (
-            "OCR engineering evidence only; a passing profile still requires "
-            "a separate reviewed E2.4.2 freeze and cannot authorize entry."
+            "Development regression only; technical targets cannot pass the "
+            "E2.4.2 freeze. A fresh post-freeze external holdout is required."
+            if evidence_role == "DEVELOPMENT_REGRESSION_ONLY"
+            else "OCR engineering evidence only; passing cannot authorize entry."
         ),
     }
 
 
 def render_summary_markdown(summary: dict[str, Any]) -> str:
     lines = [
-        "# AI-TDSS E2.4.1 OCR Benchmark",
+        f"# AI-TDSS {summary['experiment_id']} OCR Benchmark",
         "",
         f"Generated (UTC): `{summary['generated_at_utc']}`",
+        f"Evidence role: `{summary['evidence_role']}`",
         "",
         "## Boundary",
         "",
@@ -1529,8 +1775,8 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
         "",
         "| Profile | Tasks | Success | Precision | Recall | Exact text | "
         "Calibration recall | Fail-closed recall | False calibration | "
-        "Normalized MAE |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "Normalized MAE | Pixel MAE |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
     def percent(value: Any) -> str:
@@ -1555,6 +1801,7 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
                     percent(synthetic["fail_closed_recall"]),
                     percent(synthetic["false_calibration_rate"]),
                     decimal(synthetic["normalized_mapping_mae"]),
+                    decimal(synthetic["mapping_mae_pixels"]),
                 )
             )
             + " |"
@@ -1570,8 +1817,8 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
             "",
             "| Profile | External N | Precision | Recall | Exact text | "
             "Calibration recall | Fail-closed recall | False calibration | "
-            "Normalized MAE | Gate |",
-            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+            "Normalized MAE | Pixel MAE | Gate |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
         ]
     )
 
@@ -1591,6 +1838,7 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
                     percent(external["fail_closed_recall"]),
                     percent(external["false_calibration_rate"]),
                     decimal(external["normalized_mapping_mae"]),
+                    decimal(external["mapping_mae_pixels"]),
                     "PASS" if gate else "FAIL",
                 )
             )
@@ -1605,13 +1853,20 @@ def render_summary_markdown(summary: dict[str, Any]) -> str:
             (
                 "Overall benchmark: **PASS**"
                 if summary["benchmark_pass"]
-                else "Overall benchmark: **FAIL / INCOMPLETE**"
+                else (
+                    "Development targets: **PASS**; E2.4.2 freeze: "
+                    "**NOT EVALUATED**"
+                    if summary.get("technical_gate_pass")
+                    and not summary.get("freeze_evaluated")
+                    else "Overall benchmark: **FAIL / INCOMPLETE**"
+                )
             ),
             "",
             "Synthetic fixtures are smoke tests. Profile selection and gate "
             "acceptance use reviewed external TradingView/MT5 fixtures only.",
             "A PASS does not change BUY/SELL/WATCHLIST/NO_TRADE, entry/SL/TP, "
             "High Risk, canonical OHLCV, or locked outcome datasets.",
+            summary["interpretation"],
             "",
         ]
     )
@@ -1630,10 +1885,32 @@ def run(
     manifest = read_json(manifest_path)
 
     contract_errors = validate_contract(contract)
+    if (
+        not contract_errors
+        and contract.get("status")
+        == "IMPLEMENTATION_FROZEN_AWAITING_HOLDOUT"
+    ):
+        implementation_freeze = contract["implementation_freeze"]
+        frozen_sources = {
+            "calibration_service_source_sha256": file_sha256(
+                CALIBRATION_SERVICE_SOURCE
+            ),
+            "benchmark_runner_source_sha256": file_sha256(Path(__file__)),
+        }
+        for key, actual_digest in frozen_sources.items():
+            expected_digest = str(implementation_freeze[key]).lower()
+            if actual_digest != expected_digest:
+                contract_errors.append(
+                    f"Frozen source SHA berubah untuk {key}: "
+                    f"expected={expected_digest}, actual={actual_digest}"
+                )
     manifest_errors = validate_manifest(manifest, contract, manifest_path)
     errors = contract_errors + manifest_errors
     if errors:
-        raise ValueError("E2.4.1 INVALID: " + "; ".join(errors))
+        raise ValueError(
+            f"{contract.get('experiment_id', 'OCR')} INVALID: "
+            + "; ".join(errors)
+        )
 
     profiles = resolve_profiles(contract, args.profile_ids)
     effective_tesseract_cmd = (
@@ -1642,15 +1919,23 @@ def run(
         else str(os.getenv("AI_TDSS_TESSERACT_CMD", "")).strip()
     ) or None
     run_contract = _run_contract(
+        experiment_id=str(contract["experiment_id"]),
+        fixture_manifest_experiment_id=str(manifest["experiment_id"]),
         contract_path=contract_path,
         fixture_manifest_path=manifest_path,
         profiles=profiles,
         tesseract_cmd=effective_tesseract_cmd,
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    rows_path = output_dir / "e2_4_1_ocr_benchmark_rows.csv"
-    summary_json_path = output_dir / "e2_4_1_ocr_benchmark_summary.json"
-    summary_md_path = output_dir / "e2_4_1_ocr_benchmark_summary.md"
+    output_prefix = (
+        str(contract["experiment_id"])
+        .lower()
+        .replace(".", "_")
+        + "_ocr_benchmark"
+    )
+    rows_path = output_dir / f"{output_prefix}_rows.csv"
+    summary_json_path = output_dir / f"{output_prefix}_summary.json"
+    summary_md_path = output_dir / f"{output_prefix}_summary.md"
     run_contract_path = output_dir / "run_contract.json"
 
     existing_rows = read_rows(rows_path)
@@ -1712,7 +1997,12 @@ def run(
             )
             row["fixture_set_id"] = manifest["fixture_set_id"]
         except Exception as error:
-            row = error_row(fixture, profile, error)
+            row = error_row(
+                fixture,
+                profile,
+                error,
+                experiment_id=str(contract["experiment_id"]),
+            )
             row["fixture_set_id"] = manifest["fixture_set_id"]
             if args.fail_fast:
                 existing_by_key[
@@ -1762,11 +2052,21 @@ def run(
             str(value.get("fixture_id")),
         ),
     )
+    evidence_role = "EXTERNAL_GATE"
+    if (
+        contract.get("experiment_id") == "E2.4.2"
+        and manifest.get("experiment_id") != "E2.4.2"
+    ):
+        evidence_role = "DEVELOPMENT_REGRESSION_ONLY"
+    elif contract.get("experiment_id") == "E2.4.2":
+        evidence_role = "FRESH_EXTERNAL_HOLDOUT"
+
     summary = build_summary(
         rows,
         contract,
         str(manifest["fixture_set_id"]),
         run_contract,
+        evidence_role=evidence_role,
     )
     summary_json_path.write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n",

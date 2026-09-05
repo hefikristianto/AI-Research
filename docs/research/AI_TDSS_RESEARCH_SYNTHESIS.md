@@ -329,7 +329,7 @@ Export harus mempertahankan timestamp UTC, analysis ID, model version, blockers,
 | Endpoint full analysis belum memiliki fixture integration test dengan model stub | Risiko regresi orkestrasi masih lebih tinggi daripada service-level unit test | P1 |
 | E2.3.1 gagal pada gate ambiguity High Risk selection | High Risk belum layak dipromosikan dan 2024/2025 tetap terkunci | CLOSED — reject promotion |
 | E2.4.1 belum memiliki minimal 32 fixture eksternal yang direview | Profile OCR belum dapat dipilih dan kalibrasi belum boleh menjadi default upload | P0 |
-| Robustness tema warna/platform belum dibekukan melalui E2.4.2 | Recall dapat turun pada TradingView/MT5 yang berbeda dari fixture development | P1 |
+| Fresh holdout robustness tema/platform E2.4.2 belum dievaluasi | Recall dapat turun pada TradingView/MT5 yang berbeda dari fixture development | P1 |
 | Liquidity masih memerlukan validasi rule-level terhadap swing/EQH-EQL dan sweep-reclaim | Wick panjang dapat salah dianggap liquidity bila konteks struktur tidak diwajibkan | P1 |
 
 ## 14. Batas Klaim Akademik
